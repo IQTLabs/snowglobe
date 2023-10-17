@@ -3,6 +3,7 @@
 import langchain
 import langchain.llms
 import langchain.prompts
+import langchain.chains
 
 def main():
     template = 'You are the leader of the country of {nation}.  What is a major challenge facing your country?'
@@ -12,7 +13,13 @@ def main():
 
     llm_openai = langchain.llms.OpenAI()
     llm = llm_openai
-    print(llm.predict(prompt.format_prompt(nation='Papua New Guinea').to_messages()[0].content))
+    #print(llm.predict(prompt.format_prompt(nation='Papua New Guinea').to_messages()[0].content))
+
+    chain = langchain.chains.LLMChain(
+        prompt=prompt,
+        llm=llm
+    )
+    print(chain.run(nation='Panama'))
 
 if __name__ == '__main__':
     main()
