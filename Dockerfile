@@ -1,5 +1,5 @@
 FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
-LABEL org.iqtlabs.name LLM
+LABEL org.iqtlabs.name Scenario
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     python3 \
@@ -15,10 +15,12 @@ RUN pip3 install \
     transformers \
     einops \
     accelerate \
-    tqdm
+    tqdm \
+    langchain \
+    openai
 
 # User account
-ARG username=llm
+ARG username=scenario
 ARG groupname=$username
 ARG uid=1000
 ARG gid=$uid
