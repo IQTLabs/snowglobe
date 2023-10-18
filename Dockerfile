@@ -17,7 +17,8 @@ RUN pip3 install \
     accelerate \
     tqdm \
     langchain \
-    openai
+    openai \
+    llama-cpp-python
 
 # User account
 ARG username=scenario
