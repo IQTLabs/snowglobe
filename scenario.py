@@ -14,7 +14,9 @@ def main():
 
     llm_openai = langchain.llms.OpenAI()
     #mp = '/home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf'
-    mp = '/home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf'
+    #mp = '/home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf'
+    #mp = '/home/scenario/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf'
+    mp = '/home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf'
     cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
     llm_llamacpp = langchain.llms.LlamaCpp(
         model_path=mp,
