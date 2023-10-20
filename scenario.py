@@ -53,15 +53,34 @@ def main():
         # Model Source: Hugging Face (Local)
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
+        config = transformers.AutoConfig.from_pretrained(
+            'mosaicml/mpt-7b',
+            trust_remote_code=True,
+            init_device='cuda',
+            learned_pos_emb=False,
+        )
+        config.attn_config['attn_impl'] = 'triton'
+        config.update({'max_seq_len': 2048})
+
         model = transformers.AutoModelForCausalLM.from_pretrained(
             'mosaicml/mpt-7b', #'/home/scenario/wdata/mosaicml/mpt-7b',
+            config = config,
             trust_remote_code=True,
             torch_dtype=torch.bfloat16,
-            #max_seq_len=2048,
         )
         model.eval()
         model.to(device)
 
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            'EleutherAI/gpt-neox-20b')
+        pipeline = transformers.pipeline(
+            'text-generation',
+            model=model,
+            tokenizer=tokenizer,
+            device=device,
+        )
+
+        """
         tokenizer = transformers.AutoTokenizer.from_pretrained(
             'EleutherAI/gpt-neox-20b')
         stop_token_ids = tokenizer.convert_tokens_to_ids(['<|endoftext|>'])
@@ -86,14 +105,15 @@ def main():
             #temperature=0.1,
             #top_p=0.15,
             #top_k=0,
-            #max_new_tokens=2048,
+            max_new_tokens=2048,
             #repetition_penalty=1.1,
         )
+        """
 
         cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
         llm_huggingface = langchain.llms.HuggingFacePipeline(
             pipeline=pipeline,
-            callback_manager=cbm,
+            #callback_manager=cbm,
         )
         llm = llm_huggingface
 

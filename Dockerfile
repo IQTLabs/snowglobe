@@ -7,6 +7,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     emacs \
     less \
     tree \
+    cmake \
+    git \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install \
     numpy \
@@ -19,7 +21,7 @@ RUN pip3 install \
     langchain \
     openai \
     llama-cpp-python \
-    triton
+    triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
 
 # User account
 ARG username=scenario
