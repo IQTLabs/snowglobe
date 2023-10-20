@@ -2,6 +2,7 @@
 
 import torch
 import transformers
+import triton
 
 import langchain
 import langchain.llms
@@ -53,10 +54,10 @@ def main():
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
         model = transformers.AutoModelForCausalLM.from_pretrained(
-            '/home/scenario/wdata/mosaicml/mpt-7b',
+            'mosaicml/mpt-7b', #'/home/scenario/wdata/mosaicml/mpt-7b',
             trust_remote_code=True,
             torch_dtype=torch.bfloat16,
-            max_seq_len=2048,
+            #max_seq_len=2048,
         )
         model.eval()
         model.to(device)
@@ -82,11 +83,11 @@ def main():
             task='text-generation',
             device=device,
             #stopping_criteria=stopping_criteria,
-            temperature=0.1,
-            top_p=0.15,
-            top_k=0,
-            max_new_tokens=2048,
-            repetition_penalty=1.1,
+            #temperature=0.1,
+            #top_p=0.15,
+            #top_k=0,
+            #max_new_tokens=2048,
+            #repetition_penalty=1.1,
         )
 
         cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])

@@ -18,7 +18,8 @@ RUN pip3 install \
     tqdm \
     langchain \
     openai \
-    llama-cpp-python
+    llama-cpp-python \
+    triton
 
 # User account
 ARG username=scenario
