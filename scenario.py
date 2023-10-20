@@ -54,16 +54,16 @@ def main():
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
         config = transformers.AutoConfig.from_pretrained(
-            'mosaicml/mpt-7b',
+            'mosaicml/mpt-7b-chat',
             trust_remote_code=True,
             init_device='cuda',
             learned_pos_emb=False,
+            max_seq_len=2500,
         )
-        config.attn_config['attn_impl'] = 'triton'
-        config.update({'max_seq_len': 2048})
+        config.attn_config['attn_impl'] = 'torch'
 
         model = transformers.AutoModelForCausalLM.from_pretrained(
-            'mosaicml/mpt-7b', #'/home/scenario/wdata/mosaicml/mpt-7b',
+            'mosaicml/mpt-7b-chat',
             config = config,
             trust_remote_code=True,
             torch_dtype=torch.bfloat16,
@@ -72,12 +72,26 @@ def main():
         model.to(device)
 
         tokenizer = transformers.AutoTokenizer.from_pretrained(
-            'EleutherAI/gpt-neox-20b')
+            #'EleutherAI/gpt-neox-20b')
+            'mosaicml/mpt-7b-chat')
+
+        class Criterion(transformers.StoppingCriteria):
+            def __call__(self, input_ids: torch.LongTensor,
+                         scores: torch.FloatTensor, **kwargs) -> bool:
+                for stop_id in tokenizer.convert_tokens_to_ids(
+                        ['<|endoftext|>']):
+                    if input_ids[0][-1] == stop_id:
+                        return True
+                return False
+        stopping_criteria = transformers.StoppingCriteriaList([Criterion()])
+
         pipeline = transformers.pipeline(
             'text-generation',
             model=model,
             tokenizer=tokenizer,
             device=device,
+            max_new_tokens=2048,
+            stopping_criteria=stopping_criteria,
         )
 
         """
@@ -113,7 +127,7 @@ def main():
         cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
         llm_huggingface = langchain.llms.HuggingFacePipeline(
             pipeline=pipeline,
-            #callback_manager=cbm,
+            callback_manager=cbm,
         )
         llm = llm_huggingface
 
