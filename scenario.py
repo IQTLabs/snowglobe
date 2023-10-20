@@ -17,7 +17,7 @@ def main():
     prompt.format(nation='Poland')
 
     # LLM
-    choice = ['openai', 'llamacpp', 'huggingface'][2]
+    choice = ['openai', 'llamacpp', 'huggingface'][1]
     if choice == 'openai':
 
         # LLM: OpenAI (Cloud)
@@ -39,7 +39,7 @@ def main():
         cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
         llm_llamacpp = langchain.llms.LlamaCpp(
             model_path=mp,
-            n_gpu_layers=1,
+            n_gpu_layers=9999,
             n_batch=512,
             n_ctx=2048,
             f16_kv=True,

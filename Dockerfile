@@ -10,7 +10,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     cmake \
     git \
     && rm -rf /var/lib/apt/lists/*
-RUN pip3 install \
+RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     numpy \
     torch \
     torchvision \
