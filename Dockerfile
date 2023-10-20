@@ -22,6 +22,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     openai \
     llama-cpp-python \
     triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
+ENV LLAMA_CPP_LIB=/usr/local/lib/python3.8/dist-packages/llama_cpp/libllama.so
 
 # User account
 ARG username=scenario
