@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import torch
-import transformers
 import triton
+import typing
+import transformers
 
 import langchain
 import langchain.llms
@@ -17,7 +18,7 @@ def main():
     prompt.format(nation='Poland')
 
     # LLM
-    choice = ['openai', 'llamacpp', 'huggingface'][1]
+    choice = ['openai', 'llamacpp', 'huggingface'][2]
     if choice == 'openai':
 
         # LLM: OpenAI (Cloud)
@@ -51,10 +52,12 @@ def main():
     elif choice == 'huggingface':
 
         # Model Source: Hugging Face (Local)
+        model_path = 'mosaicml/mpt-7b-chat'
+
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
         config = transformers.AutoConfig.from_pretrained(
-            'mosaicml/mpt-7b-chat',
+            model_path,
             trust_remote_code=True,
             init_device='cuda',
             learned_pos_emb=False,
@@ -63,7 +66,7 @@ def main():
         config.attn_config['attn_impl'] = 'torch'
 
         model = transformers.AutoModelForCausalLM.from_pretrained(
-            'mosaicml/mpt-7b-chat',
+            model_path,
             config = config,
             trust_remote_code=True,
             torch_dtype=torch.bfloat16,
@@ -71,19 +74,21 @@ def main():
         model.eval()
         model.to(device)
 
-        tokenizer = transformers.AutoTokenizer.from_pretrained(
-            #'EleutherAI/gpt-neox-20b')
-            'mosaicml/mpt-7b-chat')
+        tokenizer = transformers.AutoTokenizer.from_pretrained(model_path)
 
-        class Criterion(transformers.StoppingCriteria):
+        class StopOnTokens(transformers.StoppingCriteria):
             def __call__(self, input_ids: torch.LongTensor,
-                         scores: torch.FloatTensor, **kwargs) -> bool:
+                         scores: torch.FloatTensor,
+                         **kwargs: typing.Any) -> bool:
                 for stop_id in tokenizer.convert_tokens_to_ids(
-                        ['<|endoftext|>']):
+                        ['<|endoftext|>', '<|im_end|>']):
                     if input_ids[0][-1] == stop_id:
                         return True
                 return False
-        stopping_criteria = transformers.StoppingCriteriaList([Criterion()])
+        stopping_criteria = transformers.StoppingCriteriaList([StopOnTokens()])
+
+        streamer = transformers.TextStreamer(
+            tokenizer, skip_prompt=True, skip_special=True)
 
         pipeline = transformers.pipeline(
             'text-generation',
@@ -92,23 +97,10 @@ def main():
             device=device,
             max_new_tokens=2048,
             stopping_criteria=stopping_criteria,
+            streamer=streamer,
         )
 
         """
-        tokenizer = transformers.AutoTokenizer.from_pretrained(
-            'EleutherAI/gpt-neox-20b')
-        stop_token_ids = tokenizer.convert_tokens_to_ids(['<|endoftext|>'])
-        class StopOnTokens(transformers.StoppingCriteria):
-            def __call__(self, input_ids: torch.LongTensor,
-                         scores: torch.FloatTensor, **kwargs) -> bool:
-                for stop_id in stop_token_ids:
-                    if input_ids[0][-1] == stop_id:
-                        return True
-                return False
-        stopping_criteria = transformers.StoppingCriteriaList([StopOnTokens()])
-
-        # triton (more memory for faster speed)
-
         pipeline = transformers.pipeline(
             model=model,
             tokenizer=tokenizer,
@@ -124,10 +116,8 @@ def main():
         )
         """
 
-        cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
         llm_huggingface = langchain.llms.HuggingFacePipeline(
             pipeline=pipeline,
-            callback_manager=cbm,
         )
         llm = llm_huggingface
 
