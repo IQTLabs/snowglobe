@@ -45,7 +45,7 @@ def main():
             n_ctx=2048,
             f16_kv=True,
             callback_manager=cbm,
-            verbose=True
+            verbose=False,
         )
         llm = llm_llamacpp
 
@@ -53,6 +53,7 @@ def main():
 
         # Model Source: Hugging Face (Local)
         model_path = 'mosaicml/mpt-7b-chat'
+        #model_path = '/home/scenario/wdata/mosaicml/mpt-7b-chat'
 
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
@@ -67,7 +68,7 @@ def main():
 
         model = transformers.AutoModelForCausalLM.from_pretrained(
             model_path,
-            config = config,
+            config=config,
             trust_remote_code=True,
             torch_dtype=torch.bfloat16,
         )
@@ -101,19 +102,11 @@ def main():
         )
 
         """
-        pipeline = transformers.pipeline(
-            model=model,
-            tokenizer=tokenizer,
-            return_full_text=True,
-            task='text-generation',
-            device=device,
-            #stopping_criteria=stopping_criteria,
+            #return_full_text=True,
             #temperature=0.1,
             #top_p=0.15,
             #top_k=0,
-            max_new_tokens=2048,
             #repetition_penalty=1.1,
-        )
         """
 
         llm_huggingface = langchain.llms.HuggingFacePipeline(
@@ -121,7 +114,7 @@ def main():
         )
         llm = llm_huggingface
 
-    #print(llm.predict(prompt.format_prompt(nation='Papua New Guinea').to_messages()[0].content))
+    print(llm.predict(prompt.format_prompt(nation='Papua New Guinea').to_messages()[0].content))
 
     chain = langchain.chains.LLMChain(
         prompt=prompt,
