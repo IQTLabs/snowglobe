@@ -12,7 +12,12 @@ import langchain.chains
 import langchain.callbacks
 
 def main():
-    template = 'You are the leader of the country of {nation}.  What is a major challenge facing your country?'
+    #template = 'You are the leader of the country of {nation}.  What is a major challenge facing your country?'
+    template = """Question: You are the leader of the country of {nation}.
+    What is a major challenge facing your country?
+
+    Answer: """
+
     #prompt = langchain.prompts.PromptTemplate.from_template(template)
     prompt = langchain.prompts.PromptTemplate(template=template, input_variables=['nation'])
     prompt.format(nation='Poland')
@@ -52,8 +57,10 @@ def main():
     elif choice == 'huggingface':
 
         # Model Source: Hugging Face (Local)
-        model_path = 'mosaicml/mpt-7b-chat'
+        #model_path = 'mosaicml/mpt-7b-chat'
         #model_path = '/home/scenario/wdata/mosaicml/mpt-7b-chat'
+        model_path = '/home/scenario/wdata/mosaicml/mpt-30b-chat'
+        #model_path = '/home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B'
 
         device = torch.device('cuda:' + str(torch.cuda.current_device())
                               if torch.cuda.is_available() else 'cpu')
@@ -64,7 +71,7 @@ def main():
             learned_pos_emb=False,
             max_seq_len=2500,
         )
-        config.attn_config['attn_impl'] = 'torch'
+        #config.attn_config['attn_impl'] = 'torch'
 
         model = transformers.AutoModelForCausalLM.from_pretrained(
             model_path,
