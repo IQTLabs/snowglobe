@@ -126,15 +126,16 @@ class Control():
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
 
-    def header(self, title, h=0):
+    def header(self, title, h=0, width=80):
         print()
         if h == 0:
-            print('+-' + '-' * len(title) + '-+')
+            print('+-' + '-' * min(len(title), width) + '-+')
             print('| ' + title.upper() + ' |')
-            print('+-' + '-' * len(title) + '-+')
+            print('+-' + '-' * min(len(title), width) + '-+')
         elif h == 1:
+            print('-' * min(len(title), width))
             print(title)
-            print('-' * len(title))
+            print('-' * min(len(title), width))
         else:
             print(title)
 
