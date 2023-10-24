@@ -11,126 +11,111 @@ import langchain.prompts
 import langchain.chains
 import langchain.callbacks
 
-def main():
-    #template = 'You are the leader of the country of {nation}.  What is a major challenge facing your country?'
-    template = """Question: You are the leader of the country of {nation}.
-    What is a major challenge facing your country?
+class LLM():
+    def __init__(self, source_name=None, model_name=None):
 
-    Answer: """
+        # Select large language model
+        default_source_name = 'huggingface'
+        default_model_name = 'mpt-7b-chat'
+        model_paths = {
+            'openai' : {
+                'text-davinci-003' : '',
+            },
+            'llamacpp' : {
+                'mistral-7b-openorca' : '/home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf',
+                'mistral-7b-instruct' : '/home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf',
+                'gpt4all-falcon' : '/home/scenario/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf',
+                'mpt-7b-chat' : '/home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf',
+            },
+            'huggingface' : {
+                'mpt-7b-chat_auto' : 'mosaicml/mpt-7b-chat',
+                'mpt-7b-chat' : '/home/scenario/wdata/mosaicml/mpt-7b-chat',
+                'mpt-30b-chat' : '/home/scenario/wdata/mosaicml/mpt-30b-chat',
+                'Cerebras-GPT-13B' : '/home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B',
+            }
+        }
+        if source_name is not None and model_name is not None:
+            self.source_name = source_name
+            self.modeel_name = model_name
+        else:
+            self.source_name = default_source_name
+            self.model_name = default_model_name
+        self.model_path = model_paths[self.source_name][self.model_name]
 
-    #prompt = langchain.prompts.PromptTemplate.from_template(template)
-    prompt = langchain.prompts.PromptTemplate(template=template, input_variables=['nation'])
-    prompt.format(nation='Poland')
+        if self.source_name == 'openai':
 
-    # LLM
-    choice = ['openai', 'llamacpp', 'huggingface'][2]
-    if choice == 'openai':
+            # Model Source: OpenAI (Cloud)
+            self.llm = langchain.llms.OpenAI(
+                model_name=self.model_name
+            )
 
-        # LLM: OpenAI (Cloud)
-        llm_openai = langchain.llms.OpenAI(
-            model_name='text-davinci-003'
-        )
-        llm = llm_openai
+        elif self.source_name == 'llamacpp':
 
-    elif choice == 'llamacpp':
+            # Model Source: llama.cpp (Local)
+            cbm = langchain.callbacks.manager.CallbackManager(
+                [langchain.callbacks.streaming_stdout\
+                 .StreamingStdOutCallbackHandler()])
+            self.llm = langchain.llms.LlamaCpp(
+                model_path=self.model_path,
+                n_gpu_layers=9999,
+                n_batch=512,
+                n_ctx=2048,
+                f16_kv=True,
+                callback_manager=cbm,
+                verbose=False,
+            )
 
-        # LLM: llama.cpp (Local)
-        mps = [
-            '/home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf',
-            '/home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf',
-            '/home/scenario/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf',
-            '/home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf',
-        ]
-        mp = mps[1]
-        cbm = langchain.callbacks.manager.CallbackManager([langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler()])
-        llm_llamacpp = langchain.llms.LlamaCpp(
-            model_path=mp,
-            n_gpu_layers=9999,
-            n_batch=512,
-            n_ctx=2048,
-            f16_kv=True,
-            callback_manager=cbm,
-            verbose=False,
-        )
-        llm = llm_llamacpp
+        elif self.source_name == 'huggingface':
 
-    elif choice == 'huggingface':
+            # Model Source: Hugging Face (Local)
+            device = torch.device('cuda:' + str(torch.cuda.current_device())
+                                  if torch.cuda.is_available() else 'cpu')
+            config = transformers.AutoConfig.from_pretrained(
+                self.model_path,
+                trust_remote_code=True,
+                init_device='cuda',
+                learned_pos_emb=False,
+                max_seq_len=2500,
+            )
+            #config.attn_config['attn_impl'] = 'torch'
 
-        # Model Source: Hugging Face (Local)
-        #model_path = 'mosaicml/mpt-7b-chat'
-        #model_path = '/home/scenario/wdata/mosaicml/mpt-7b-chat'
-        model_path = '/home/scenario/wdata/mosaicml/mpt-30b-chat'
-        #model_path = '/home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B'
+            model = transformers.AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                config=config,
+                trust_remote_code=True,
+                torch_dtype=torch.bfloat16,
+            )
+            model.eval()
+            model.to(device)
 
-        device = torch.device('cuda:' + str(torch.cuda.current_device())
-                              if torch.cuda.is_available() else 'cpu')
-        config = transformers.AutoConfig.from_pretrained(
-            model_path,
-            trust_remote_code=True,
-            init_device='cuda',
-            learned_pos_emb=False,
-            max_seq_len=2500,
-        )
-        #config.attn_config['attn_impl'] = 'torch'
+            tokenizer = transformers.AutoTokenizer.from_pretrained(
+                self.model_path)
 
-        model = transformers.AutoModelForCausalLM.from_pretrained(
-            model_path,
-            config=config,
-            trust_remote_code=True,
-            torch_dtype=torch.bfloat16,
-        )
-        model.eval()
-        model.to(device)
+            class StopOnTokens(transformers.StoppingCriteria):
+                def __call__(self, input_ids: torch.LongTensor,
+                             scores: torch.FloatTensor,
+                             **kwargs: typing.Any) -> bool:
+                    for stop_id in tokenizer.convert_tokens_to_ids(
+                            ['<|endoftext|>', '<|im_end|>']):
+                        if input_ids[0][-1] == stop_id:
+                            return True
+                    return False
+            stopping_criteria = transformers.StoppingCriteriaList(
+                [StopOnTokens()])
 
-        tokenizer = transformers.AutoTokenizer.from_pretrained(model_path)
+            streamer = transformers.TextStreamer(
+                tokenizer, skip_prompt=True, skip_special=True)
 
-        class StopOnTokens(transformers.StoppingCriteria):
-            def __call__(self, input_ids: torch.LongTensor,
-                         scores: torch.FloatTensor,
-                         **kwargs: typing.Any) -> bool:
-                for stop_id in tokenizer.convert_tokens_to_ids(
-                        ['<|endoftext|>', '<|im_end|>']):
-                    if input_ids[0][-1] == stop_id:
-                        return True
-                return False
-        stopping_criteria = transformers.StoppingCriteriaList([StopOnTokens()])
+            pipeline = transformers.pipeline(
+                'text-generation',
+                model=model,
+                tokenizer=tokenizer,
+                device=device,
+                max_new_tokens=2048,
+                stopping_criteria=stopping_criteria,
+                streamer=streamer,
+            )
 
-        streamer = transformers.TextStreamer(
-            tokenizer, skip_prompt=True, skip_special=True)
-
-        pipeline = transformers.pipeline(
-            'text-generation',
-            model=model,
-            tokenizer=tokenizer,
-            device=device,
-            max_new_tokens=2048,
-            stopping_criteria=stopping_criteria,
-            streamer=streamer,
-        )
-
-        """
-            #return_full_text=True,
-            #temperature=0.1,
-            #top_p=0.15,
-            #top_k=0,
-            #repetition_penalty=1.1,
-        """
-
-        llm_huggingface = langchain.llms.HuggingFacePipeline(
-            pipeline=pipeline,
-        )
-        llm = llm_huggingface
-
-    print(llm.predict(prompt.format_prompt(nation='Papua New Guinea').to_messages()[0].content))
-
-    chain = langchain.chains.LLMChain(
-        prompt=prompt,
-        llm=llm
-    )
-    print(chain.run(nation='Panama'))
-    inputs = [{'nation': 'Palau'},
-              {'nation': 'Paraguay'}]
-    print(chain.generate(inputs))
-
-if __name__ == '__main__':
-    main()
+            self.llm = langchain.llms.HuggingFacePipeline(
+                pipeline=pipeline,
+            )
