@@ -15,8 +15,8 @@ class LLM():
     def __init__(self, source_name=None, model_name=None):
 
         # Select large language model
-        default_source_name = 'huggingface'
-        default_model_name = 'mpt-7b-chat'
+        default_source_name = 'llamacpp'
+        default_model_name = 'mistral-7b-openorca'
         model_paths = {
             'openai' : {
                 'text-davinci-003' : '',
@@ -36,7 +36,7 @@ class LLM():
         }
         if source_name is not None and model_name is not None:
             self.source_name = source_name
-            self.modeel_name = model_name
+            self.model_name = model_name
         else:
             self.source_name = default_source_name
             self.model_name = default_model_name
@@ -119,3 +119,21 @@ class LLM():
             self.llm = langchain.llms.HuggingFacePipeline(
                 pipeline=pipeline,
             )
+
+class Control():
+    def __init__(self, llm_source_name=None, llm_model_name=None):
+        self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name).llm
+    def run(self):
+        raise Exception('! Override this method in the subclass for your specific scenario.')
+
+    def header(self, title, h=0):
+        print()
+        if h == 0:
+            print('+-' + '-' * len(title) + '-+')
+            print('| ' + title.upper() + ' |')
+            print('+-' + '-' * len(title) + '-+')
+        elif h == 1:
+            print(title)
+            print('-' * len(title))
+        else:
+            print(title)
