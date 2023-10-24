@@ -137,3 +137,15 @@ class Control():
             print('-' * len(title))
         else:
             print(title)
+
+class Player():
+    def __init__(self,
+                 name='Anonymous', kind='ai',
+                 persona='You are a person.'):
+        self.name = name
+        self.kind = kind
+        self.persona = persona
+    def info(self):
+        print(self.name)
+        print('  Type:', self.kind)
+        print('  Persona:', self.persona)
