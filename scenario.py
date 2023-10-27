@@ -10,6 +10,7 @@ import langchain.llms
 import langchain.prompts
 import langchain.chains
 import langchain.callbacks
+import langchain.memory
 
 class LLM():
     def __init__(self, source_name=None, model_name=None):
@@ -77,7 +78,7 @@ class LLM():
                 learned_pos_emb=False,
                 max_seq_len=2500,
             )
-            #config.attn_config['attn_impl'] = 'torch'
+            # config.attn_config['attn_impl'] = 'torch'
 
             model = transformers.AutoModelForCausalLM.from_pretrained(
                 self.model_path,
@@ -120,9 +121,12 @@ class LLM():
                 pipeline=pipeline,
             )
 
+
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name).llm
+        self.public_history = langchain.memory.ChatMessageHistory()
+
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
 
@@ -139,13 +143,56 @@ class Control():
         else:
             print(title)
 
+    def record_narration(self, narration):
+        self.public_history.add_ai_message(
+            'Narrator: ' + narration)
+    def record_response(self, player_name, player_response):
+        self.public_history.add_user_message(
+            player_name + ': ' + player_response)
+
+
 class Player():
-    def __init__(self,
+    def __init__(self, llm,
                  name='Anonymous', kind='ai',
-                 persona='You are a person.'):
+                 persona=None):
+        self.llm = llm
         self.name = name
         self.kind = kind
         self.persona = persona
+
+    def respond(self, history=None, query=None):
+        persona = self.persona
+
+        # Define template and included variables
+        template = ''
+        variables = {}
+        if persona is not None:
+            template += 'You are {persona}.\n\n'
+            variables['persona'] = persona
+        if history is not None:
+            template += 'This is what has happened so far.\n{history}\n\n'
+            variables['history'] = history
+        if query is not None:
+            template += '{query}'
+            variables['query'] = query
+        else:
+            template += 'How do you respond?'
+        if persona is not None:
+            template += '  (Remember, you are {persona}.)'
+
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
+        chain = langchain.chains.LLMChain(
+            prompt=prompt,
+            llm=self.llm
+        )
+        print(chain.prompt.format(**variables))
+        print()
+        output = chain.run(**variables)
+        return output
+
     def info(self):
         print(self.name)
         print('  Type:', self.kind)
