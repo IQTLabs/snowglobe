@@ -133,6 +133,10 @@ class History():
         return ''.join([('You' if entry['name'] == name else entry['name'])
                         + ': ' + entry['text'] + '\n'
                         for entry in self.entries])
+    def copy(self):
+        history_copy = History()
+        history_copy.entries = self.entries.copy()
+        return history_copy
 
 
 class Control():
