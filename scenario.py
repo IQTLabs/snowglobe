@@ -122,6 +122,16 @@ class LLM():
             )
 
 
+class History():
+    def __init__(self):
+        self.entries = []
+    def add(self, name, text):
+        entries.append({'name': name, 'text': text})
+    def str(self, name=None):
+        ''.join([('You' if entry['name'] == name else entry['name'])
+                 + ': ' + entry['text'] for x in self.entries])
+
+
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name).llm
@@ -176,7 +186,7 @@ class Player():
             template += '{query}'
             variables['query'] = query
         else:
-            template += 'How do you respond?'
+            template += 'How do you respond?  Keep your answer brief.'
         if persona is not None:
             template += '  (Remember, you are {persona}.)'
 
