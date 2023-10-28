@@ -29,8 +29,10 @@ class LLM():
                 'mpt-7b-chat' : '/home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf',
             },
             'huggingface' : {
-                'mpt-7b-chat_auto' : 'mosaicml/mpt-7b-chat',
+                'mpt-7b' : '/home/scenario/wdata/mosaicml/mpt-7b',
                 'mpt-7b-chat' : '/home/scenario/wdata/mosaicml/mpt-7b-chat',
+                'mpt-7b-instruct': '/home/scenario/wdata/mosaicml/mpt-7b-instruct',
+                'mpt-7b-storywriter': '/home/scenario/wdata/mosaicml/mpt-7b-storywriter',
                 'mpt-30b-chat' : '/home/scenario/wdata/mosaicml/mpt-30b-chat',
                 'Cerebras-GPT-13B' : '/home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B',
             }
@@ -58,7 +60,7 @@ class LLM():
                  .StreamingStdOutCallbackHandler()])
             self.llm = langchain.llms.LlamaCpp(
                 model_path=self.model_path,
-                n_gpu_layers=9999,
+                n_gpu_layers=-1,
                 n_batch=512,
                 n_ctx=2048,
                 f16_kv=True,
@@ -156,8 +158,23 @@ class Control():
 
     def record_narration(self, narration):
         self.public_history.add('Narrator', narration)
+
     def record_response(self, player_name, player_response):
         self.public_history.add(player_name, player_response)
+
+    def assess(self, history, query):
+        template = 'This is what happened.\n{history}\n{query}'
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=['history', 'query'],
+        )
+        chain = langchain.chains.LLMChain(
+            prompt=prompt,
+            llm=self.llm
+        )
+        output = chain.run(history=history.str(), query=query).strip()
+        print()
+        return output
 
 
 class Player():
@@ -169,7 +186,7 @@ class Player():
         self.kind = kind
         self.persona = persona
 
-    def respond(self, history=None, query=None):
+    def respond(self, history=None, query=None, verbose=0):
         persona = self.persona
 
         # Define template and included variables
@@ -197,9 +214,11 @@ class Player():
             prompt=prompt,
             llm=self.llm
         )
-        print(chain.prompt.format(**variables))
+        if verbose >= 1:
+            print(chain.propt.format(**variables))
+            print()
+        output = chain.run(**variables).strip()
         print()
-        output = chain.run(**variables)
         return output
 
     def info(self):
