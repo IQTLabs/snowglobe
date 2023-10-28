@@ -151,7 +151,7 @@ class Control():
         print()
         if h == 0:
             print('+-' + '-' * min(len(title), width) + '-+')
-            print('| ' + title.upper() + ' |')
+            print('| ' + title + ' |')
             print('+-' + '-' * min(len(title), width) + '-+')
         elif h == 1:
             print('-' * min(len(title), width))
