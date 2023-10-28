@@ -126,16 +126,17 @@ class History():
     def __init__(self):
         self.entries = []
     def add(self, name, text):
-        entries.append({'name': name, 'text': text})
+        self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
-        ''.join([('You' if entry['name'] == name else entry['name'])
-                 + ': ' + entry['text'] for x in self.entries])
+        return ''.join([('You' if entry['name'] == name else entry['name'])
+                        + ': ' + entry['text'] + '\n'
+                        for entry in self.entries])
 
 
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name).llm
-        self.public_history = langchain.memory.ChatMessageHistory()
+        self.public_history = History()
 
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -154,11 +155,9 @@ class Control():
             print(title)
 
     def record_narration(self, narration):
-        self.public_history.add_ai_message(
-            'Narrator: ' + narration)
+        self.public_history.add('Narrator', narration)
     def record_response(self, player_name, player_response):
-        self.public_history.add_user_message(
-            player_name + ': ' + player_response)
+        self.public_history.add(player_name, player_response)
 
 
 class Player():
@@ -180,13 +179,13 @@ class Player():
             template += 'You are {persona}.\n\n'
             variables['persona'] = persona
         if history is not None:
-            template += 'This is what has happened so far.\n{history}\n\n'
-            variables['history'] = history
+            template += 'This is what has happened so far.\n{history}\n'
+            variables['history'] = history.str(name=self.name)
         if query is not None:
             template += '{query}'
             variables['query'] = query
         else:
-            template += 'How do you respond?  Keep your answer brief.'
+            template += 'How do you respond?'
         if persona is not None:
             template += '  (Remember, you are {persona}.)'
 
