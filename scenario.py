@@ -206,7 +206,7 @@ class Player():
             template += '{query}'
             variables['query'] = query
         else:
-            template += 'What actions do you take in response?:'
+            template += 'What action or actions do you take in response?:'
         if persona is not None:
             template += ' (Remember, you are {persona}.)'
 
