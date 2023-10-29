@@ -206,9 +206,9 @@ class Player():
             template += '{query}'
             variables['query'] = query
         else:
-            template += 'Your response:'
+            template += 'What actions do you take in response?:'
         if persona is not None:
-            template += '  (Remember, you are {persona}.)'
+            template += ' (Remember, you are {persona}.)'
 
         prompt = langchain.prompts.PromptTemplate(
             template=template,
