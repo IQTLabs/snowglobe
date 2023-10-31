@@ -181,10 +181,27 @@ class Control():
         return output
 
 
+class Team():
+    def __init__(self, name='Anonymous', leader=None, members=None):
+        self.name = name
+        self.leader = leader
+        self.members = members
+
+    def respond(self, history=None, query=None, verbose=0):
+        member_responses = [
+            player.respond(history=history, query=query, verbose=verbose)
+            for player in self.members]
+        leader_response = self.leader.synthesize()
+        return leader_response
+
+    def info(self):
+        print('Team:', self.name)
+        print('  Leader:', self.leader.name)
+        print('  Members:', [member.name for member in self.members])
+
+
 class Player():
-    def __init__(self, llm,
-                 name='Anonymous', kind='ai',
-                 persona=None):
+    def __init__(self, llm, name='Anonymous', kind='ai', persona=None):
         self.llm = llm
         self.name = name
         self.kind = kind
@@ -219,13 +236,17 @@ class Player():
             llm=self.llm
         )
         if verbose >= 1:
-            print(chain.propt.format(**variables))
+            print(chain.prompt.format(**variables))
             print()
         output = chain.run(**variables).strip()
         print()
         return output
 
+    def synthesize(self, history=None, query=None, verbose=0):
+        persona = self.persona
+        return ''
+
     def info(self):
-        print(self.name)
+        print('Player:', self.name)
         print('  Type:', self.kind)
         print('  Persona:', self.persona)
