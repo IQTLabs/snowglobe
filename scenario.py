@@ -194,6 +194,8 @@ class Team():
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
                 history=history, query=query, verbose=verbose))
+        if verbose >= 1:
+            print('\n### ' + self.leader.name)
         leader_response = self.leader.synthesize(
             history=history, responses=member_responses, verbose=verbose)
         return leader_response
