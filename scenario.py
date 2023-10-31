@@ -263,9 +263,10 @@ class Player():
         if responses is not None:
             template += 'These are the actions your team members recommend you take in response.\n{responses}\n'
             variables['responses'] = responses.str(name=self.name)
-        template += 'What action or actions do you take in response?:'
-        if persona is not None:
-            template += ' (Remember, you are {persona}.)'
+        # template += 'What action or actions do you take in response?:'
+        template += 'Combine the recommended actions given above:'
+        # if persona is not None:
+        #     template += ' (Remember, you are {persona}.)'
 
         prompt = langchain.prompts.PromptTemplate(
             template=template,
