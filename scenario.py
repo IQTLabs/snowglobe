@@ -188,10 +188,14 @@ class Team():
         self.members = members
 
     def respond(self, history=None, query=None, verbose=0):
-        member_responses = [
-            player.respond(history=history, query=query, verbose=verbose)
-            for player in self.members]
-        leader_response = self.leader.synthesize()
+        member_responses = History()
+        for member in self.members:
+            if verbose >= 1:
+                print('\n### ' + member.name)
+            member_responses.add(member.name, member.respond(
+                history=history, query=query, verbose=verbose))
+        leader_response = self.leader.synthesize(
+            history=history, responses=member_responses, verbose=verbose)
         return leader_response
 
     def info(self):
@@ -235,16 +239,46 @@ class Player():
             prompt=prompt,
             llm=self.llm
         )
-        if verbose >= 1:
+        if verbose >= 2:
             print(chain.prompt.format(**variables))
             print()
         output = chain.run(**variables).strip()
         print()
         return output
 
-    def synthesize(self, history=None, query=None, verbose=0):
+    def synthesize(self, history=None, responses=None, verbose=0):
         persona = self.persona
-        return ''
+
+        # Define template and included variables
+        template = ''
+        variables = {}
+        if persona is not None:
+            template += 'You are {persona}.\n\n'
+            variables['persona'] = persona
+        if history is not None:
+            template += 'This is what has happened so far.\n{history}\n'
+            variables['history'] = history.str(name=self.name)
+        if responses is not None:
+            template += 'These are the actions your team members recommend you take in response.\n{responses}\n'
+            variables['responses'] = responses.str(name=self.name)
+        template += 'What action or actions do you take in response?:'
+        if persona is not None:
+            template += ' (Remember, you are {persona}.)'
+
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
+        chain = langchain.chains.LLMChain(
+            prompt=prompt,
+            llm=self.llm
+        )
+        if verbose >= 2:
+            print(chain.prompt.format(**variables))
+            print()
+        output = chain.run(**variables).strip()
+        print()
+        return output
 
     def info(self):
         print('Player:', self.name)
