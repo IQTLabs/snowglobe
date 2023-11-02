@@ -219,7 +219,7 @@ class Player():
         self.kind = kind
         self.persona = persona
 
-    def respond(self, history=None, query=None, max_tries=32, verbose=0):
+    def respond(self, history=None, query=None, max_tries=64, verbose=0):
         persona = self.persona
 
         # Define template and included variables
