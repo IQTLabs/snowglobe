@@ -21,6 +21,7 @@ class LLM():
         model_paths = {
             'openai' : {
                 'text-davinci-003' : '',
+                'gpt-4' : '',
             },
             'llamacpp' : {
                 'mistral-7b-openorca' : '/home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf',
@@ -172,7 +173,7 @@ class Control():
         self.public_history.add(player_name, player_response)
 
     def assess(self, history, query):
-        template = 'This is what happened.\n{history}\n{query}'
+        template = 'This is what happened.\n{history}\nQuestion: {query}\nAnswer: '
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=['history', 'query'],
