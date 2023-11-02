@@ -48,8 +48,13 @@ class LLM():
         if self.source_name == 'openai':
 
             # Model Source: OpenAI (Cloud)
+            cbm = langchain.callbacks.manager.CallbackManager(
+                [langchain.callbacks.streaming_stdout\
+                 .StreamingStdOutCallbackHandler()])
             self.llm = langchain.llms.OpenAI(
-                model_name=self.model_name
+                model_name=self.model_name,
+                callback_manager=cbm,
+                streaming=True,
             )
 
         elif self.source_name == 'llamacpp':
