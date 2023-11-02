@@ -254,7 +254,6 @@ class Player():
             output = chain.run(**variables).strip()
             if len(output) > 0:
                 break
-            print('*************REBOOT')
         print()
         return output
 
