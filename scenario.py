@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import yaml
 import torch
 import triton
@@ -13,13 +14,15 @@ import langchain.prompts
 import langchain.callbacks
 
 class LLM():
-    def __init__(self, source_name=None, model_name=None,
-                 model_menu='../llms.yaml'):
+    def __init__(self, source_name=None, model_name=None, menu=None):
 
         # Select large language model
         default_source_name = 'llamacpp'
         default_model_name = 'mistral-7b-openorca'
-        model_paths = yaml.safe_load(open(model_menu, 'r'))
+        default_menu = os.path.join(os.path.split(__file__)[0], 'llms.yaml')
+
+        self.menu = menu if menu is not None else default_menu
+        model_paths = yaml.safe_load(open(self.menu, 'r'))
         if source_name is not None and model_name is not None:
             self.source_name = source_name
             self.model_name = model_name
