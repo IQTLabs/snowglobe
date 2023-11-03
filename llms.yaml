@@ -1,0 +1,15 @@
+openai:
+  text-davinci-003:
+  gpt-4:
+llamacpp:
+  mistral-7b-openorca: /home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf
+  mistral-7b-instruct: /home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf
+  gpt4all-falcon: /home/scenario/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf
+  mpt-7b-chat: /home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf
+huggingface:
+  mpt-7b: /home/scenario/wdata/mosaicml/mpt-7b
+  mpt-7b-chat: /home/scenario/wdata/mosaicml/mpt-7b-chat
+  mpt-7b-instruct: /home/scenario/wdata/mosaicml/mpt-7b-instruct
+  mpt-7b-storywriter: /home/scenario/wdata/mosaicml/mpt-7b-storywriter
+  mpt-30b-chat: /home/scenario/wdata/mosaicml/mpt-30b-chat
+  Cerebras-GPT-13B: /home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B

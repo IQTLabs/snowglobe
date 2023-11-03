@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import yaml
 import torch
 import triton
 import typing
@@ -7,37 +8,18 @@ import transformers
 
 import langchain
 import langchain.llms
-import langchain.prompts
 import langchain.chains
+import langchain.prompts
 import langchain.callbacks
-import langchain.memory
 
 class LLM():
-    def __init__(self, source_name=None, model_name=None):
+    def __init__(self, source_name=None, model_name=None,
+                 model_menu='../llms.yaml'):
 
         # Select large language model
         default_source_name = 'llamacpp'
         default_model_name = 'mistral-7b-openorca'
-        model_paths = {
-            'openai' : {
-                'text-davinci-003' : '',
-                'gpt-4' : '',
-            },
-            'llamacpp' : {
-                'mistral-7b-openorca' : '/home/scenario/wdata/llm/gpt4all/mistral-7b-openorca.Q4_0.gguf',
-                'mistral-7b-instruct' : '/home/scenario/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf',
-                'gpt4all-falcon' : '/home/scenario/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf',
-                'mpt-7b-chat' : '/home/scenario/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf',
-            },
-            'huggingface' : {
-                'mpt-7b' : '/home/scenario/wdata/mosaicml/mpt-7b',
-                'mpt-7b-chat' : '/home/scenario/wdata/mosaicml/mpt-7b-chat',
-                'mpt-7b-instruct': '/home/scenario/wdata/mosaicml/mpt-7b-instruct',
-                'mpt-7b-storywriter': '/home/scenario/wdata/mosaicml/mpt-7b-storywriter',
-                'mpt-30b-chat' : '/home/scenario/wdata/mosaicml/mpt-30b-chat',
-                'Cerebras-GPT-13B' : '/home/scenario/wdata/llm/cerebras/Cerebras-GPT-13B',
-            }
-        }
+        model_paths = yaml.safe_load(open(model_menu, 'r'))
         if source_name is not None and model_name is not None:
             self.source_name = source_name
             self.model_name = model_name
