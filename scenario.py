@@ -171,6 +171,15 @@ class Control():
         print()
         return output
 
+    def chat(self):
+        conversation = langchain.chains.ConversationChain(
+            llm=self.llm, memory=langchain.memory.ConversationBufferMemory())
+        while True:
+            line = input('\n')
+            if line.lower() == 'exit':
+                break
+            conversation(line)
+
 
 class Team():
     def __init__(self, name='Anonymous', leader=None, members=None):
