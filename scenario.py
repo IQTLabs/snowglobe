@@ -52,13 +52,14 @@ class LLM():
             self.llm = langchain.llms.LlamaCpp(
                 model_path=self.model_path,
                 n_gpu_layers=-1,
+                max_tokens=1000,
                 n_batch=512,
                 n_ctx=2048,
                 f16_kv=True,
                 callback_manager=cbm,
                 verbose=False,
             )
-            self.bound = {'max_tokens': 1000}
+            self.bound = {}
 
         elif self.source_name == 'huggingface':
 
