@@ -3,7 +3,6 @@
 import os
 import yaml
 import torch
-import triton
 import typing
 import transformers
 
@@ -42,6 +41,7 @@ class LLM():
                 callback_manager=cbm,
                 streaming=True,
             )
+            self.bound = {}
 
         elif self.source_name == 'llamacpp':
 
@@ -58,6 +58,7 @@ class LLM():
                 callback_manager=cbm,
                 verbose=False,
             )
+            self.bound = {'max_tokens': 1000}
 
         elif self.source_name == 'huggingface':
 
@@ -113,6 +114,7 @@ class LLM():
             self.llm = langchain.llms.HuggingFacePipeline(
                 pipeline=pipeline,
             )
+            self.bound = {}
 
 
 class History():
@@ -132,7 +134,7 @@ class History():
 
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
-        self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name).llm
+        self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
         self.public_history = History()
 
     def run(self):
@@ -163,7 +165,7 @@ class Control():
             template=template,
             input_variables=['history', 'query'],
         )
-        chain = prompt | self.llm
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({
             'history': history.str(), 'query': query}).strip()
         print()
@@ -171,7 +173,8 @@ class Control():
 
     def chat(self):
         conversation = langchain.chains.ConversationChain(
-            llm=self.llm, memory=langchain.memory.ConversationBufferMemory())
+            llm=self.llm.llm,
+            memory=langchain.memory.ConversationBufferMemory())
         while True:
             line = input('\n')
             if line.lower() == 'exit':
@@ -235,7 +238,7 @@ class Player():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = prompt | self.llm
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
         if verbose >= 2:
             print(prompt.format(**variables))
             print()
@@ -270,7 +273,7 @@ class Player():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = prompt | self.llm
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
         if verbose >= 2:
             print(prompt.format(**variables))
             print()
