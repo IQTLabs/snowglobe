@@ -237,7 +237,7 @@ class Player():
         )
         chain = prompt | self.llm
         if verbose >= 2:
-            print(chain.prompt.format(**variables))
+            print(prompt.format(**variables))
             print()
         for i in range(max_tries):
             output = chain.invoke(variables).strip()
@@ -272,7 +272,7 @@ class Player():
         )
         chain = prompt | self.llm
         if verbose >= 2:
-            print(chain.prompt.format(**variables))
+            print(prompt.format(**variables))
             print()
         output = chain.invoke(variables).strip()
         print()
