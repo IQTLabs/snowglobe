@@ -3,6 +3,7 @@
 import os
 import yaml
 import torch
+import triton
 import typing
 import transformers
 
@@ -54,7 +55,7 @@ class LLM():
                 n_gpu_layers=-1,
                 max_tokens=1000,
                 n_batch=512,
-                n_ctx=2048,
+                n_ctx=4096,
                 f16_kv=True,
                 callback_manager=cbm,
                 verbose=False,
