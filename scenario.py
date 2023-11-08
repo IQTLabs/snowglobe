@@ -163,11 +163,9 @@ class Control():
             template=template,
             input_variables=['history', 'query'],
         )
-        chain = langchain.chains.LLMChain(
-            prompt=prompt,
-            llm=self.llm
-        )
-        output = chain.run(history=history.str(), query=query).strip()
+        chain = prompt | self.llm
+        output = chain.invoke({
+            'history': history.str(), 'query': query}).strip()
         print()
         return output
 
@@ -237,15 +235,12 @@ class Player():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = langchain.chains.LLMChain(
-            prompt=prompt,
-            llm=self.llm
-        )
+        chain = prompt | self.llm
         if verbose >= 2:
             print(chain.prompt.format(**variables))
             print()
         for i in range(max_tries):
-            output = chain.run(**variables).strip()
+            output = chain.invoke(variables).strip()
             if len(output) > 0:
                 break
         print()
@@ -275,14 +270,11 @@ class Player():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = langchain.chains.LLMChain(
-            prompt=prompt,
-            llm=self.llm
-        )
+        chain = prompt | self.llm
         if verbose >= 2:
             print(chain.prompt.format(**variables))
             print()
-        output = chain.run(**variables).strip()
+        output = chain.invoke(variables).strip()
         print()
         return output
 
