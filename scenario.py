@@ -287,3 +287,51 @@ class Player():
         print('Player:', self.name)
         print('  Type:', self.kind)
         print('  Persona:', self.persona)
+
+
+def desubjunctifier(llm):
+    examples = [{
+        'input': "We would undertake an audit.",
+        'output': "We undertake an audit.",
+    },{
+        'input': "I could send a message to the ambassador, stating our intentions.",
+        'output': "I send a message to the ambassador, stating our intentions.",
+    },{
+        'input': "I implement a response plan.",
+        'output': "I implement a response plan.",
+    },{
+        'input': "After that, immediately deploy the medics.",
+        'output': "After that, we immediately deploy the medics.",
+    },{
+        'input': "Continue to investigate the source of the problems.",
+        'output': "I continue to investigate the source of the problems.",
+    },{
+        'input': "I will refrain from making accusations.",
+        'output': "I refrain from making accusations.",
+    },{
+        'input': "We should optimize the allocation of resources to different departments.",
+        'output': "We optimize the allocation of resources to different departments.",
+    }]
+    example_template = 'Input: {input}\nOutput: {output}'
+    example_prompt = langchain.prompt.PromptTemplate(
+        template=example_template,
+        variables=['input', 'output']
+    )
+    prefix = 'Replace the subjunctive voice and other indirect speech with present-tense declarative statements.'
+    suffix = 'Input: {input}\nOutput: '
+    prompt = langchain.prompt.FewShotPromptTemplate(
+        examples=examples,
+        example_prompt=example_prompt,
+        prefix=prefix,
+        suffix=suffix,
+        input_variables=['input']
+    )
+    chain = {'input': RunnablePassthrough()} | prompt | llm
+    return chain
+    """
+    template =
+    prompt =
+    chain =
+    return chain
+    """
+    pass
