@@ -10,6 +10,7 @@ import transformers
 import langchain
 import langchain.llms
 import langchain.chains
+import langchain.schema
 import langchain.prompts
 import langchain.callbacks
 
@@ -240,7 +241,8 @@ class Player():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        llm = self.llm.llm.bind(**self.llm.bound)
+        chain = prompt | llm | desubjunctifier(llm)
         if verbose >= 2:
             print(prompt.format(**variables))
             print()
@@ -313,25 +315,18 @@ def desubjunctifier(llm):
         'output': "We optimize the allocation of resources to different departments.",
     }]
     example_template = 'Input: {input}\nOutput: {output}'
-    example_prompt = langchain.prompt.PromptTemplate(
+    example_prompt = langchain.prompts.PromptTemplate(
         template=example_template,
-        variables=['input', 'output']
+        input_variables=['input', 'output']
     )
     prefix = 'Replace the subjunctive voice and other indirect speech with present-tense declarative statements.'
     suffix = 'Input: {input}\nOutput: '
-    prompt = langchain.prompt.FewShotPromptTemplate(
+    prompt = langchain.prompts.FewShotPromptTemplate(
         examples=examples,
         example_prompt=example_prompt,
         prefix=prefix,
         suffix=suffix,
         input_variables=['input']
     )
-    chain = {'input': RunnablePassthrough()} | prompt | llm
+    chain = {'input': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
     return chain
-    """
-    template =
-    prompt =
-    chain =
-    return chain
-    """
-    pass
