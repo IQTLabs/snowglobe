@@ -242,7 +242,7 @@ class Player():
             input_variables=list(variables.keys()),
         )
         llm = self.llm.llm.bind(**self.llm.bound)
-        chain = prompt | llm | desubjunctifier(llm)
+        chain = prompt | llm
         if verbose >= 2:
             print(prompt.format(**variables))
             print()
@@ -251,6 +251,11 @@ class Player():
             if len(output) > 0:
                 break
         print()
+        if True:
+            prompt_desub = langchain.prompts.PromptTemplate.from_template(
+                '{input}')
+            chain_desub = desubjunctifier(llm)
+            output = chain_desub.invoke(input=output).strip()
         return output
 
     def synthesize(self, history=None, responses=None, verbose=0):
@@ -313,20 +318,33 @@ def desubjunctifier(llm):
     },{
         'input': "We should optimize the allocation of resources to different departments.",
         'output': "We optimize the allocation of resources to different departments.",
+    },{
+        'input': "This should not be thrown away.",
+        'output': "This is not thrown away.",
     }]
     example_template = 'Input: {input}\nOutput: {output}'
     example_prompt = langchain.prompts.PromptTemplate(
         template=example_template,
         input_variables=['input', 'output']
     )
+    # example_selector = langchain.\
+    #     prompts.example_selector.LengthBasedExampleSelector(
+    #     examples=examples,
+    #     example_prompt=example_prompt
+    # )
     prefix = 'Replace the subjunctive voice and other indirect speech with present-tense declarative statements.'
     suffix = 'Input: {input}\nOutput: '
     prompt = langchain.prompts.FewShotPromptTemplate(
         examples=examples,
+        #example_selector=example_selector,
         example_prompt=example_prompt,
+        #example_separator='\n\n',
         prefix=prefix,
         suffix=suffix,
         input_variables=['input']
     )
+    print('*****')
+    print(prompt.format(input='INPUT_HERE'))
+    print('*****')
     chain = {'input': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
     return chain
