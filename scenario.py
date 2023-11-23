@@ -204,10 +204,13 @@ class Team():
             history=history, responses=member_responses, verbose=verbose)
         return leader_response
 
-    def info(self):
-        print('Team:', self.name)
-        print('  Leader:', self.leader.name)
-        print('  Members:', [member.name for member in self.members])
+    def info(self, verbose=0, offset=0):
+        print(' ' * offset + 'Team:', self.name)
+        print(' ' * offset + '  Leader:', self.leader.name)
+        print(' ' * offset + '  Members:', [member.name for member in self.members])
+        if verbose >= 1:
+            for member in self.members:
+                member.info(verbose=verbose, offset=offset+2)
 
 
 class Player():
@@ -251,7 +254,7 @@ class Player():
             if len(output) > 0:
                 break
         print()
-        if True:
+        if False:
             prompt_desub = langchain.prompts.PromptTemplate.from_template(
                 '{input}')
             chain_desub = desubjunctifier(llm)
@@ -290,10 +293,10 @@ class Player():
         print()
         return output
 
-    def info(self):
-        print('Player:', self.name)
-        print('  Type:', self.kind)
-        print('  Persona:', self.persona)
+    def info(self, verbose=0, offset=0):
+        print(' ' * offset + 'Player:', self.name)
+        print(' ' * offset + '  Type:', self.kind)
+        print(' ' * offset + '  Persona:', self.persona)
 
 
 def desubjunctifier(llm):
