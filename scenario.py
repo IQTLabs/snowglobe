@@ -56,7 +56,7 @@ class LLM():
                 n_gpu_layers=-1,
                 max_tokens=1000,
                 n_batch=512,
-                n_ctx=4096,
+                n_ctx=8192,
                 f16_kv=True,
                 callback_manager=cbm,
                 verbose=False,
