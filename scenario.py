@@ -127,7 +127,7 @@ class History():
         self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
         return ''.join([('You' if entry['name'] == name else entry['name'])
-                        + ': ' + entry['text'] + '\n'
+                        + ':\n"""\n' + entry['text'] + '\n"""\n'
                         for entry in self.entries])
     def copy(self):
         history_copy = History()
