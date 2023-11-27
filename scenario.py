@@ -226,6 +226,8 @@ class Player():
 
     def respond(self, history=None, query=None, max_tries=64, verbose=0):
         persona = self.persona
+        if query is None:
+            query = 'What action or actions do you take in response?'
 
         # Define template and included variables
         template = ''
@@ -236,13 +238,17 @@ class Player():
         if history is not None:
             template += 'This is what has happened so far.\n{history}\n'
             variables['history'] = history.str(name=self.name)
-        if query is not None:
-            template += '{query}'
-            variables['query'] = query
-        else:
-            template += 'What action or actions do you take in response?:'
+        # if query is not None:
+        #     template += '{query}'
+        #     variables['query'] = query
+        # else:
+        #     template += 'What action or actions do you take in response?:'
+        # if persona is not None:
+        #     template += ' (Remember, you are {persona}.)'
+        template += 'Question: ' + query
         if persona is not None:
             template += ' (Remember, you are {persona}.)'
+        template += '\nAnswer:\n"""'
 
         prompt = langchain.prompts.PromptTemplate(
             template=template,
