@@ -204,6 +204,10 @@ class Team():
             history=history, responses=member_responses, verbose=verbose)
         return leader_response
 
+    def synthesize(self, history=None, responses=None, verbose=0):
+        return self.leader.synthesize(
+            history=history, responses=responses, verbose=verbose)
+
     def info(self, verbose=0, offset=0):
         print(' ' * offset + 'Team:', self.name)
         print(' ' * offset + '  Leader:', self.leader.name)
