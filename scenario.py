@@ -162,6 +162,34 @@ class Control():
     def record_response(self, player_name, player_response):
         self.public_history.add(player_name, player_response)
 
+    def adjudicate(self, history=None, responses=None, query=None, verbose=0):
+        if query is None:
+            query = 'What happens next?'
+
+        # Define template and included variables
+        template = ''
+        variables = {}
+        if history is not None:
+            template += 'This is what has happened so far.\n{history}\n'
+            variables['history'] = history.str()
+        if responses is not None:
+            template += 'These are the actions undertaken by each person or group.\n{responses}\n'
+            variables['responses'] = responses.str()
+        template += '{query}'
+        variables['query'] = query
+
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        if verbose >= 2:
+            print(prompt.format(**variables))
+            print()
+        output = chain.invoke(variables).strip()
+        print()
+        return output
+
     def assess(self, history, query):
         template = 'This is what happened.\n{history}\nQuestion: {query}\nAnswer: '
         prompt = langchain.prompts.PromptTemplate(
