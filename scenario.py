@@ -61,7 +61,7 @@ class LLM():
                 callback_manager=cbm,
                 verbose=False,
             )
-            self.bound = {}
+            self.bound = {'stop': '"""'}
 
         elif self.source_name == 'huggingface':
 
