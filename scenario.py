@@ -238,14 +238,8 @@ class Player():
         if history is not None:
             template += 'This is what has happened so far.\n{history}\n'
             variables['history'] = history.str(name=self.name)
-        # if query is not None:
-        #     template += '{query}'
-        #     variables['query'] = query
-        # else:
-        #     template += 'What action or actions do you take in response?:'
-        # if persona is not None:
-        #     template += ' (Remember, you are {persona}.)'
-        template += 'Question:\n"""\n' + query
+        template += 'Question:\n"""\n{query}'
+        variables['query'] = query
         if persona is not None:
             template += ' (Remember, you are {persona}.)'
         template += '\n"""\nAnswer:\n"""'
