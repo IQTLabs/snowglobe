@@ -168,19 +168,21 @@ class Control():
 
     def adjudicate(self, history=None, responses=None, query=None, verbose=0):
         if query is None:
-            query = 'This is an example of what happens next as a result of these plans.'
+            #query = 'This is an example of what happens next as a result of these plans.'
+            query = 'This is what happens when these plans are carried out'
 
         # Define template and included variables
         template = ''
         variables = {}
         if history is not None:
-            template += 'This is what has happened so far.\n{history}\n'
+            template += 'This is what has happened so far:\n{history}\n'
             variables['history'] = history.textonly()
         if responses is not None:
-            #template += 'These are the actions undertaken by each person or group.\n{responses}\n'
-            template += 'These are the plans for each person or group.\n{responses}\n'
+            #template += 'These are the actions undertaken by each person or group:\n{responses}\n'
+            template += 'These are the plans for each person or group:\n{responses}\n'
             variables['responses'] = responses.str()
-        template += 'Question:\n"""\n{query}\n"""\nAnswer:\n"""\n'
+        #template += 'Question:\n"""\n{query}\n"""\nAnswer:\n"""\n'
+        template += '{query}:\n"""\n'
         variables['query'] = query
 
         prompt = langchain.prompts.PromptTemplate(
