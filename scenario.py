@@ -163,8 +163,9 @@ class Control():
         self.public_history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None, verbose=0):
+        #history = None # TEST
         if query is None:
-            query = 'What happens next?  Make up a plausible story.'
+            query = 'This is an example of what happens next as a result of these plans.'
 
         # Define template and included variables
         template = ''
@@ -173,9 +174,10 @@ class Control():
             template += 'This is what has happened so far.\n{history}\n'
             variables['history'] = history.str()
         if responses is not None:
-            template += 'These are the actions undertaken by each person or group.\n{responses}\n'
+            #template += 'These are the actions undertaken by each person or group.\n{responses}\n'
+            template += 'These are the plans for each person or group.\n{responses}\n'
             variables['responses'] = responses.str()
-        template += 'Question: {query}\nAnswer:\n"""\n'
+        template += 'Question:\n"""\n{query}\n"""\nAnswer:\n"""\n'
         variables['query'] = query
 
         prompt = langchain.prompts.PromptTemplate(
