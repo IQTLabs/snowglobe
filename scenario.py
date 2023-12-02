@@ -129,6 +129,10 @@ class History():
         return ''.join([('You' if entry['name'] == name else entry['name'])
                         + ':\n"""\n' + entry['text'] + '\n"""\n'
                         for entry in self.entries])
+    def textonly(self):
+        return '"""\n' \
+            + '\n\n'.join([entry['text'] for entry in self.entries]) \
+            + '\n"""'
     def copy(self):
         history_copy = History()
         history_copy.entries = self.entries.copy()
@@ -163,7 +167,6 @@ class Control():
         self.public_history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None, verbose=0):
-        #history = None # TEST
         if query is None:
             query = 'This is an example of what happens next as a result of these plans.'
 
@@ -172,7 +175,7 @@ class Control():
         variables = {}
         if history is not None:
             template += 'This is what has happened so far.\n{history}\n'
-            variables['history'] = history.str()
+            variables['history'] = history.textonly()
         if responses is not None:
             #template += 'These are the actions undertaken by each person or group.\n{responses}\n'
             template += 'These are the plans for each person or group.\n{responses}\n'
