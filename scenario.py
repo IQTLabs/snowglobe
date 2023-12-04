@@ -166,16 +166,18 @@ class Control():
     def record_response(self, player_name, player_response):
         self.public_history.add(player_name, player_response)
 
-    def adjudicate(self, history=None, responses=None, query=None, verbose=0):
+    def adjudicate(self, history=None, responses=None, query=None,
+                   timeframe='week', verbose=0):
         if query is None:
             #query = 'This is an example of what happens next as a result of these plans.'
-            query = 'This is what happens when these plans are carried out'
+            query = 'This is what happens in the next ' + timeframe \
+                + ' due to these plans.  Include unexpected developments'
 
         # Define template and included variables
         template = ''
         variables = {}
         if history is not None:
-            template += 'This is what has happened so far:\n{history}\n'
+            template += 'This is what has happened so far:\n{history}\n\n'
             variables['history'] = history.textonly()
         if responses is not None:
             #template += 'These are the actions undertaken by each person or group:\n{responses}\n'
