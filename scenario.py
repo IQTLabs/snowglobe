@@ -167,11 +167,15 @@ class Control():
         self.public_history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None,
-                   timeframe='week', verbose=0):
+                   nature=False, timeframe='week', verbose=0):
         if query is None:
             #query = 'This is an example of what happens next as a result of these plans.'
-            query = 'This is what happens in the next ' + timeframe \
-                + ' due to these plans.  Include unexpected developments'
+            if nature:
+                query = 'This is what happens in the next ' + timeframe \
+                    + ' due to these plans.  Include unexpected developments'
+            else:
+                query = 'This is what happens in the next ' + timeframe \
+                    + ' due to these plans.'
 
         # Define template and included variables
         template = ''
@@ -348,7 +352,7 @@ class Player():
 
 
 def novel(llm):
-    template = 'History:\n"""\n{history}\n"""\n\nNews:\n"""\n{news}\n"""\n\nIn a short paragraph, what\'s the most important information appearing in the news but not in the history?:\n"""\n'
+    template = 'History:\n"""\n{history}\n"""\n\nNews:\n"""\n{news}\n"""\n\nIn a short paragraph, what\'s the most important information appearing in the news but not in the history?  Do not use phrases like "most important news" in your answer:\n"""\n'
     prompt = langchain.prompts.PromptTemplate(
         template=template,
         input_variables=['history', 'news'],
