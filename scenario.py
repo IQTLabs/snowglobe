@@ -201,7 +201,7 @@ class Control():
             print()
         output = chain.invoke(variables).strip()
         print()
-        if True:
+        if False:
             print('\n### Summary\n')
             chain_novel = novel(self.llm.llm.bind(**self.llm.bound))
             output = chain_novel.invoke({
@@ -307,8 +307,7 @@ class Player():
                 break
         print()
         if False:
-            prompt_desub = langchain.prompts.PromptTemplate.from_template(
-                '{input}')
+            print('\n###\n')
             chain_desub = desubjunctifier(llm)
             output = chain_desub.invoke(input=output).strip()
         return output
@@ -363,53 +362,31 @@ def novel(llm):
 
 def desubjunctifier(llm):
     examples = [{
-        'input': "We would undertake an audit.",
-        'output': "We undertake an audit.",
+        'input': "A) We would undertake an audit."
+        "\n\nB) I could send a message to the ambassador, stating our intentions."
+        "\n\nC) I implement a response plan."
+        "\n\nD) After that, immediately deploy the medics.  Furnish all needed supplies.",
+        'output': "A) We undertake an audit."
+        "\n\nB) I send a message to the ambassador, stating our intentions."
+        "\n\nC) I implement a response plan."
+        "\n\nD) After that, we immediately deploy the medics.  We furnish all needed supplies.",
     },{
-        'input': "I could send a message to the ambassador, stating our intentions.",
-        'output': "I send a message to the ambassador, stating our intentions.",
-    },{
-        'input': "I implement a response plan.",
-        'output': "I implement a response plan.",
-    },{
-        'input': "After that, immediately deploy the medics.",
-        'output': "After that, we immediately deploy the medics.",
-    },{
-        'input': "Continue to investigate the source of the problems.",
-        'output': "I continue to investigate the source of the problems.",
-    },{
-        'input': "I will refrain from making accusations.",
-        'output': "I refrain from making accusations.",
-    },{
-        'input': "We should optimize the allocation of resources to different departments.",
-        'output': "We optimize the allocation of resources to different departments.",
-    },{
-        'input': "This should not be thrown away.",
-        'output': "This is not thrown away.",
+        'input': "Continue to investigate the source of the problems. I will refrain from making accusations. We should optimize the allocation of resources to different departments. This should not be thrown away.",
+        'output': "I continue to investigate the source of the problems. I refrain from making accusations. We optimize the allocation of resources to different departments. This is not thrown away.",
     }]
-    example_template = 'Input: {input}\nOutput: {output}'
+    example_template = 'Input:\n"""\n{input}\n"""\nOutput:\n"""\n{output}\n"""'
     example_prompt = langchain.prompts.PromptTemplate(
         template=example_template,
         input_variables=['input', 'output']
     )
-    # example_selector = langchain.\
-    #     prompts.example_selector.LengthBasedExampleSelector(
-    #     examples=examples,
-    #     example_prompt=example_prompt
-    # )
-    prefix = 'Replace the subjunctive voice and other indirect speech with present-tense declarative statements.'
-    suffix = 'Input: {input}\nOutput: '
+    prefix = 'Change every Input sentence into a first-person present indicative statement.'
+    suffix = 'Input:\n"""\n{input}\n"""\nOutput:\n"""\n'
     prompt = langchain.prompts.FewShotPromptTemplate(
         examples=examples,
-        #example_selector=example_selector,
         example_prompt=example_prompt,
-        #example_separator='\n\n',
         prefix=prefix,
         suffix=suffix,
         input_variables=['input']
     )
-    print('*****')
-    print(prompt.format(input='INPUT_HERE'))
-    print('*****')
     chain = {'input': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
     return chain
