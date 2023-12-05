@@ -352,7 +352,7 @@ class Player():
 
 
 def novel(llm):
-    template = 'History:\n"""\n{history}\n"""\n\nNews:\n"""\n{news}\n"""\n\nIn a short paragraph, what\'s the most important information appearing in the news but not in the history?  Do not use phrases like "most important news" or "most important information" in your answer:\n"""\n'
+    template = 'History:\n"""\n{history}\n"""\n\nNews:\n"""\n{news}\n"""\n\nIn a short paragraph, what\'s the most important information appearing in the news but not in the history?  Do not use phrases similar to "most important news" in your answer:\n"""\n'
     prompt = langchain.prompts.PromptTemplate(
         template=template,
         input_variables=['history', 'news'],
