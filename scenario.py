@@ -197,6 +197,12 @@ class Control():
             print()
         output = chain.invoke(variables).strip()
         print()
+        if True:
+            chain_novel = novel(self.llm.llm.bind(**self.llm.bound))
+            output = chain_novel.invoke({
+                'original': history.textonly(),
+                'addition': output,
+            }).strip()
         return output
 
     def assess(self, history, query):
@@ -338,6 +344,16 @@ class Player():
         print(' ' * offset + 'Player:', self.name)
         print(' ' * offset + '  Type:', self.kind)
         print(' ' * offset + '  Persona:', self.persona)
+
+
+def novel(llm):
+    template = 'Print all the information in the "Additional Text" that does not appear in the "Original Text".\n\nOriginal Text:\n"""\n{original}\n"""\n\nAdditioanl Text:\n"""\n{addition}\n"""\n\nNew Information in Additional Text that is NOT in the original text:\n"""\n'
+    prompt = langchain.prompts.PromptTemplate(
+        template=template,
+        input_variables=['original', 'addition'],
+    )
+    chain = {'original': langchain.schema.runnable.RunnablePassthrough(), 'addition': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
+    return chain
 
 
 def desubjunctifier(llm):
