@@ -198,11 +198,11 @@ class Control():
         output = chain.invoke(variables).strip()
         print()
         if True:
-            print('### New Developments')
+            print('\n### Summary\n')
             chain_novel = novel(self.llm.llm.bind(**self.llm.bound))
             output = chain_novel.invoke({
-                'original': history.textonly(),
-                'addition': output,
+                'history': history.textonly(),
+                'news': output,
             }).strip()
         return output
 
@@ -348,11 +348,10 @@ class Player():
 
 
 def novel(llm):
-    #template = 'Reword the "Additional Text" to remove all information that is in the "Original Text".\n\nOriginal Text:\n"""\n{original}\n"""\n\nAdditional Text:\n"""\n{addition}\n"""\n\nAdditional Text with Original Text content removed:\n"""\n'
-    template = 'This is what has happened so far:\n"""\n{original}\n"""\n\nNew Developments:\n"""\n{addition}\n"""\n\nSummarize the new developments in a few sentences:\n"""\n'
+    template = 'History:\n"""\n{history}\n"""\n\nNews:\n"""\n{news}\n"""\n\nIn a short paragraph, what\'s the most important information appearing in the news but not in the history?:\n"""\n'
     prompt = langchain.prompts.PromptTemplate(
         template=template,
-        input_variables=['original', 'addition'],
+        input_variables=['history', 'news'],
     )
     chain = prompt | llm
     return chain
