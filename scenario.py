@@ -347,12 +347,12 @@ class Player():
 
 
 def novel(llm):
-    template = 'Print all the information in the "Additional Text" that does not appear in the "Original Text".\n\nOriginal Text:\n"""\n{original}\n"""\n\nAdditioanl Text:\n"""\n{addition}\n"""\n\nNew Information in Additional Text that is NOT in the original text:\n"""\n'
+    template = 'Reword the "Additional Text" to remove all information that is in the "Original Text".\n\nOriginal Text:\n"""\n{original}\n"""\n\nAdditioanl Text:\n"""\n{addition}\n"""\n\nAdditional Text with Original Text content removed:\n"""\n'
     prompt = langchain.prompts.PromptTemplate(
         template=template,
         input_variables=['original', 'addition'],
     )
-    chain = {'original': langchain.schema.runnable.RunnablePassthrough(), 'addition': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
+    chain = prompt | llm
     return chain
 
 
