@@ -142,7 +142,7 @@ class History():
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
-        self.public_history = History()
+        self.history = History()
 
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -161,10 +161,10 @@ class Control():
             print(title)
 
     def record_narration(self, narration):
-        self.public_history.add('Narrator', narration)
+        self.history.add('Narrator', narration)
 
     def record_response(self, player_name, player_response):
-        self.public_history.add(player_name, player_response)
+        self.history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None,
                    nature=True, timeframe='week', verbose=0):
