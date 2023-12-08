@@ -61,7 +61,7 @@ class LLM():
                 callback_manager=cbm,
                 verbose=False,
             )
-            self.bound = {'stop': '""'}
+            self.bound = {'stop': '##'}
 
         elif self.source_name == 'huggingface':
 
@@ -126,13 +126,12 @@ class History():
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
-        return ''.join([('You' if entry['name'] == name else entry['name'])
-                        + ':\n"""\n' + entry['text'] + '\n"""\n'
+        return ''.join([('\n### ' \
+                         + 'You' if entry['name'] == name else entry['name'])
+                        + ':\n\n' + entry['text']
                         for entry in self.entries])
     def textonly(self):
-        return '"""\n' \
-            + '\n\n'.join([entry['text'] for entry in self.entries]) \
-            + '\n"""'
+        return '\n\n'.join([entry['text'] for entry in self.entries])
     def copy(self):
         history_copy = History()
         history_copy.entries = self.entries.copy()
@@ -181,14 +180,14 @@ class Control():
         template = ''
         variables = {}
         if history is not None:
-            template += 'This is what has happened so far:\n{history}\n\n'
+            template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.textonly()
         if responses is not None:
-            #template += 'These are the actions undertaken by each person or group:\n{responses}\n'
-            template += 'These are the plans for each person or group:\n{responses}\n'
+            #template += '### These are the actions undertaken by each person or group:\n\n{responses}\n\n'
+            template += '### These are the plans for each person or group:\n\n{responses}\n\n'
             variables['responses'] = responses.str()
-        #template += 'Question:\n"""\n{query}\n"""\nAnswer:\n"""\n'
-        template += '{query}:\n"""\n'
+        #template += '### Question: {query}\n\n### Answer:\n\n'
+        template += '### {query}:\n\n'
         variables['query'] = query
 
         prompt = langchain.prompts.PromptTemplate(
@@ -211,7 +210,7 @@ class Control():
         return output
 
     def assess(self, history, query):
-        template = 'This is what happened.\n{history}\nQuestion: {query}\nAnswer: '
+        template = '### This is what happened.\n\n{history}\n\n### Question:\n\n{query}\n\n### Answer:\n\n'
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=['history', 'query'],
@@ -281,16 +280,16 @@ class Player():
         template = ''
         variables = {}
         if persona is not None:
-            template += 'You are {persona}.\n\n'
+            template += '### You are {persona}.\n\n'
             variables['persona'] = persona
         if history is not None:
-            template += 'This is what has happened so far.\n{history}\n'
+            template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.str(name=self.name)
-        template += 'Question:\n"""\n{query}'
+        template += '### Question:\n\n{query}'
         variables['query'] = query
         if persona is not None:
             template += ' (Remember, you are {persona}.)'
-        template += '\n"""\nAnswer:\n"""'
+        template += '\n\n### Answer:\n\n'
 
         prompt = langchain.prompts.PromptTemplate(
             template=template,
@@ -319,16 +318,16 @@ class Player():
         template = ''
         variables = {}
         if persona is not None:
-            template += 'You are {persona}.\n\n'
+            template += '### You are {persona}.\n\n'
             variables['persona'] = persona
         if history is not None:
-            template += 'This is what has happened so far.\n{history}\n'
+            template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.str(name=self.name)
         if responses is not None:
-            template += 'These are the actions your team members recommend you take in response.\n{responses}\n'
+            template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
             variables['responses'] = responses.str(name=self.name)
-        # template += 'What action or actions do you take in response?:'
-        template += 'Combine the recommended actions given above:'
+        # template += '### What action or actions do you take in response?:\n\n'
+        template += '### Combine the recommended actions given above:\n\n'
         # if persona is not None:
         #     template += ' (Remember, you are {persona}.)'
 
