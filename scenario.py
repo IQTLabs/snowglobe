@@ -222,15 +222,47 @@ class Control():
         print()
         return output
 
-    def chat(self):
-        conversation = langchain.chains.ConversationChain(
-            llm=self.llm.llm,
-            memory=langchain.memory.ConversationBufferMemory())
+    def chat(self, history=None, verbose=1):
+        if history is None:
+            history = self.history
+        chatlog = History()
+        if verbose >= 1:
+            instructions = 'Start typing to discuss the simulation with Control (the moderator), or press [Enter] three times to exit.'
+            self.header(instructions, h=1)
         while True:
-            line = input('\n')
-            if line.lower() == 'exit':
+            # Get user input, which may include single blank lines
+            usertext = ''
+            while True:
+                userline = input()
+                usertext += userline + '\n'
+                if len(usertext) >= 3 and usertext[-3:] == '\n\n\n':
+                    break
+            if len(usertext) == 3 and usertext[-3:] == '\n\n\n':
                 break
-            conversation(line)
+            usertext = usertext.strip()
+            chatlog.add('User', usertext)
+
+            # Create template
+            template = '### You are the Control (a.k.a. moderator) of a simulated scenario.\n\n'
+            variables = {}
+            if len(history.entries) >= 0:
+                template += '### This is what happened.\n\n{history}\n\n'
+                variables['history'] = history.str()
+            template += '### This is a conversation about what happened.\n\n{chat}\n\nControl:\n\n'
+            variables['chat'] = chatlog.str()
+
+            # Get LLM response
+            prompt = langchain.prompts.PromptTemplate(
+                template=template,
+                input_variables=list(variables.keys()),
+            )
+            chain = prompt | self.llm.llm.bind(**self.llm.bound)
+            if verbose >= 2:
+                print(prompt.format(**variables))
+                print()
+            output = chain.invoke(variables).strip()
+            print()
+            chatlog.add('User', usertext)
 
 
 class Team():
