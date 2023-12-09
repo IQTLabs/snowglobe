@@ -247,19 +247,21 @@ class Team():
             member_responses.add(member.name, member.respond(
                 history=history, query=query, verbose=verbose))
         if verbose >= 1:
-            print('\n### ' + self.leader.name)
+            print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
-            history=history, responses=member_responses, verbose=verbose)
+            history=history, responses=member_responses, query=query,
+            verbose=verbose)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None, verbose=0):
         return self.leader.synthesize(
-            history=history, responses=responses, verbose=verbose)
+            history=history, responses=responses, query=query, verbose=verbose)
 
     def info(self, verbose=0, offset=0):
         print(' ' * offset + 'Team:', self.name)
         print(' ' * offset + '  Leader:', self.leader.name)
-        print(' ' * offset + '  Members:', [member.name for member in self.members])
+        print(' ' * offset + '  Members:', [member.name
+                                            for member in self.members])
         if verbose >= 1:
             for member in self.members:
                 member.info(verbose=verbose, offset=offset+2)
@@ -312,7 +314,7 @@ class Player():
             output = chain_desub.invoke(input=output).strip()
         return output
 
-    def synthesize(self, history=None, responses=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None, verbose=0):
         persona = self.persona
 
         # Define template and included variables
@@ -325,10 +327,16 @@ class Player():
             template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.str(name=self.name)
         if responses is not None:
-            template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
+            if query is None:
+                template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
+            else:
+                template += '### These are the responses from your team members:\n\n{responses}\n\n'
             variables['responses'] = responses.str(name=self.name)
         # template += '### What action or actions do you take in response?:\n\n'
-        template += '### Combine the recommended actions given above:\n\n'
+        if query is None:
+            template += '### Combine the recommended actions given above:\n\n'
+        else:
+            template += '### Combine the responses given above:\n\n'
         # if persona is not None:
         #     template += ' (Remember, you are {persona}.)'
 
@@ -365,11 +373,11 @@ def desubjunctifier(llm):
         'input': "A) We would undertake an audit."
         "\n\nB) I could send a message to the ambassador, stating our intentions."
         "\n\nC) I implement a response plan."
-        "\n\nD) After that, immediately deploy the medics.  Furnish all needed supplies.",
+        "\n\nD) After that, immediately deploy the medics. Furnish all needed supplies.",
         'output': "A) We undertake an audit."
         "\n\nB) I send a message to the ambassador, stating our intentions."
         "\n\nC) I implement a response plan."
-        "\n\nD) After that, we immediately deploy the medics.  We furnish all needed supplies.",
+        "\n\nD) After that, we immediately deploy the medics. We furnish all needed supplies.",
     },{
         'input': "Continue to investigate the source of the problems. I will refrain from making accusations. We should optimize the allocation of resources to different departments. This should not be thrown away.",
         'output': "I continue to investigate the source of the problems. I refrain from making accusations. We optimize the allocation of resources to different departments. This is not thrown away.",
