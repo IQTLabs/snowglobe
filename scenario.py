@@ -226,18 +226,19 @@ class Control():
         if history is None:
             history = self.history
         chatlog = History()
+        nb = 2
         if verbose >= 1:
-            instructions = 'Start typing to discuss the simulation with Control (the moderator), or press [Enter] three times to exit.'
+            instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
             self.header(instructions, h=1)
         while True:
-            # Get user input, which may include single blank lines
+            # Get user input, which may be multiline if no line is blank
             usertext = ''
             while True:
                 userline = input()
                 usertext += userline + '\n'
-                if len(usertext) >= 3 and usertext[-3:] == '\n\n\n':
+                if len(usertext) >= nb and usertext[-nb:] == '\n' * nb:
                     break
-            if len(usertext) == 3 and usertext[-3:] == '\n\n\n':
+            if len(usertext) == nb and usertext[-nb:] == '\n' * nb:
                 break
             usertext = usertext.strip()
             chatlog.add('User', usertext)
@@ -256,13 +257,14 @@ class Control():
                 template=template,
                 input_variables=list(variables.keys()),
             )
-            chain = prompt | self.llm.llm.bind(**self.llm.bound)
+            chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(stop=['User:', 'Control:', 'Narrator:'])
             if verbose >= 2:
                 print(prompt.format(**variables))
                 print()
             output = chain.invoke(variables).strip()
             print()
-            chatlog.add('User', usertext)
+            print()
+            chatlog.add('Control', usertext)
 
 
 class Team():
