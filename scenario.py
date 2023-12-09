@@ -257,7 +257,8 @@ class Control():
                 template=template,
                 input_variables=list(variables.keys()),
             )
-            chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(stop=['User:', 'Control:', 'Narrator:'])
+            chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(
+                stop=['User:', 'Control:', 'Narrator:'])
             if verbose >= 2:
                 print(prompt.format(**variables))
                 print()
