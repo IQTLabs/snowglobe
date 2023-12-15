@@ -267,6 +267,23 @@ class Control():
             print()
             chatlog.add('Control', usertext)
 
+    def create_scenario(self, query, clip=0):
+        prompt = langchain.prompts.PromptTemplate(
+            template='Question: {query}\n\nAnswer: ',
+            input_variables=['query'])
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        output = chain.invoke({'query': query}).strip()
+        if clip > 0:
+            output = '\n\n'.join(output.split('\n\n')[:-clip])
+        return output
+
+    def create_players(self, scenario):
+        prompt = langchain.prompts.PromptTemplate(
+            template='Scenario: {scenario}\n\nQuestion: List the key players in this scenario.\n\nAnswer: ',
+            input_variables=['query'])
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        return chain.invoke({'scenario': scenario}).strip()
+
 
 class Team():
     def __init__(self, name='Anonymous', leader=None, members=None):
