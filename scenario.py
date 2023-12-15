@@ -267,22 +267,32 @@ class Control():
             print()
             chatlog.add('Control', usertext)
 
-    def create_scenario(self, query, clip=0):
+    def create_scenario(self, instruction, clip=0):
         prompt = langchain.prompts.PromptTemplate(
-            template='Question: {query}\n\nAnswer: ',
-            input_variables=['query'])
+            template='Question: {instruction}\n\nAnswer: ',
+            input_variables=['instruction'])
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        output = chain.invoke({'query': query}).strip()
+        output = chain.invoke({'instruction': instruction}).strip()
         if clip > 0:
             output = '\n\n'.join(output.split('\n\n')[:-clip])
         return output
 
-    def create_players(self, scenario):
+    def create_players(self, scenario, max_players=None,
+                       query=None, separator=None):
+        if query is None:
+            query = 'List the key players in this scenario, separated by semicolons.'
+        if separator is None:
+            separator = ';\n0123456789()'
         prompt = langchain.prompts.PromptTemplate(
-            template='Scenario: {scenario}\n\nQuestion: List the key players in this scenario.\n\nAnswer: ',
-            input_variables=['query'])
+            template='Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: ',
+            input_variables=['scenario', 'query'])
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        return chain.invoke({'scenario': scenario}).strip()
+        output = chain.invoke({'scenario': scenario, 'query': query}).strip()
+        names = [x.strip() for x in output.split(';')]
+        if max_players is not None:
+            names = names[:max_players]
+        players = [Player(llm=self.llm, name=name) for name in names]
+        return players
 
 
 class Team():
