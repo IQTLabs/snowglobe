@@ -268,13 +268,15 @@ class Control():
             print()
             chatlog.add('Control', usertext)
 
-    def create_scenario(self, instruction, clip=0):
+    def create_scenario(self, query=None, clip=0):
+        if query is None:
+            query = ''
         prompt = langchain.prompts.PromptTemplate(
-            template='Question: {instruction}\n\nAnswer: ',
-            input_variables=['instruction'],
+            template='Question: {query}\n\nAnswer: ',
+            input_variables=['query'],
         )
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        output = chain.invoke({'instruction': instruction}).strip()
+        output = chain.invoke({'query': query}).strip()
         print()
         if clip > 0:
             output = '\n\n'.join(output.split('\n\n')[:-clip])
@@ -307,16 +309,16 @@ class Control():
 
     def create_inject(self, history=None, query=None):
         if query is None:
-            #query = 'In a sentence or two, this is an unexpected development that could occur next?'
-            #query = 'This unexpectedly happens next.'
-            query = 'This unexpectedly happens next.\n\nNarrator:\n'
+            query = 'Give an example of what unexpectedly happens next.'
 
         template = ''
         variables = {}
         if history is not None:
             template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.str()
-        template += '### {query}:\n\n'
+        #template += '### {query}:\n\n'
+        #template += 'Narrator:\nUnexpectedly, '
+        template += '### {query}:\n\nNarrator:\n'
         variables['query'] = query
 
         prompt = langchain.prompts.PromptTemplate(
