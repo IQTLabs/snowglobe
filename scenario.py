@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import yaml
 import torch
 import triton
@@ -273,25 +274,31 @@ class Control():
             input_variables=['instruction'])
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({'instruction': instruction}).strip()
+        print()
         if clip > 0:
             output = '\n\n'.join(output.split('\n\n')[:-clip])
         return output
 
     def create_players(self, scenario, max_players=None,
-                       query=None, separator=None):
+                       query=None, pattern=None):
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
-        if separator is None:
-            separator = ';\n0123456789()'
+        if pattern is None:
+            pattern = '[\.\,\-;\n0-9\(\)]+'
         prompt = langchain.prompts.PromptTemplate(
             template='Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: ',
             input_variables=['scenario', 'query'])
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({'scenario': scenario, 'query': query}).strip()
-        names = [x.strip() for x in output.split(';')]
+        print()
+        names = re.split(pattern, output)
+        names = [name.strip() for name in names]
+        print(names)
+        #names = [name for name in re.split(pattern, output) if len(name) > 0]
         if max_players is not None:
             names = names[:max_players]
-        players = [Player(llm=self.llm, name=name) for name in names]
+        players = [Player(llm=self.llm, name=name, persona=name)
+                   for name in names]
         return players
 
 
