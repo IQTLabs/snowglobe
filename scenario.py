@@ -307,7 +307,9 @@ class Control():
 
     def create_inject(self, history=None, query=None):
         if query is None:
-            query = 'In a sentence or two, what is an unexpected development that could occur next?'
+            #query = 'In a sentence or two, this is an unexpected development that could occur next?'
+            #query = 'This unexpectedly happens next.'
+            query = 'This unexpectedly happens next.\n\nNarrator:\n'
 
         template = ''
         variables = {}
@@ -321,7 +323,8 @@ class Control():
             template=template,
             input_variables=list(variables.keys()),
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(
+                stop=['\n\n'])
         output = chain.invoke(variables).strip()
         print()
         return output
