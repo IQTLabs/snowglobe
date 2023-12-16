@@ -270,7 +270,7 @@ class Control():
 
     def create_scenario(self, query=None, clip=0):
         if query is None:
-            query = ''
+            raise Exception('Query required to create scenario.')
         prompt = langchain.prompts.PromptTemplate(
             template='Question: {query}\n\nAnswer: ',
             input_variables=['query'],
@@ -309,7 +309,7 @@ class Control():
 
     def create_inject(self, history=None, query=None):
         if query is None:
-            query = 'Give an example of what unexpectedly happens next.'
+            raise Exception('Query required to create inject.')
 
         template = ''
         variables = {}
