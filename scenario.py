@@ -305,6 +305,27 @@ class Control():
                    for name in names]
         return players
 
+    def create_inject(self, history=None, query=None):
+        if query is None:
+            query = 'In a sentence or two, what is an unexpected development that could occur next?'
+
+        template = ''
+        variables = {}
+        if history is not None:
+            template += '### This is what has happened so far:\n\n{history}\n\n'
+            variables['history'] = history.str()
+        template += '### {query}:\n\n'
+        variables['query'] = query
+
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
+        chain = prompt | self.llm.llm.bind(**self.llm.bound)
+        output = chain.invoke(variables).strip()
+        print()
+        return output
+
 
 class Team():
     def __init__(self, name='Anonymous', leader=None, members=None):
