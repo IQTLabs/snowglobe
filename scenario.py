@@ -280,12 +280,14 @@ class Control():
             output = '\n\n'.join(output.split('\n\n')[:-clip])
         return output
 
-    def create_players(self, scenario, max_players=None,
-                       query=None, pattern=None):
+    def create_players(self, scenario, max_players=None, query=None,
+                       pattern_sep=None, pattern_left=None):
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
-        if pattern is None:
-            pattern = '[\.\,\-;\n0-9]+'
+        if pattern_sep is None:
+            pattern_sep = '[\.\,;\n0-9]+'
+        if pattern_left is None:
+            pattern_left = ' ()-'
         prompt = langchain.prompts.PromptTemplate(
             template='Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: ',
             input_variables=['scenario', 'query'],
@@ -293,8 +295,9 @@ class Control():
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({'scenario': scenario, 'query': query}).strip()
         print()
-        names = re.split(pattern, output)
-        names = [name.strip() for name in names if len(name.strip()) > 0]
+        names = re.split(pattern_sep, output)
+        names = [name.lstrip(pattern_left).rstrip() for name in names]
+        names = [name for name in names if len(name) > 0]
         print(names)
         if max_players is not None:
             names = names[:max_players]
