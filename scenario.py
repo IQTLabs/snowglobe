@@ -271,7 +271,8 @@ class Control():
     def create_scenario(self, instruction, clip=0):
         prompt = langchain.prompts.PromptTemplate(
             template='Question: {instruction}\n\nAnswer: ',
-            input_variables=['instruction'])
+            input_variables=['instruction'],
+        )
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({'instruction': instruction}).strip()
         print()
@@ -284,17 +285,17 @@ class Control():
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
         if pattern is None:
-            pattern = '[\.\,\-;\n0-9\(\)]+'
+            pattern = '[\.\,\-;\n0-9]+'
         prompt = langchain.prompts.PromptTemplate(
             template='Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: ',
-            input_variables=['scenario', 'query'])
+            input_variables=['scenario', 'query'],
+        )
         chain = prompt | self.llm.llm.bind(**self.llm.bound)
         output = chain.invoke({'scenario': scenario, 'query': query}).strip()
         print()
         names = re.split(pattern, output)
-        names = [name.strip() for name in names]
+        names = [name.strip() for name in names if len(name.strip()) > 0]
         print(names)
-        #names = [name for name in re.split(pattern, output) if len(name) > 0]
         if max_players is not None:
             names = names[:max_players]
         players = [Player(llm=self.llm, name=name, persona=name)
