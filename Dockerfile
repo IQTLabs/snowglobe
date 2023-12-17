@@ -26,7 +26,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
 ENV LLAMA_CPP_LIB=/usr/local/lib/python3.8/dist-packages/llama_cpp/libllama.so
 
 # User account
-ARG username=scenario
+ARG username=snowglobe
 ARG groupname=$username
 ARG uid=1000
 ARG gid=$uid
