@@ -1,5 +1,5 @@
 FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
-LABEL org.iqtlabs.name Scenario
+LABEL org.iqtlabs.name snowglobe
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     python3 \
