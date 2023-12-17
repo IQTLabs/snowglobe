@@ -124,6 +124,12 @@ class LLM():
 class History():
     def __init__(self):
         self.entries = []
+    def __len__(self):
+        return len(self.entries)
+    def __getitem__(self, indices):
+        history_part = History()
+        history_part.entries = self.entries[indices]
+        return history_part
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
