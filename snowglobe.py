@@ -126,9 +126,12 @@ class History():
         self.entries = []
     def __len__(self):
         return len(self.entries)
-    def __getitem__(self, indices):
+    def __getitem__(self, index):
         history_part = History()
-        history_part.entries = self.entries[indices]
+        if isinstance(index, slice):
+            history_part.entries = self.entries[index]
+        elif isinstance(index, int):
+            history_part.entries = [self.entries[index]]
         return history_part
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
@@ -188,7 +191,7 @@ class Control():
         variables = {}
         if history is not None:
             template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.textonly()
+            variables['history'] = history[-1].textonly()
         if responses is not None:
             #template += '### These are the actions undertaken by each person or group:\n\n{responses}\n\n'
             template += '### These are the plans for each person or group:\n\n{responses}\n\n'
