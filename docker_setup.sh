@@ -20,8 +20,8 @@ docker run --name $container_name \
        --device /dev/nvidia0 \
        --device /dev/nvidia1 \
        --device /dev/nvidia2 \
-       -v ~/src:/home/scenario/src \
-       -v ~/wdata:/home/scenario/wdata \
+       -v ~/src:/home/snowglobe/src \
+       -v ~/wdata:/home/snowglobe/wdata \
        -v /nfs:/nfs \
        -v /local_data:/local_data \
        $image_name
