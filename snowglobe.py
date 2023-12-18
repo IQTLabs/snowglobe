@@ -191,7 +191,7 @@ class Control():
         variables = {}
         if history is not None:
             template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history[-1].textonly()
+            variables['history'] = history.textonly()
         if responses is not None:
             #template += '### These are the actions undertaken by each person or group:\n\n{responses}\n\n'
             template += '### These are the plans for each person or group:\n\n{responses}\n\n'
@@ -346,6 +346,7 @@ class Team():
         self.name = name
         self.leader = leader
         self.members = members
+        self.history = History()
 
     def respond(self, history=None, query=None, verbose=0):
         member_responses = History()
@@ -381,6 +382,7 @@ class Player():
         self.name = name
         self.kind = kind
         self.persona = persona
+        self.history = History()
 
     def respond(self, history=None, query=None, max_tries=64, verbose=0):
         persona = self.persona
