@@ -420,10 +420,6 @@ class Player():
             if len(output) > 0:
                 break
         print()
-        if False:
-            print('\n###\n')
-            chain_desub = desubjunctifier(llm)
-            output = chain_desub.invoke(input=output).strip()
         return output
 
     def synthesize(self, history=None, responses=None, query=None, verbose=0):
@@ -476,36 +472,4 @@ def novel(llm):
         input_variables=['history', 'news'],
     )
     chain = prompt | llm
-    return chain
-
-
-def desubjunctifier(llm):
-    examples = [{
-        'input': "A) We would undertake an audit."
-        "\n\nB) I could send a message to the ambassador, stating our intentions."
-        "\n\nC) I implement a response plan."
-        "\n\nD) After that, immediately deploy the medics. Furnish all needed supplies.",
-        'output': "A) We undertake an audit."
-        "\n\nB) I send a message to the ambassador, stating our intentions."
-        "\n\nC) I implement a response plan."
-        "\n\nD) After that, we immediately deploy the medics. We furnish all needed supplies.",
-    },{
-        'input': "Continue to investigate the source of the problems. I will refrain from making accusations. We should optimize the allocation of resources to different departments. This should not be thrown away.",
-        'output': "I continue to investigate the source of the problems. I refrain from making accusations. We optimize the allocation of resources to different departments. This is not thrown away.",
-    }]
-    example_template = 'Input:\n"""\n{input}\n"""\nOutput:\n"""\n{output}\n"""'
-    example_prompt = langchain.prompts.PromptTemplate(
-        template=example_template,
-        input_variables=['input', 'output']
-    )
-    prefix = 'Change every Input sentence into a first-person present indicative statement.'
-    suffix = 'Input:\n"""\n{input}\n"""\nOutput:\n"""\n'
-    prompt = langchain.prompts.FewShotPromptTemplate(
-        examples=examples,
-        example_prompt=example_prompt,
-        prefix=prefix,
-        suffix=suffix,
-        input_variables=['input']
-    )
-    chain = {'input': langchain.schema.runnable.RunnablePassthrough()} | prompt | llm
     return chain
