@@ -4,6 +4,7 @@ import os
 import re
 import yaml
 import torch
+import random
 import triton
 import typing
 import transformers
@@ -178,25 +179,22 @@ class Control():
     def adjudicate(self, history=None, responses=None, query=None,
                    nature=True, timeframe='week', verbose=0):
         if query is None:
-            #query = 'This is an example of what happens next as a result of these plans.'
-            if nature:
+            if (isinstance(nature, bool) and nature) \
+               or random.random() < nature:
                 query = 'This is what happens in the next ' + timeframe \
-                    + ' due to these plans. Include unexpected developments.'
+                    + ' due to these plans. Include an unexpected development.'
             else:
                 query = 'This is what happens in the next ' + timeframe \
                     + ' due to these plans.'
 
-        # Define template and included variables
         template = ''
         variables = {}
         if history is not None:
             template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.textonly()
+            variables['history'] = history.str()
         if responses is not None:
-            #template += '### These are the actions undertaken by each person or group:\n\n{responses}\n\n'
             template += '### These are the plans for each person or group:\n\n{responses}\n\n'
             variables['responses'] = responses.str()
-        #template += '### Question: {query}\n\n### Answer:\n\n'
         template += '### {query}:\n\n'
         variables['query'] = query
 
@@ -325,8 +323,6 @@ class Control():
         if history is not None:
             template += '### This is what has happened so far:\n\n{history}\n\n'
             variables['history'] = history.str()
-        #template += '### {query}:\n\n'
-        #template += 'Narrator:\nUnexpectedly, '
         template += '### {query}:\n\nNarrator:\n'
         variables['query'] = query
 
@@ -442,7 +438,6 @@ class Player():
             else:
                 template += '### These are the responses from your team members:\n\n{responses}\n\n'
             variables['responses'] = responses.str(name=self.name)
-        # template += '### What action or actions do you take in response?:\n\n'
         if query is None:
             template += '### Combine the recommended actions given above:\n\n'
         else:
@@ -469,7 +464,7 @@ class Player():
 
 
 def novel(llm):
-    template = '### History:\n\n{history}\n\n\n### News:\n\n{news}\n\n### In a short paragraph, what\'s the most important information appearing in the news but not in the history?  Do not use phrases similar to "most important news" in your answer:'
+    template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
     prompt = langchain.prompts.PromptTemplate(
         template=template,
         input_variables=['history', 'news'],
