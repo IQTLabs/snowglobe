@@ -183,7 +183,7 @@ class Intelligent():
                 variables['history'] = history.textonly()
         if responses is not None:
             template += '### ' + responses_intro + ':\n\n{responses}\n\n'
-            variables['responses'] = responses.str(name=self.name)
+            variables['responses'] = responses.str(name=name)
         if query_format is None or query_format == 'twoline':
             template += '### Question:\n\n{query}'
             if persona is not None and persona_reminder:
@@ -198,7 +198,7 @@ class Intelligent():
         variables['query'] = query
         return template, variables
 
-    def return_output(self, kind=None, **kwargs):
+    def return_output(self, kind=None, bind=None, verbose=0, **kwargs):
         # Set defaults
         if kind is None:
             kind = self.kind
@@ -206,17 +206,22 @@ class Intelligent():
         # Use intelligent entity (AI or human) to generate output
         template, variables = self.return_template(**kwargs)
         if kind == 'ai':
-            output = self.return_from_ai(template, variables)
+            output = self.return_from_ai(template, variables,
+                                         bind=bind, verbose=verbose)
         elif kind == 'human':
-            output = self.return_from_human(template, variables)
+            output = self.return_from_human(template, variables,
+                                            verbose=verbose)
         return output
 
-    def return_from_ai(self, template, variables, max_tries=64, verbose=2):
+    def return_from_ai(self, template, variables, max_tries=64, bind=None,
+                       verbose=0):
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=list(variables.keys()),
         )
         llm = self.llm.llm.bind(**self.llm.bound)
+        if bind is not None:
+            llm = llm.bind(**bind)
         chain = prompt | llm
         if verbose >= 2:
             print('v' * 8)
@@ -263,6 +268,7 @@ class Control(Intelligent):
 
     def adjudicate(self, history=None, responses=None, query=None,
                    nature=True, timeframe='week', verbose=0):
+        responses_intro = 'These are the plans for each person or group'
         if query is None:
             if (isinstance(nature, bool) and nature) \
                or random.random() < nature:
@@ -271,28 +277,11 @@ class Control(Intelligent):
             else:
                 query = 'This is what happens in the next ' + timeframe \
                     + ' due to these plans.'
-
-        template = ''
-        variables = {}
-        if history is not None:
-            template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.str()
-        if responses is not None:
-            template += '### These are the plans for each person or group:\n\n{responses}\n\n'
-            variables['responses'] = responses.str()
-        template += '### {query}:\n\n'
-        variables['query'] = query
-
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=list(variables.keys()),
+        output = self.return_output(
+            history=history,
+            responses=responses, responses_intro=responses_intro,
+            query=query, query_format='oneline'
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        if verbose >= 2:
-            print(prompt.format(**variables))
-            print()
-        output = chain.invoke(variables).strip()
-        print()
         if False:
             print('\n### Summary\n')
             chain_novel = novel(self.llm.llm.bind(**self.llm.bound))
@@ -303,16 +292,17 @@ class Control(Intelligent):
             print()
         return output
 
-    def assess(self, history, query):
-        template = '### This is what happened.\n\n{history}\n\n### Question:\n\n{query}\n\n### Answer:\n\n'
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=['history', 'query'],
+    def assess(self, history=None, responses=None, query=None):
+        responses_intro = 'Questions about what happened'
+        if responses is None:
+            query_format = 'twoline'
+        else:
+            query_format = 'twoline_simple'
+        output = self.return_output(
+            history=history, history_over=True,
+            responses=responses, responses_intro=responses_intro,
+            query=query, query_format=query_format
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        output = chain.invoke({
-            'history': history.str(), 'query': query}).strip()
-        print()
         return output
 
     def chat(self, history=None, verbose=1):
@@ -320,6 +310,8 @@ class Control(Intelligent):
             history = self.history
         chatlog = History()
         nb = 2
+        persona = 'the Control (a.k.a. moderator) of a simulated scenario'
+        chat_intro = 'This is a conversation about what happened'
         if verbose >= 1:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
             self.header(instructions, h=1)
@@ -336,29 +328,17 @@ class Control(Intelligent):
             usertext = usertext.strip()
             chatlog.add('User', usertext)
 
-            # Create template
-            template = '### You are the Control (a.k.a. moderator) of a simulated scenario.\n\n'
-            variables = {}
-            if len(history.entries) >= 0:
-                template += '### This is what happened.\n\n{history}\n\n'
-                variables['history'] = history.str()
-            template += '### This is a conversation about what happened.\n\n{chat}\n\nControl:\n\n'
-            variables['chat'] = chatlog.str()
-
-            # Get LLM response
-            prompt = langchain.prompts.PromptTemplate(
-                template=template,
-                input_variables=list(variables.keys()),
+            # Get response
+            bind = {'stop': ['User:', 'Control:', 'Narrator:']}
+            output = self.return_output(
+                bind=bind,
+                persona=persona,
+                history=history, history_over=True,
+                responses=chatlog, responses_intro=chat_intro,
+                query='Control:\n\n', query_format='oneline_simple'
             )
-            chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(
-                stop=['User:', 'Control:', 'Narrator:'])
-            if verbose >= 2:
-                print(prompt.format(**variables))
-                print()
-            output = chain.invoke(variables).strip()
             print()
-            print()
-            chatlog.add('Control', usertext)
+            chatlog.add('Control', output)
 
     def create_scenario(self, query=None, clip=0):
         if query is None:
