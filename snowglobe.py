@@ -149,6 +149,48 @@ class History():
         return history_copy
 
 
+class Intelligent():
+    def return_template(self, persona=None, context=None, query=None):
+        # Set defaults
+        if persona is None:
+            pass # Add code to use player persona
+
+        # Substitute prewritten text
+        stock_text = {
+            '<history>': 'This is what has happened so far',
+            '<history_end>': 'This is what happened',
+            '<responses>': 'These are the plans for each person or group',
+        }
+        if context is not None:
+            for item in context:
+                if item[0] in stock_text.keys():
+                    item[0] = stock_text[item[0]]
+
+        # Create template and variables
+        template = ''
+        variables = {}
+        if persona is not None:
+            template += '### You are {persona}.\n\n'
+            variables['persona'] = persona
+        if context is not None:
+            for item in context:
+                
+        return template, variables
+    def return_output(self, kind=None, **kwargs):
+        # Set defaults
+        if kind is None:
+            kind = self.kind
+
+        # Use intelligent entity (AI or human) to generate output
+        template = self.return_template(**kwargs)
+        output = 'output from ' + template
+        return output
+    def return_output_ai(self):
+        pass
+    def return_output_human(self):
+        pass
+
+
 class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
