@@ -150,21 +150,29 @@ class History():
 
 
 class Intelligent():
-    def return_template(self, persona=None, context=None, query=None):
+    def return_template(self, persona=None, query=None,
+                        history=None, history_over=None, history_block=None,
+                        ):
         # Set defaults
         if persona is None:
             pass # Add code to use player persona
+        if persona is not None:
+            if persona[-1] = '.':
+                persona = persona[:-1]
 
-        # Substitute prewritten text
-        stock_text = {
-            '<history>': 'This is what has happened so far',
-            '<history_end>': 'This is what happened',
-            '<responses>': 'These are the plans for each person or group',
-        }
-        if context is not None:
-            for item in context:
-                if item[0] in stock_text.keys():
-                    item[0] = stock_text[item[0]]
+        # Build dictionary of context information
+        context = []
+        if history is not None:
+            entry = {}
+            entry['name'] = 'history'
+            if history_over is not True:
+                entry['intro'] = 'This is what has happened so far'
+            else:
+                entry['intro'] = 'This is what happened'
+            if history_block is not True:
+                entry['content'] = history.str()
+            else:
+                entry['content'] = history.textonly()
 
         # Create template and variables
         template = ''
@@ -173,8 +181,8 @@ class Intelligent():
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
         if context is not None:
-            for item in context:
-                
+            for entry in context:
+                template += '### ' + entry['intro'] + ':\n\n{' + entry['name'] + '}\n\n
         return template, variables
     def return_output(self, kind=None, **kwargs):
         # Set defaults
