@@ -152,20 +152,18 @@ class History():
 class Intelligent():
     def return_template(self, name=None,
                         persona=None, persona_reminder=None,
-                        query=None, query_mode=None,
+                        query=None, query_format=None,
                         history=None, history_over=None, history_merged=None,
-                        responses=None, responses_intro=None, #responses_type=None,
+                        responses=None, responses_intro=None,
                         ):
         # Set defaults
-        # if name is None:
-        #     pass # Add code to use player name
-        # if persona is None:
-        #     pass # Add code to use player persona
-        # if persona is not None:
-        #     if persona[-1] = '.':
-        #         persona = persona[:-1]
-        # if responses_type is None:
-        #     responses_type = 'response'
+        if name is None:
+            pass # Add code to use player name
+        if persona is None:
+            pass # Add code to use player persona
+        if persona is not None:
+            if persona[-1:] == '.':
+                persona = persona[:-1]
 
         # Create template and variables
         template = ''
@@ -175,32 +173,28 @@ class Intelligent():
             variables['persona'] = persona
         if history is not None:
             if not history_over:
-                template += '### This is what has happened so far:\n\n{history}\n\n'
+                history_intro = 'This is what has happened so far'
             else:
-                template += '### This is what happened:\n\n{history}\n\n'
-            if not history_block:
+                history_intro = 'This is what happened'
+            template += '### ' + history_intro + ':\n\n{history}\n\n'
+            if not history_merged:
                 variables['history'] = history.str()
             else:
                 variables['history'] = history.textonly()
         if responses is not None:
-            # if responses_type == 'action':
-            #     template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
-            # elif responses_type == 'response':
-            #     template += '### These are the responses from your team members:\n\n{responses}\n\n'
-            # elif response_type == 'plan':
-            #     template += '### These are the plans for each person or group:\n\n{responses}\n\n'
-            # else:
-            #     raise Exception('! Responses without response_type')
-            template += '### ' + response_intro + ':\n\n{responses}\n\n'
+            template += '### ' + responses_intro + ':\n\n{responses}\n\n'
             variables['responses'] = responses.str(name=self.name)
-
-        if query_type is None:
+        if query_format is None or query_format == 'twoline':
             template += '### Question:\n\n{query}'
             if persona is not None and persona_reminder:
                 template += ' (Remember, you are {persona}.)'
             template += '\n\n### Answer:\n\n'
-        elif query_type == 'oneline':
+        elif query_format == 'oneline':
             template += '### {query}:\n\n'
+        elif query_format == 'twoline_simple':
+            template += 'Question: {query}\n\nAnswer: '
+        elif query_format == 'oneline_simple':
+            template += '{query}'
         variables['query'] = query
         return template, variables
 
@@ -225,6 +219,7 @@ class Control():
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
         self.history = History()
+        self.kind = 'ai'
 
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
