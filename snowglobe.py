@@ -150,29 +150,22 @@ class History():
 
 
 class Intelligent():
-    def return_template(self, persona=None, query=None,
-                        history=None, history_over=None, history_block=None,
+    def return_template(self, name=None,
+                        persona=None, persona_reminder=None,
+                        query=None, query_mode=None,
+                        history=None, history_over=None, history_merged=None,
+                        responses=None, responses_intro=None, #responses_type=None,
                         ):
         # Set defaults
-        if persona is None:
-            pass # Add code to use player persona
-        if persona is not None:
-            if persona[-1] = '.':
-                persona = persona[:-1]
-
-        # Build dictionary of context information
-        context = []
-        if history is not None:
-            entry = {}
-            entry['name'] = 'history'
-            if history_over is not True:
-                entry['intro'] = 'This is what has happened so far'
-            else:
-                entry['intro'] = 'This is what happened'
-            if history_block is not True:
-                entry['content'] = history.str()
-            else:
-                entry['content'] = history.textonly()
+        # if name is None:
+        #     pass # Add code to use player name
+        # if persona is None:
+        #     pass # Add code to use player persona
+        # if persona is not None:
+        #     if persona[-1] = '.':
+        #         persona = persona[:-1]
+        # if responses_type is None:
+        #     responses_type = 'response'
 
         # Create template and variables
         template = ''
@@ -180,10 +173,37 @@ class Intelligent():
         if persona is not None:
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
-        if context is not None:
-            for entry in context:
-                template += '### ' + entry['intro'] + ':\n\n{' + entry['name'] + '}\n\n
+        if history is not None:
+            if not history_over:
+                template += '### This is what has happened so far:\n\n{history}\n\n'
+            else:
+                template += '### This is what happened:\n\n{history}\n\n'
+            if not history_block:
+                variables['history'] = history.str()
+            else:
+                variables['history'] = history.textonly()
+        if responses is not None:
+            # if responses_type == 'action':
+            #     template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
+            # elif responses_type == 'response':
+            #     template += '### These are the responses from your team members:\n\n{responses}\n\n'
+            # elif response_type == 'plan':
+            #     template += '### These are the plans for each person or group:\n\n{responses}\n\n'
+            # else:
+            #     raise Exception('! Responses without response_type')
+            template += '### ' + response_intro + ':\n\n{responses}\n\n'
+            variables['responses'] = responses.str(name=self.name)
+
+        if query_type is None:
+            template += '### Question:\n\n{query}'
+            if persona is not None and persona_reminder:
+                template += ' (Remember, you are {persona}.)'
+            template += '\n\n### Answer:\n\n'
+        elif query_type == 'oneline':
+            template += '### {query}:\n\n'
+        variables['query'] = query
         return template, variables
+
     def return_output(self, kind=None, **kwargs):
         # Set defaults
         if kind is None:
@@ -193,8 +213,10 @@ class Intelligent():
         template = self.return_template(**kwargs)
         output = 'output from ' + template
         return output
+
     def return_output_ai(self):
         pass
+
     def return_output_human(self):
         pass
 
