@@ -204,14 +204,31 @@ class Intelligent():
             kind = self.kind
 
         # Use intelligent entity (AI or human) to generate output
-        template = self.return_template(**kwargs)
-        output = 'output from ' + template
+        template, variables = self.return_template(**kwargs)
+        if kind == 'ai':
+            output = self.return_from_ai(template, variables)
+        elif kind == 'human':
+            output = self.return_from_human(template, variables)
         return output
 
-    def return_output_ai(self):
-        pass
+    def return_from_ai(self, template, variables, max_tries=64, verbose=0):
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
+        llm = self.llm.llm.bind(**self.llm.bound)
+        chain = prompt | llm
+        if verbose >= 2:
+            print(prompt.format(**variables))
+            print()
+        for i in range(max_tries):
+            output = chain.invoke(variables).strip()
+            if len(output) > 0:
+                break
+        print()
+        return output
 
-    def return_output_human(self):
+    def return_from_human(self):
         pass
 
 
