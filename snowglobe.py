@@ -152,9 +152,9 @@ class History():
 class Intelligent():
     def return_template(self, name=None,
                         persona=None, persona_reminder=None,
-                        query=None, query_format=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
+                        query=None, query_format=None,
                         ):
         # Set defaults
         if name is None:
@@ -211,7 +211,7 @@ class Intelligent():
             output = self.return_from_human(template, variables)
         return output
 
-    def return_from_ai(self, template, variables, max_tries=64, verbose=0):
+    def return_from_ai(self, template, variables, max_tries=64, verbose=2):
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=list(variables.keys()),
@@ -219,8 +219,9 @@ class Intelligent():
         llm = self.llm.llm.bind(**self.llm.bound)
         chain = prompt | llm
         if verbose >= 2:
+            print('v' * 8)
             print(prompt.format(**variables))
-            print()
+            print('^' * 8)
         for i in range(max_tries):
             output = chain.invoke(variables).strip()
             if len(output) > 0:
@@ -232,7 +233,7 @@ class Intelligent():
         pass
 
 
-class Control():
+class Control(Intelligent):
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
         self.history = History()
@@ -462,7 +463,7 @@ class Team():
                 member.info(verbose=verbose, offset=offset+2)
 
 
-class Player():
+class Player(Intelligent):
     def __init__(self, llm, name='Anonymous', kind='ai', persona=None):
         self.llm = llm
         self.name = name
@@ -471,76 +472,29 @@ class Player():
         self.history = History()
 
     def respond(self, history=None, query=None, max_tries=64, verbose=0):
-        persona = self.persona
         if query is None:
             query = 'What action or actions do you take in response?'
-
-        # Define template and included variables
-        template = ''
-        variables = {}
-        if persona is not None:
-            template += '### You are {persona}.\n\n'
-            variables['persona'] = persona
-        if history is not None:
-            template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.str(name=self.name)
-        template += '### Question:\n\n{query}'
-        variables['query'] = query
-        if persona is not None:
-            template += ' (Remember, you are {persona}.)'
-        template += '\n\n### Answer:\n\n'
-
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=list(variables.keys()),
+        output = self.return_output(
+            persona=self.persona, persona_reminder=True,
+            history=history,
+            query=query
         )
-        llm = self.llm.llm.bind(**self.llm.bound)
-        chain = prompt | llm
-        if verbose >= 2:
-            print(prompt.format(**variables))
-            print()
-        for i in range(max_tries):
-            output = chain.invoke(variables).strip()
-            if len(output) > 0:
-                break
-        print()
         return output
 
     def synthesize(self, history=None, responses=None, query=None, verbose=0):
-        persona = self.persona
-
-        # Define template and included variables
-        template = ''
-        variables = {}
-        if persona is not None:
-            template += '### You are {persona}.\n\n'
-            variables['persona'] = persona
-        if history is not None:
-            template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.str(name=self.name)
-        if responses is not None:
-            if query is None:
-                template += '### These are the actions your team members recommend you take in response:\n\n{responses}\n\n'
-            else:
-                template += '### These are the responses from your team members:\n\n{responses}\n\n'
-            variables['responses'] = responses.str(name=self.name)
         if query is None:
-            template += '### Combine the recommended actions given above:\n\n'
+            responses_intro = 'These are the actions your team members recommend you take in response'
+            synthesize_query = 'Combine the recommended actions given above'
         else:
-            template += '### Combine the responses given above:\n\n'
-        # if persona is not None:
-        #     template += ' (Remember, you are {persona}.)'
-
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=list(variables.keys()),
+            responses_intro = 'These are the responses from your team members'
+            synthesize_query = 'Combine the responses given above'
+        output = self.return_output(
+            name=self.name,
+            persona=self.persona,
+            history=history,
+            responses=responses, responses_intro=responses_intro,
+            query=synthesize_query, query_format='oneline'
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        if verbose >= 2:
-            print(prompt.format(**variables))
-            print()
-        output = chain.invoke(variables).strip()
-        print()
         return output
 
     def info(self, verbose=0, offset=0):
