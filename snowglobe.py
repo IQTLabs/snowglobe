@@ -8,6 +8,9 @@ import torch
 import random
 import triton
 import typing
+import asyncio
+import inspect
+import numpy as np
 import transformers
 
 import langchain
@@ -123,6 +126,15 @@ class LLM():
             self.bound = {}
 
 
+async def gather_plus(*args):
+    items = np.array(args)
+    flags = np.array([inspect.isawaitable(x) for x in items])
+    awaitables  = items[flags]
+    outputs = await asyncio.gather(*awaitables)
+    items[flags] = outputs
+    return items
+
+
 class History():
     def __init__(self):
         self.entries = []
@@ -138,6 +150,14 @@ class History():
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
+        names = [entry['name'] for entry in self.entries]
+        texts = [entry['text'] for entry in self.entries]
+        texts = asyncio.run(gather_plus(*texts))
+        return '\n\n'.join(['' \
+                            + ('You' if xname == name else xname)
+                            + ':\n\n' + xtext
+                            for xname, xtext in zip(names, texts)])
+    def str_orig(self, name=None):
         return '\n\n'.join(['' \
                         + ('You' if entry['name'] == name else entry['name'])
                         + ':\n\n' + entry['text']
@@ -234,7 +254,7 @@ class Intelligent():
         print()
         return output
 
-    def return_from_human(self, prompt, variables, verbose=0):
+    async def return_from_human(self, prompt, variables, delay=2, verbose=0):
         base_path = '/home/snowglobe/src/llm/scenario/temp'
         prompt_path = os.path.join(base_path, '%i_%02i_prompt.json'
                                    % (self.human_label, self.human_count))
@@ -249,9 +269,9 @@ class Intelligent():
             json.dump(prompt_json, f)
 
         # Read answer from disk
-        import time
         while not os.path.exists(answer_path):
-            time.sleep(2)
+            await asyncio.sleep(delay)
+            print('waiting')
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
