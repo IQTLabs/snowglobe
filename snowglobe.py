@@ -150,6 +150,21 @@ class History():
 
 
 class Intelligent():
+    def return_output(self, kind=None, bind=None, verbose=0, **kwargs):
+        # Set defaults
+        if kind is None:
+            kind = self.kind
+
+        # Use intelligent entity (AI or human) to generate output
+        template, variables = self.return_template(**kwargs)
+        if kind == 'ai':
+            output = self.return_from_ai(template, variables,
+                                         bind=bind, verbose=verbose)
+        elif kind == 'human':
+            output = self.return_from_human(template, variables,
+                                            verbose=verbose)
+        return output
+
     def return_template(self, name=None,
                         persona=None, persona_reminder=None,
                         history=None, history_over=None, history_merged=None,
@@ -197,21 +212,6 @@ class Intelligent():
             template += '{query}'
         variables['query'] = query
         return template, variables
-
-    def return_output(self, kind=None, bind=None, verbose=0, **kwargs):
-        # Set defaults
-        if kind is None:
-            kind = self.kind
-
-        # Use intelligent entity (AI or human) to generate output
-        template, variables = self.return_template(**kwargs)
-        if kind == 'ai':
-            output = self.return_from_ai(template, variables,
-                                         bind=bind, verbose=verbose)
-        elif kind == 'human':
-            output = self.return_from_human(template, variables,
-                                            verbose=verbose)
-        return output
 
     def return_from_ai(self, template, variables, max_tries=64, bind=None,
                        verbose=0):
