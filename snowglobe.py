@@ -244,12 +244,19 @@ class Intelligent():
 
         # Write prompt to disk
         prompt_content = prompt.format(**variables)
+        prompt_json = {'content': prompt_content}
         with open(prompt_path, 'w') as f:
-            json.dump({'content': prompt_content}, f)
+            json.dump(prompt_json, f)
 
         # Read answer from disk
-
-        return ''
+        import time
+        while not os.path.exists(answer_path):
+            time.sleep(2)
+        with open(answer_path, 'r') as f:
+            answer_json = json.load(f)
+        answer_content = answer_json['content']
+        print(answer_content)
+        return answer_content
 
     def set_id(self):
         self.human_label = random.randint(100000, 999999)
