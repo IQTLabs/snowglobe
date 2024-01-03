@@ -3,6 +3,7 @@
 import os
 import re
 import yaml
+import json
 import torch
 import random
 import triton
@@ -157,12 +158,15 @@ class Intelligent():
 
         # Use intelligent entity (AI or human) to generate output
         template, variables = self.return_template(**kwargs)
+        prompt = langchain.prompts.PromptTemplate(
+            template=template,
+            input_variables=list(variables.keys()),
+        )
         if kind == 'ai':
-            output = self.return_from_ai(template, variables,
+            output = self.return_from_ai(prompt, variables,
                                          bind=bind, verbose=verbose)
         elif kind == 'human':
-            output = self.return_from_human(template, variables,
-                                            verbose=verbose)
+            output = self.return_from_human(prompt, variables, verbose=verbose)
         return output
 
     def return_template(self, name=None,
@@ -213,12 +217,8 @@ class Intelligent():
         variables['query'] = query
         return template, variables
 
-    def return_from_ai(self, template, variables, max_tries=64, bind=None,
+    def return_from_ai(self, prompt, variables, max_tries=64, bind=None,
                        verbose=0):
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=list(variables.keys()),
-        )
         llm = self.llm.llm.bind(**self.llm.bound)
         if bind is not None:
             llm = llm.bind(**bind)
@@ -234,8 +234,26 @@ class Intelligent():
         print()
         return output
 
-    def return_from_human(self):
-        pass
+    def return_from_human(self, prompt, variables, verbose=0):
+        base_path = '/home/snowglobe/src/llm/scenario/temp'
+        prompt_path = os.path.join(base_path, '%i_%02i_prompt.json'
+                                   % (self.human_label, self.human_count))
+        answer_path = os.path.join(base_path, '%i_%02i_answer.json'
+                                   % (self.human_label, self.human_count))
+        self.human_count += 1
+
+        # Write prompt to disk
+        prompt_content = prompt.format(**variables)
+        with open(prompt_path, 'w') as f:
+            json.dump({'content': prompt_content}, f)
+
+        # Read answer from disk
+
+        return ''
+
+    def set_id(self):
+        self.human_label = random.randint(100000, 999999)
+        self.human_count = 0
 
 
 class Control(Intelligent):
@@ -243,6 +261,7 @@ class Control(Intelligent):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
         self.history = History()
         self.kind = 'ai'
+        self.set_id()
 
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -444,12 +463,13 @@ class Team():
 
 
 class Player(Intelligent):
-    def __init__(self, llm, name='Anonymous', kind='ai', persona=None):
+    def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None):
         self.llm = llm
         self.name = name
         self.kind = kind
         self.persona = persona
         self.history = History()
+        self.set_id()
 
     def respond(self, history=None, query=None, max_tries=64, verbose=0):
         if query is None:
