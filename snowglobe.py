@@ -129,6 +129,8 @@ class LLM():
 async def gather_plus(*args):
     items = np.array(args)
     flags = np.array([inspect.isawaitable(x) for x in items])
+    if sum(flags) == 0:
+        return items
     awaitables  = items[flags]
     outputs = await asyncio.gather(*awaitables)
     items[flags] = outputs
