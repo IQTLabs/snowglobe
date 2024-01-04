@@ -150,13 +150,13 @@ class History():
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
     def str(self, name=None):
+        your_name = name
         names = [entry['name'] for entry in self.entries]
         texts = [entry['text'] for entry in self.entries]
         texts = asyncio.run(gather_plus(*texts))
-        return '\n\n'.join(['' \
-                            + ('You' if xname == name else xname)
-                            + ':\n\n' + xtext
-                            for xname, xtext in zip(names, texts)])
+        return '\n\n'.join([
+            ('You' if name == your_name else name) + ':\n\n' + text
+            for name, text in zip(names, texts)])
     def str_orig(self, name=None):
         return '\n\n'.join(['' \
                         + ('You' if entry['name'] == name else entry['name'])
@@ -275,7 +275,6 @@ class Intelligent():
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
-        print(answer_content)
         return answer_content
 
     def set_id(self):
