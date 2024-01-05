@@ -257,8 +257,8 @@ class Intelligent():
         print()
         return output
 
-    async def return_from_human(self, prompt, variables, delay=2, verbose=0):
-        base_path = '/home/snowglobe/src/llm/scenario/temp'
+    async def return_from_human(self, prompt, variables, delay=2,
+                                base_path='../messages', verbose=0):
         prompt_path = os.path.join(base_path, '%i_%02i_prompt.json'
                                    % (self.human_label, self.human_count))
         answer_path = os.path.join(base_path, '%i_%02i_answer.json'
