@@ -9,7 +9,7 @@ from pydantic import BaseModel
 app = fastapi.FastAPI()
 base_path = 'messages'
 
-class Answer(pydantic.BaseModel):
+class Answer(BaseModel):
     content: str
 
 @app.get('/prompt/{label}/{count}')
