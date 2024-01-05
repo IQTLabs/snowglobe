@@ -173,7 +173,7 @@ class History():
 
 
 class Intelligent():
-    def return_output(self, kind=None, bind=None, verbose=0, **kwargs):
+    def return_output(self, kind=None, bind=None, verbose=1, **kwargs):
         # Set defaults
         if kind is None:
             kind = self.kind
@@ -273,7 +273,8 @@ class Intelligent():
         # Read answer from disk
         while not os.path.exists(answer_path):
             await asyncio.sleep(delay)
-            print('waiting')
+            if verbose >= 1:
+                print('Awaiting', self.name)
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
@@ -287,8 +288,9 @@ class Intelligent():
 class Control(Intelligent):
     def __init__(self, llm_source_name=None, llm_model_name=None):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
-        self.history = History()
+        self.name = 'Control'
         self.kind = 'ai'
+        self.history = History()
         self.set_id()
 
     def run(self):
