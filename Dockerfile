@@ -19,6 +19,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     accelerate \
     tqdm \
     pyyaml \
+    fastapi[all] \
     langchain \
     openai \
     llama-cpp-python==0.2.12 \
