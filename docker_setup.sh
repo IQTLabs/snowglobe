@@ -13,7 +13,7 @@ fi
 
 docker run --name $container_name \
        --runtime=nvidia \
-       -it --ipc=host --shm-size=64g \
+       -it --ipc=host --shm-size=64g -p 8000:8000 \
        --env OPENAI_API_KEY=$(cat ~/src/llm/api/openai) \
        -v ~/src:/home/snowglobe/src \
        -v ~/wdata:/home/snowglobe/wdata \
