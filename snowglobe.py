@@ -135,6 +135,8 @@ async def gather_plus(*args):
     outputs = await asyncio.gather(*awaitables)
     items[flags] = outputs
     return items
+def make_concrete(args):
+    return asyncio.run(gather_plus(*args))
 
 
 class History():
@@ -151,7 +153,21 @@ class History():
         return history_part
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
+    def concrete(self):
+        texts = [entry['text'] for entry in self.entries]
+        print([type(x) for x in texts])
+        #texts = asyncio.run(await gather_plus(*texts))
+        texts = make_concrete(texts)
+        print([type(x) for x in texts])
+        for i in range(len(texts)):
+            self.entries[i]['text'] = texts[i]
     def str(self, name=None):
+        self.concrete()
+        return '\n\n'.join(['' \
+                        + ('You' if entry['name'] == name else entry['name'])
+                        + ':\n\n' + entry['text']
+                        for entry in self.entries])
+    def str_new(self, name=None):
         your_name = name
         names = [entry['name'] for entry in self.entries]
         texts = [entry['text'] for entry in self.entries]
