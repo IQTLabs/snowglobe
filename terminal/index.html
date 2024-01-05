@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html class="tall">
+<html>
   <head>
     <title>Snow Globe Player Terminal</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
   </head>
   <body>
-    Test 5 4 3 2 1
+    <table border=0>
+      <tr>
+	<td colspan=2 align="center">
+	  <img width=150 src="snowglobe.png" alt="Snow Globe">
+	  <h1>Player Terminal</h1>
+	</td>
+      </tr><tr>
+	<td>
+	  <label>ID <input type="text"></label>
+	  <br><button type="button">Connect</button>
+	</td><td>
+	  <label>Name <input type="text"></label>
+	  <br><label>Persona <input type="text"></label>
+	</td>
+      </tr><tr>
+	<td colspan=2>
+	  <textarea name="prompt" rows=16 cols=80></textarea>
+	</td>
+      </tr><tr>
+	<td colspan=2>
+	  <textarea name="answer" rows=16 cols=80></textarea>
+	</td>
+      </tr><tr>
+	</td><td colspan=2 align="center">
+	  <button type="button">Submit</button>
+	  <p class="fineprint">Do not submit sensitive <br>or personal information.</p>
+	</td>
+      </tr>
+    </table>
   </body>
 </html>
 
