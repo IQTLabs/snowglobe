@@ -155,10 +155,7 @@ class History():
         self.entries.append({'name': name, 'text': text})
     def concrete(self):
         texts = [entry['text'] for entry in self.entries]
-        print([type(x) for x in texts])
-        #texts = asyncio.run(await gather_plus(*texts))
         texts = make_concrete(texts)
-        print([type(x) for x in texts])
         for i in range(len(texts)):
             self.entries[i]['text'] = texts[i]
     def str(self, name=None):
@@ -167,20 +164,8 @@ class History():
                         + ('You' if entry['name'] == name else entry['name'])
                         + ':\n\n' + entry['text']
                         for entry in self.entries])
-    def str_new(self, name=None):
-        your_name = name
-        names = [entry['name'] for entry in self.entries]
-        texts = [entry['text'] for entry in self.entries]
-        texts = asyncio.run(gather_plus(*texts))
-        return '\n\n'.join([
-            ('You' if name == your_name else name) + ':\n\n' + text
-            for name, text in zip(names, texts)])
-    def str_orig(self, name=None):
-        return '\n\n'.join(['' \
-                        + ('You' if entry['name'] == name else entry['name'])
-                        + ':\n\n' + entry['text']
-                        for entry in self.entries])
     def textonly(self):
+        self.concrete()
         return '\n\n'.join([entry['text'] for entry in self.entries])
     def copy(self):
         history_copy = History()
