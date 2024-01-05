@@ -274,7 +274,8 @@ class Intelligent():
         while not os.path.exists(answer_path):
             await asyncio.sleep(delay)
             if verbose >= 1:
-                print('Awaiting', self.name)
+                print('Awaiting %s [Label %i, Count %i]'
+                      % (self.name, self.human_label, self.human_count - 1))
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
