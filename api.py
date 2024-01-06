@@ -21,7 +21,6 @@ async def prompt(label: int, count: int):
 
 @app.post('/answer/{label}/{count}')
 async def answer(label: int, count: int, answer: Answer):
-    print(answer.dict())
     path = os.path.join(base_path, '%i_%i_answer.json' % (label, count))
     with open(path, 'w') as f:
         json.dump(answer.dict(), f)

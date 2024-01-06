@@ -36,12 +36,12 @@ $(document).ready(function(){
     // Send answer to server
     async function send_answer() {
 	data = {"content": $("#answer").val()};
-	console.log(json);
 	await fetch(api_path(true), {
 	    method: "POST",
 	    headers: {"Content-Type": "application/json"},
 	    body: JSON.stringify(data)
 	});
+	get_prompt();
     }
 
 });
