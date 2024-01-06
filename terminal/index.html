@@ -8,7 +8,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   </head>
   <body>
-    <table border=0>
+    <table border=0 align="center">
       <tr>
 	<td colspan=2 align="center">
 	  <img width=150 src="snowglobe.png" alt="Snow Globe">
@@ -19,12 +19,12 @@
 	  <label>ID <input type="text" id="id"></label>
 	  <br><form><button type="button" id="connect">Connect</button></form>
 	</td><td>
-	  <label>Name <input type="text" id="name"></label>
-	  <br><label>Persona <input type="text" id="persona"></label>
+	  <label>Name <input type="text" id="name" readonly></label>
+	  <br><label>Persona <input type="text" id="persona" readonly></label>
 	</td>
       </tr><tr>
 	<td colspan=2>
-	  <textarea id="prompt" rows=16 cols=80></textarea>
+	  <textarea id="prompt" rows=16 cols=80 readonly></textarea>
 	</td>
       </tr><tr>
 	<td colspan=2>
