@@ -257,12 +257,9 @@ class Intelligent():
         print()
         return output
 
-    async def return_from_human(self, prompt, variables, delay=2,
-                                base_path='../messages', verbose=0):
-        prompt_path = os.path.join(base_path, '%i_%i_prompt.json'
-                                   % (self.human_label, self.human_count))
-        answer_path = os.path.join(base_path, '%i_%i_answer.json'
-                                   % (self.human_label, self.human_count))
+    async def return_from_human(self, prompt, variables, delay=2, verbose=0):
+        prompt_path = self.get_iopath(False)
+        answer_path = self.get_iopath(True)
         self.human_count += 1
 
         # Write prompt to disk
@@ -275,16 +272,31 @@ class Intelligent():
         while not os.path.exists(answer_path):
             await asyncio.sleep(delay)
             if verbose >= 1:
-                print('Awaiting %s [Label %i, Count %i]'
+                print('Awaiting %s [ID %i # %i]'
                       % (self.name, self.human_label, self.human_count - 1))
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
         return answer_content
 
-    def set_id(self):
+    def set_id(self, verbose=1):
         self.human_label = random.randint(100000, 999999)
         self.human_count = 0
+        if verbose >= 1:
+            print('ID %i: %s' % (self.human_label, self.name))
+        intro_path = self.get_iopath(False)
+        intro_json = {'name': self.name, 'persona':
+                      self.persona if self.persona is not None else ''}
+        with open(intro_path, 'w') as f:
+            json.dump(intro_json, f)
+        self.human_count += 1
+
+    def get_iopath(self, answer=False, base_path=None):
+        if base_path is None:
+            base_path = '../messages'
+        return os.path.join(base_path, '%i_%i_%s.json'
+                            % (self.human_label, self.human_count,
+                               'answer' if answer else 'prompt'))
 
 
 class Control(Intelligent):
@@ -292,8 +304,10 @@ class Control(Intelligent):
         self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
         self.name = 'Control'
         self.kind = 'ai'
+        self.persona = None
         self.history = History()
-        self.set_id()
+        if self.kind == 'human':
+            self.set_id()
 
     def run(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -501,7 +515,8 @@ class Player(Intelligent):
         self.kind = kind
         self.persona = persona
         self.history = History()
-        self.set_id()
+        if self.kind == 'human':
+            self.set_id()
 
     def respond(self, history=None, query=None, max_tries=64, verbose=0):
         if query is None:

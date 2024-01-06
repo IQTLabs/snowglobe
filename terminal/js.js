@@ -25,7 +25,8 @@ $(document).ready(function(){
 	    const response = await fetch(api_path(false), {method: "GET"});
 	    json = await response.json();
 	    if (Object.keys(json).length > 0) {
-		if (globals.count == 9999) {
+		if (globals.count == 0) {
+		    
 		} else {
 		    $("#prompt").val(json['content']);
 		    break;
