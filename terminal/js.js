@@ -2,34 +2,37 @@ $(document).ready(function(){
 
     var globals = {};
     globals.count = -1;
-    globals.label = 9999;
 
     $("#connect").on("click", setup);
     $("#submit").on("click", send_answer);
 
     // Get path to API
-    function get_path(answer=false) {
-	
+    function api_path(answer=false) {
+	return '/' + (answer ? 'answer' : 'prompt')
+	    + '/' + globals.label + '/' + globals.count;
     };
 
     // Set up
     function setup() {
-        console.log("in setup");
         globals.label = $("#id").val();
         get_prompt();
     }
 
     // Get prompt from server
-    function get_prompt() {
+    async function get_prompt() {
 	globals.count += 1;
+	const response = await fetch(api_path(false), {
+	    method: "GET"
+	});
+	json = await response.json()
+	console.log(json)
 	while (true) {
-	    console.log(globals.label);
 	    break;
 	}
     }
 
     // Send answer to server
-    function send_answer() {
+    async function send_answer() {
     }
 
 });
