@@ -21,18 +21,27 @@ $(document).ready(function(){
     // Get prompt from server
     async function get_prompt() {
 	globals.count += 1;
-	const response = await fetch(api_path(false), {
-	    method: "GET"
-	});
-	json = await response.json()
-	console.log(json)
 	while (true) {
-	    break;
+	    const response = await fetch(api_path(false), {method: "GET"});
+	    json = await response.json()
+	    if (globals.count == 9999) {
+	    } else {
+		$("#prompt").val(json['content']);
+		break;
+	    }
+	    await new Promise(r => setTimeout(r, 2000));
 	}
     }
 
     // Send answer to server
     async function send_answer() {
+	data = {"content": $("#answer").val()};
+	console.log(json);
+	await fetch(api_path(true), {
+	    method: "POST",
+	    headers: {"Content-Type": "application/json"},
+	    body: JSON.stringify(data)
+	});
     }
 
 });
