@@ -15,6 +15,8 @@ class Answer(BaseModel):
 @app.get('/prompt/{label}/{count}')
 async def prompt(label: int, count: int):
     path = os.path.join(base_path, '%i_%i_prompt.json' % (label, count))
+    if not os.path.exists(path):
+        return {}
     with open(path, 'r') as f:
         j = json.load(f)
     return j

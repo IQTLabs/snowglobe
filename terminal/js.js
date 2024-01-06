@@ -6,7 +6,7 @@ $(document).ready(function(){
     $("#connect").on("click", setup);
     $("#submit").on("click", send_answer);
 
-    // Get path to API
+    // Get API path
     function api_path(answer=false) {
 	return '/' + (answer ? 'answer' : 'prompt')
 	    + '/' + globals.label + '/' + globals.count;
@@ -23,12 +23,15 @@ $(document).ready(function(){
 	globals.count += 1;
 	while (true) {
 	    const response = await fetch(api_path(false), {method: "GET"});
-	    json = await response.json()
-	    if (globals.count == 9999) {
-	    } else {
-		$("#prompt").val(json['content']);
-		break;
+	    json = await response.json();
+	    if (Object.keys(json).length > 0) {
+		if (globals.count == 9999) {
+		} else {
+		    $("#prompt").val(json['content']);
+		    break;
+		}
 	    }
+	    console.log('wait');
 	    await new Promise(r => setTimeout(r, 2000));
 	}
     }
