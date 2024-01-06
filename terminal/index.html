@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Snow Globe Player Terminal</title>
+    <script type="text/javascript" src="jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="js.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   </head>
@@ -14,8 +16,8 @@
 	</td>
       </tr><tr>
 	<td>
-	  <label>ID <input type="text"></label>
-	  <br><button type="button">Connect</button>
+	  <label>ID <input type="text" id="id"></label>
+	  <br><form><button type="button" id="connect">Connect</button></form>
 	</td><td>
 	  <label>Name <input type="text"></label>
 	  <br><label>Persona <input type="text"></label>
@@ -30,7 +32,7 @@
 	</td>
       </tr><tr>
 	</td><td colspan=2 align="center">
-	  <button type="button">Submit</button>
+	  <button type="button" id="submit">Submit</button>
 	  <p class="fineprint">Do not submit sensitive <br>or personal information.</p>
 	</td>
       </tr>
