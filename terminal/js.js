@@ -26,11 +26,17 @@ $(document).ready(function(){
 	    json = await response.json();
 	    if (Object.keys(json).length > 0) {
 		if (globals.count == 0) {
-		    $("#name").val(json['name']);
-		    $("#persona").val(json['persona']);
+		    $("#name").val(json["name"]);
+		    $("#persona").val(json["persona"]);
+		    $("#id").attr("readonly", "readonly");
+		    $("#connect").attr("disabled", "disabled");
+		    $("#prompt, #answer").addClass("waiting");
+		    // $("#answer").focus();
 		    globals.count += 1;
 		} else {
-		    $("#prompt").val(json['content']);
+		    $("#prompt").val(json["content"]);
+		    $("#submit").removeAttr("disabled");
+		    $("#prompt, #answer").removeClass("waiting");
 		    break;
 		}
 	    }
@@ -40,6 +46,8 @@ $(document).ready(function(){
 
     // Send answer to server
     async function send_answer() {
+	$("#submit").attr("disabled", "disabled");
+	$("#prompt, #answer").addClass("waiting");
 	data = {"content": $("#answer").val()};
 	await fetch(api_path(true), {
 	    method: "POST",
