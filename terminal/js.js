@@ -26,13 +26,14 @@ $(document).ready(function(){
 	    json = await response.json();
 	    if (Object.keys(json).length > 0) {
 		if (globals.count == 0) {
-		    
+		    $("#name").val(json['name']);
+		    $("#persona").val(json['persona']);
+		    globals.count += 1;
 		} else {
 		    $("#prompt").val(json['content']);
 		    break;
 		}
 	    }
-	    console.log('wait');
 	    await new Promise(r => setTimeout(r, 2000));
 	}
     }
