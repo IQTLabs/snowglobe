@@ -4,11 +4,11 @@ table {
 
 h1 {
     margin-top: 0px;
-    # margin-bottom: 0px;
+    /* margin-bottom: 0px; */
 }
 
 .waiting {
-    background-color: #b4c7e7;
+    background-color: #dfecff; /* #b4c7e7; */
 }
 
 .fineprint {
