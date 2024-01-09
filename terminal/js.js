@@ -8,8 +8,10 @@ $(document).ready(function(){
 
     // Get API path
     function api_path(answer=false) {
-	return '/' + (answer ? 'answer' : 'prompt')
-	    + '/' + globals.label + '/' + globals.count;
+	path = window.location.pathname;
+	dir = path.substr(0, path.lastIndexOf("/"));
+	return dir + "/" + (answer ? "answer" : "prompt")
+	    + "/" + globals.label + "/" + globals.count;
     };
 
     // Set up
