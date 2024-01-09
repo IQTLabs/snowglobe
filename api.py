@@ -7,7 +7,9 @@ import fastapi.staticfiles
 from pydantic import BaseModel
 
 app = fastapi.FastAPI()
-base_path = 'messages'
+here = os.path.dirname(os.path.abspath(__file__))
+base_path = os.path.join(here, 'messages')
+term_path = os.path.join(here, 'terminal')
 
 class Answer(BaseModel):
     content: str
@@ -28,4 +30,4 @@ async def answer(label: int, count: int, answer: Answer):
         json.dump(answer.dict(), f)
     return 0
 
-app.mount('/', fastapi.staticfiles.StaticFiles(directory='terminal', html=True), name='terminal')
+app.mount('/', fastapi.staticfiles.StaticFiles(directory=term_path, html=True), name='terminal')
