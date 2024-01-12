@@ -412,7 +412,7 @@ class Control(Intelligent):
     def create_scenario(self, query=None, clip=0):
         if query is None:
             raise Exception('Query required to create scenario.')
-        output = self.return_output(verbose=2,
+        output = self.return_output(
             query=query, query_format='twoline_simple'
         )
         if clip > 0:
