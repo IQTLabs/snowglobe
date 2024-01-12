@@ -189,8 +189,8 @@ class Intelligent():
             input_variables=list(variables.keys()),
         )
         if kind == 'ai':
-            output = self.return_from_ai(prompt, variables,
-                                         bind=bind, verbose=verbose)
+            output = self.return_from_ai(prompt, variables, bind=bind,
+                                         verbose=verbose)
         elif kind == 'human':
             output = self.return_from_human(prompt, variables, verbose=verbose)
         return output
@@ -339,7 +339,7 @@ class Control(Intelligent):
         self.history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None,
-                   nature=True, timeframe='week', verbose=0):
+                   nature=True, timeframe='week', summarize=False, verbose=0):
         responses_intro = 'These are the plans for each person or group'
         if query is None:
             if (isinstance(nature, bool) and nature) \
@@ -354,14 +354,13 @@ class Control(Intelligent):
             responses=responses, responses_intro=responses_intro,
             query=query, query_format='oneline'
         )
-        if False:
+        if summarize:
             print('\n### Summary\n')
-            chain_novel = novel(self.llm.llm.bind(**self.llm.bound))
-            output = chain_novel.invoke({
-                'history': history.textonly(),
-                'news': output,
-            }).strip()
-            print()
+            template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
+            variables = {'history': history.textonly(), 'news': output}
+            output = self.return_output(
+                template=template, variables=variables
+            )
         return output
 
     def assess(self, history=None, responses=None, query=None):
@@ -433,7 +432,7 @@ class Control(Intelligent):
         template = 'Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: '
         variables = {'scenario': scenario, 'query': query}
         output = self.return_output(
-            template=template, variables=variables, verbose=2
+            template=template, variables=variables
         )
         names = re.split(pattern_sep, output)
         names = [name.lstrip(pattern_left).rstrip() for name in names]
@@ -536,13 +535,3 @@ class Player(Intelligent):
         print(' ' * offset + 'Player:', self.name)
         print(' ' * offset + '  Type:', self.kind)
         print(' ' * offset + '  Persona:', self.persona)
-
-
-def novel(llm):
-    template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
-    prompt = langchain.prompts.PromptTemplate(
-        template=template,
-        input_variables=['history', 'news'],
-    )
-    chain = prompt | llm
-    return chain
