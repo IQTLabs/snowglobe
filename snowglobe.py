@@ -196,7 +196,7 @@ class Intelligent():
                         persona=None, persona_reminder=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
-                        query=None, query_format=None,
+                        query=None, query_format=None, query_subtitle=None,
                         ):
         # Set defaults
         if name is None:
@@ -238,6 +238,9 @@ class Intelligent():
         elif query_format == 'oneline_simple':
             template += '{query}'
         variables['query'] = query
+        if query_subtitle is not None:
+            template += '{subtitle}:\n\n'
+            variables['subtitle'] = query_subtitle
         return template, variables
 
     def return_from_ai(self, prompt, variables, max_tries=64, bind=None,
@@ -454,23 +457,10 @@ class Control(Intelligent):
     def create_inject(self, history=None, query=None):
         if query is None:
             raise Exception('Query required to create inject.')
-
-        template = ''
-        variables = {}
-        if history is not None:
-            template += '### This is what has happened so far:\n\n{history}\n\n'
-            variables['history'] = history.str()
-        template += '### {query}:\n\nNarrator:\n'
-        variables['query'] = query
-
-        prompt = langchain.prompts.PromptTemplate(
-            template=template,
-            input_variables=list(variables.keys()),
+        output = self.return_output(
+            history=history,
+            query=query, query_format='oneline', query_subtitle='Narrator'
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound).bind(
-                stop=['\n\n'])
-        output = chain.invoke(variables).strip()
-        print()
         return output
 
 
