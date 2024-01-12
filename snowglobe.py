@@ -349,10 +349,12 @@ class Control(Intelligent):
             else:
                 query = 'This is what happens in the next ' + timeframe \
                     + ' due to these plans.'
+            query += ' Write your answer as a narrative, in paragraphs.'
+            query_subtitle = 'This ' + timeframe.title()
         output = self.return_output(
             history=history,
             responses=responses, responses_intro=responses_intro,
-            query=query, query_format='oneline'
+            query=query, query_format='oneline', query_subtitle=query_subtitle
         )
         if summarize:
             print('\n### Summary\n')
