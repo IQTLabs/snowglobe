@@ -412,13 +412,9 @@ class Control(Intelligent):
     def create_scenario(self, query=None, clip=0):
         if query is None:
             raise Exception('Query required to create scenario.')
-        prompt = langchain.prompts.PromptTemplate(
-            template='Question: {query}\n\nAnswer: ',
-            input_variables=['query'],
+        output = self.return_output(verbose=2,
+            query=query, query_format='twoline_simple'
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        output = chain.invoke({'query': query}).strip()
-        print()
         if clip > 0:
             output = '\n\n'.join(output.split('\n\n')[:-clip])
         return output
