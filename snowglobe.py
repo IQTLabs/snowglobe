@@ -174,13 +174,16 @@ class History():
 
 
 class Intelligent():
-    def return_output(self, kind=None, bind=None, verbose=1, **kwargs):
+    def return_output(self, kind=None, bind=None,
+                      template=None, variables=None,
+                      verbose=1, **kwargs):
         # Set defaults
         if kind is None:
             kind = self.kind
 
         # Use intelligent entity (AI or human) to generate output
-        template, variables = self.return_template(**kwargs)
+        if template is None and variables is None:
+            template, variables = self.return_template(**kwargs)
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=list(variables.keys()),
@@ -427,13 +430,11 @@ class Control(Intelligent):
             pattern_sep = '[\.\,;\n0-9]+'
         if pattern_left is None:
             pattern_left = ' ()-'
-        prompt = langchain.prompts.PromptTemplate(
-            template='Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: ',
-            input_variables=['scenario', 'query'],
+        template = 'Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: '
+        variables = {'scenario': scenario, 'query': query}
+        output = self.return_output(
+            template=template, variables=variables, verbose=2
         )
-        chain = prompt | self.llm.llm.bind(**self.llm.bound)
-        output = chain.invoke({'scenario': scenario, 'query': query}).strip()
-        print()
         names = re.split(pattern_sep, output)
         names = [name.lstrip(pattern_left).rstrip() for name in names]
         names = [name for name in names if len(name) > 0]
