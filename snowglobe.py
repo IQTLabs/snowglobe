@@ -322,9 +322,9 @@ class Control(Intelligent):
     def header(self, title, h=0, width=80):
         print()
         if h == 0:
-            print('+-' + '-' * min(len(title), width) + '-+')
+            print('+-' + '-' * min(len(title), width - 4) + '-+')
             print('| ' + title + ' |')
-            print('+-' + '-' * min(len(title), width) + '-+')
+            print('+-' + '-' * min(len(title), width - 4) + '-+')
         elif h == 1:
             print('-' * min(len(title), width))
             print(title)
