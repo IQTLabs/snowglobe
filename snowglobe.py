@@ -365,13 +365,15 @@ class Control(Intelligent):
             )
         return output
 
-    def assess(self, history=None, responses=None, query=None):
+    def assess(self, history=None, responses=None, query=None, short=False):
         responses_intro = 'Questions about what happened'
         if responses is None:
             query_format = 'twoline'
         else:
             query_format = 'twoline_simple'
+        bind = {'stop': ['\n\n']} if short else None
         output = self.return_output(
+            bind=bind,
             history=history, history_over=True,
             responses=responses, responses_intro=responses_intro,
             query=query, query_format=query_format
@@ -507,10 +509,12 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None, max_tries=64, verbose=0):
+    def respond(self, history=None, query=None, short=False, verbose=0):
         if query is None:
             query = 'What action or actions do you take in response?'
+        bind = {'max_tokens': 250} if short else None
         output = self.return_output(
+            bind=bind,
             persona=self.persona, persona_reminder=True,
             history=history,
             query=query
