@@ -471,13 +471,13 @@ class Team():
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None, verbose=0):
+    def respond(self, history=None, query=None, short=False, verbose=0):
         member_responses = History()
         for member in self.members:
             if verbose >= 1:
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
-                history=history, query=query, verbose=verbose))
+                history=history, query=query, short=short, verbose=verbose))
         if verbose >= 1:
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
