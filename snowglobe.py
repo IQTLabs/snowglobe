@@ -342,19 +342,13 @@ class Control(Intelligent):
                    nature=True, timeframe='week', summarize=False, verbose=0):
         responses_intro = 'These are the plans for each person or group'
         if query is None:
-            if (isinstance(nature, bool) and nature) \
-               or random.random() < nature:
-                query = 'This is what happens in the next ' + timeframe \
-                    + ' due to these plans. Include an unexpected development.'
-            else:
-                query = 'This is what happens in the next ' + timeframe \
-                    + ' due to these plans.'
-            query += ' Write your answer as a narrative, in paragraphs.'
-            query_subtitle = 'This ' + timeframe.title()
+            query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timeframe + '.'
+            if random.random() < nature:
+                query += ' Include unexpected short-term consequences.'
         output = self.return_output(
-            history=history,
+            #history=history,
             responses=responses, responses_intro=responses_intro,
-            query=query, query_format='oneline', query_subtitle=query_subtitle
+            query=query, query_format='oneline'
         )
         if summarize:
             print('\n### Summary\n')
