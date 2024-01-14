@@ -476,12 +476,14 @@ class Team():
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
             history=history, responses=member_responses, query=query,
-            verbose=verbose)
+            short=short, verbose=verbose)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, query=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None,
+                   short=False, verbose=0):
         return self.leader.synthesize(
-            history=history, responses=responses, query=query, verbose=verbose)
+            history=history, responses=responses, query=query, short=short,
+            verbose=verbose)
 
     def info(self, verbose=0, offset=0):
         print(' ' * offset + 'Team:', self.name)
@@ -515,14 +517,17 @@ class Player(Intelligent):
         )
         return output
 
-    def synthesize(self, history=None, responses=None, query=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None,
+                   short=False, verbose=0):
         if query is None:
             responses_intro = 'These are the actions your team members recommend you take in response'
             synthesize_query = 'Combine the recommended actions given above'
         else:
             responses_intro = 'These are the responses from your team members'
             synthesize_query = 'Combine the responses given above'
+        bind = {'max_tokens': 250} if short else None
         output = self.return_output(
+            bind=bind,
             name=self.name,
             persona=self.persona,
             history=history,
