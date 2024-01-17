@@ -462,25 +462,23 @@ class Team():
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None, short=False, verbose=0):
+    def respond(self, history=None, query=None, verbose=0):
         member_responses = History()
         for member in self.members:
             if verbose >= 1:
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
-                history=history, query=query, short=short, verbose=verbose))
+                history=history, query=query, verbose=verbose))
         if verbose >= 1:
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
             history=history, responses=member_responses, query=query,
-            short=short, verbose=verbose)
+            verbose=verbose)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, query=None,
-                   short=False, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None, verbose=0):
         return self.leader.synthesize(
-            history=history, responses=responses, query=query, short=short,
-            verbose=verbose)
+            history=history, responses=responses, query=query, verbose=verbose)
 
     def info(self, verbose=0, offset=0):
         print(' ' * offset + 'Team:', self.name)
@@ -502,29 +500,24 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None, short=False, verbose=0):
+    def respond(self, history=None, query=None, verbose=0):
         if query is None:
             query = 'What action or actions do you take in response?'
-        bind = {'max_tokens': 250} if short else None
         output = self.return_output(
-            bind=bind,
             persona=self.persona, persona_reminder=True,
             history=history,
             query=query
         )
         return output
 
-    def synthesize(self, history=None, responses=None, query=None,
-                   short=False, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None, verbose=0):
         if query is None:
             responses_intro = 'These are the actions your team members recommend you take in response'
             synthesize_query = 'Combine the recommended actions given above'
         else:
             responses_intro = 'These are the responses from your team members'
             synthesize_query = 'Combine the responses given above'
-        bind = {'max_tokens': 250} if short else None
         output = self.return_output(
-            bind=bind,
             name=self.name,
             persona=self.persona,
             history=history,
