@@ -341,9 +341,9 @@ class Control(Intelligent):
         if query is None:
             query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timeframe + '.'
             if random.random() < nature:
-                query += ' Include unexpected short-term consequences.'
+                query += ' Include unexpected consequences.'
         output = self.return_output(
-            #history=history,
+            history=history,
             responses=responses, responses_intro=responses_intro,
             query=query, query_format='oneline'
         )
