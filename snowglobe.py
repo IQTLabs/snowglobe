@@ -503,7 +503,9 @@ class Player(Intelligent):
     def respond(self, history=None, query=None, verbose=0):
         if query is None:
             query = 'What action or actions do you take in response?'
+        bind = {'stop': ['Narrator:']}
         output = self.return_output(
+            bind=bind,
             persona=self.persona, persona_reminder=True,
             history=history,
             query=query
