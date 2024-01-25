@@ -15,7 +15,6 @@ import transformers
 import langchain.llms
 import langchain.chains
 import langchain.prompts
-import langchain.callbacks
 
 class LLM():
     def __init__(self, source_name=None, model_name=None, menu=None):
@@ -38,12 +37,8 @@ class LLM():
         if self.source_name == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            cbm = langchain.callbacks.manager.CallbackManager(
-                [langchain.callbacks.streaming_stdout\
-                 .StreamingStdOutCallbackHandler()])
             self.llm = langchain.llms.OpenAI(
                 model_name=self.model_name,
-                callback_manager=cbm,
                 streaming=True,
             )
             self.bound = {}
@@ -51,9 +46,6 @@ class LLM():
         elif self.source_name == 'llamacpp':
 
             # Model Source: llama.cpp (Local)
-            cbm = langchain.callbacks.manager.CallbackManager(
-                [langchain.callbacks.streaming_stdout\
-                 .StreamingStdOutCallbackHandler()])
             self.llm = langchain.llms.LlamaCpp(
                 model_path=self.model_path,
                 n_gpu_layers=-1,
@@ -61,7 +53,6 @@ class LLM():
                 n_batch=512,
                 n_ctx=8192,
                 f16_kv=True,
-                callback_manager=cbm,
                 verbose=False,
             )
             self.bound = {'stop': '##'}
@@ -254,7 +245,15 @@ class Intelligent():
             print(prompt.format(**variables))
             print('^' * 8)
         for i in range(max_tries):
-            output = chain.invoke(variables).strip()
+            printme = True
+            if not printme:
+                output = chain.invoke(variables).strip()
+            else:
+                def handle(chunk):
+                    print(chunk, end='', flush=True)
+                    return chunk
+                output = ''.join(handle(x) for x in chain.stream(variables)
+                                 ).strip()
             if len(output) > 0:
                 break
         print()
