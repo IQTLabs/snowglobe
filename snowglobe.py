@@ -105,6 +105,7 @@ class LLM():
                 device=device,
                 max_new_tokens=2048,
                 stopping_criteria=stopping_criteria,
+                repetition_penalty=1.05,
                 streamer=streamer,
             )
 
