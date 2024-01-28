@@ -151,10 +151,9 @@ class History():
             self.entries[i]['text'] = texts[i]
     def str(self, name=None):
         self.concrete()
-        return '\n\n'.join(['' \
-                        + ('You' if entry['name'] == name else entry['name'])
-                        + ':\n\n' + entry['text']
-                        for entry in self.entries])
+        return '\n\n'.join([
+            ('You' if entry['name'] == name else entry['name'])
+            + ':\n\n' + entry['text'] for entry in self.entries])
     def textonly(self):
         self.concrete()
         return '\n\n'.join([entry['text'] for entry in self.entries])
