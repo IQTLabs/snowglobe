@@ -16,7 +16,7 @@ import langchain.llms
 import langchain.chains
 import langchain.prompts
 
-verbose = 3
+verbose = 2
 
 class LLM():
     def __init__(self, source_name=None, model_name=None, menu=None):
