@@ -16,7 +16,7 @@ import langchain.llms
 import langchain.chains
 import langchain.prompts
 
-verbose = 2
+verbose = 3
 
 class LLM():
     def __init__(self, source_name=None, model_name=None, menu=None):
@@ -212,7 +212,7 @@ class Intelligent():
                 history_intro = 'This is what happened'
             template += '### ' + history_intro + ':\n\n{history}\n\n'
             if not history_merged:
-                variables['history'] = history.str()
+                variables['history'] = history.str(name=name)
             else:
                 variables['history'] = history.textonly()
         if responses is not None:
@@ -503,6 +503,7 @@ class Player(Intelligent):
         bind = {'stop': ['Narrator:']}
         output = self.return_output(
             bind=bind,
+            name=self.name,
             persona=self.persona, persona_reminder=True,
             history=history,
             query=query
