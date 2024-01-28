@@ -165,7 +165,7 @@ class History():
 class Intelligent():
     def return_output(self, kind=None, bind=None,
                       template=None, variables=None,
-                      verbose=1, **kwargs):
+                      verbose=None, **kwargs):
         # Set defaults
         if kind is None:
             kind = self.kind
@@ -236,18 +236,18 @@ class Intelligent():
         return template, variables
 
     def return_from_ai(self, prompt, variables, max_tries=64, bind=None,
-                       verbose=0):
+                       verbose=None):
         llm = self.llm.llm.bind(**self.llm.bound)
         if bind is not None:
             llm = llm.bind(**bind)
         chain = prompt | llm
-        if verbose >= 2:
+        if verbose >= 3:
             print('v' * 8)
             print(prompt.format(**variables))
             print('^' * 8)
         for i in range(max_tries):
-            printme = True
-            if not printme:
+            printflag = verbose is None or verbose >= 1
+            if not printflag:
                 output = chain.invoke(variables).strip()
             else:
                 def handle(chunk):
@@ -260,7 +260,8 @@ class Intelligent():
         print()
         return output
 
-    async def return_from_human(self, prompt, variables, delay=2, verbose=0):
+    async def return_from_human(self, prompt, variables, delay=2,
+                                verbose=None):
         prompt_path = self.get_iopath(False)
         answer_path = self.get_iopath(True)
         self.human_count += 1
@@ -274,7 +275,7 @@ class Intelligent():
         # Read answer from disk
         while not os.path.exists(answer_path):
             await asyncio.sleep(delay)
-            if verbose >= 1:
+            if verbose is None or verbose >= 2:
                 print('Awaiting %s [ID %i # %i]'
                       % (self.name, self.human_label, self.human_count - 1))
         with open(answer_path, 'r') as f:
@@ -282,10 +283,10 @@ class Intelligent():
         answer_content = answer_json['content']
         return answer_content
 
-    def set_id(self, verbose=1):
+    def set_id(self, verbose=None):
         self.human_label = random.randint(100000, 999999)
         self.human_count = 0
-        if verbose >= 1:
+        if verbose is None or verbose >= 2:
             print('ID %i: %s' % (self.human_label, self.name))
         intro_path = self.get_iopath(False)
         intro_json = {'name': self.name, 'persona':
@@ -336,13 +337,15 @@ class Control(Intelligent):
         self.history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None,
-                   nature=True, timeframe='week', summarize=False, verbose=0):
+                   nature=True, timeframe='week', summarize=False,
+                   verbose=None):
         responses_intro = 'These are the plans for each person or group'
         if query is None:
             query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timeframe + '.'
             if random.random() < nature:
                 query += ' Include unexpected consequences.'
         output = self.return_output(
+            verbose=verbose,
             history=history,
             responses=responses, responses_intro=responses_intro,
             query=query, query_format='oneline'
@@ -352,11 +355,12 @@ class Control(Intelligent):
             template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
             variables = {'history': history.textonly(), 'news': output}
             output = self.return_output(
-                template=template, variables=variables
+                template=template, variables=variables, verbose=verbose
             )
         return output
 
-    def assess(self, history=None, responses=None, query=None, short=False):
+    def assess(self, history=None, responses=None, query=None, short=False,
+               verbose=None):
         responses_intro = 'Questions about what happened'
         if responses is None:
             query_format = 'twoline'
@@ -364,21 +368,21 @@ class Control(Intelligent):
             query_format = 'twoline_simple'
         bind = {'stop': ['\n\n']} if short else None
         output = self.return_output(
-            bind=bind,
+            bind=bind, verbose=verbose,
             history=history, history_over=True,
             responses=responses, responses_intro=responses_intro,
             query=query, query_format=query_format
         )
         return output
 
-    def chat(self, history=None, verbose=1):
+    def chat(self, history=None, verbose=None):
         if history is None:
             history = self.history
         chatlog = History()
         nb = 2
         persona = 'the Control (a.k.a. moderator) of a simulated scenario'
         chat_intro = 'This is a conversation about what happened'
-        if verbose >= 1:
+        if verbose is None or verbose >= 2:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
             self.header(instructions, h=1)
         while True:
@@ -397,7 +401,7 @@ class Control(Intelligent):
             # Get response
             bind = {'stop': ['User:', 'Control:', 'Narrator:']}
             output = self.return_output(
-                bind=bind,
+                bind=bind, verbose=verbose,
                 persona=persona,
                 history=history, history_over=True,
                 responses=chatlog, responses_intro=chat_intro,
@@ -462,30 +466,31 @@ class Team():
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None, verbose=0):
+    def respond(self, history=None, query=None, verbose=None):
         member_responses = History()
         for member in self.members:
-            if verbose >= 1:
+            if verbose is None or verbose >= 2:
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
                 history=history, query=query, verbose=verbose))
-        if verbose >= 1:
+        if verbose is None or verbose >= 2:
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
             history=history, responses=member_responses, query=query,
             verbose=verbose)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, query=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None,
+                   verbose=None):
         return self.leader.synthesize(
             history=history, responses=responses, query=query, verbose=verbose)
 
-    def info(self, verbose=0, offset=0):
+    def info(self, verbose=None, offset=0):
         print(' ' * offset + 'Team:', self.name)
         print(' ' * offset + '  Leader:', self.leader.name)
         print(' ' * offset + '  Members:', [member.name
                                             for member in self.members])
-        if verbose >= 1:
+        if verbose is None or verbose >= 2:
             for member in self.members:
                 member.info(verbose=verbose, offset=offset+2)
 
@@ -500,7 +505,7 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None, verbose=0):
+    def respond(self, history=None, query=None, verbose=None):
         if query is None:
             query = 'What action or actions do you take in response?'
         bind = {'stop': ['Narrator:']}
@@ -512,7 +517,8 @@ class Player(Intelligent):
         )
         return output
 
-    def synthesize(self, history=None, responses=None, query=None, verbose=0):
+    def synthesize(self, history=None, responses=None, query=None,
+                   verbose=None):
         if query is None:
             responses_intro = 'These are the actions your team members recommend you take in response'
             synthesize_query = 'Combine the recommended actions given above'
@@ -528,7 +534,7 @@ class Player(Intelligent):
         )
         return output
 
-    def info(self, verbose=0, offset=0):
+    def info(self, verbose=None, offset=0):
         print(' ' * offset + 'Player:', self.name)
         print(' ' * offset + '  Type:', self.kind)
         print(' ' * offset + '  Persona:', self.persona)
