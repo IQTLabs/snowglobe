@@ -14,7 +14,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     numpy \
     torch \
     torchvision \
-    transformers==4.34.1 \
+    transformers \
     einops \
     accelerate \
     tqdm \
@@ -22,7 +22,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     fastapi[all] \
     langchain \
     openai \
-    llama-cpp-python==0.2.12 \
+    llama-cpp-python \
     triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
 ENV LLAMA_CPP_LIB=/usr/local/lib/python3.10/dist-packages/llama_cpp/libllama.so
 
