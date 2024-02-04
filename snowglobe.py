@@ -12,9 +12,9 @@ import asyncio
 import inspect
 import numpy as np
 import transformers
-import langchain.llms
 import langchain.chains
 import langchain.prompts
+import langchain_community.llms
 
 verbose = 2
 
@@ -39,7 +39,7 @@ class LLM():
         if self.source_name == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            self.llm = langchain.llms.OpenAI(
+            self.llm = langchain_community.llms.OpenAI(
                 model_name=self.model_name,
                 streaming=True,
             )
@@ -48,7 +48,7 @@ class LLM():
         elif self.source_name == 'llamacpp':
 
             # Model Source: llama.cpp (Local)
-            self.llm = langchain.llms.LlamaCpp(
+            self.llm = langchain_community.llms.LlamaCpp(
                 model_path=self.model_path,
                 n_gpu_layers=-1,
                 max_tokens=1000,
@@ -111,7 +111,7 @@ class LLM():
                 streamer=streamer,
             )
 
-            self.llm = langchain.llms.HuggingFacePipeline(
+            self.llm = langchain_community.llms.HuggingFacePipeline(
                 pipeline=pipeline,
             )
             self.bound = {}
