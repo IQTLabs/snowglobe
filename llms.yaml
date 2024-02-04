@@ -6,6 +6,8 @@ llamacpp:
   mistral-7b-instruct: /home/snowglobe/wdata/llm/gpt4all/mistral-7b-instruct-v0.1.Q4_0.gguf
   gpt4all-falcon: /home/snowglobe/wdata/llm/gpt4all/gpt4all-falcon-q4_0.gguf
   mpt-7b-chat: /home/snowglobe/wdata/llm/gpt4all/mpt-7b-chat-q4_0.gguf
+  mixtral-8x7b-slimorca: /home/snowglobe/wdata/llm/mistral/Mixtral-SlimOrca-8x7B-GGUF/mixtral-slimorca-8x7b.Q5_K_M.gguf
+  mixtral-8x7b-instruct: /home/snowglobe/wdata/llm/mistral/Mixtral-8x7B-Instruct-v0.1-GGUF/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf
 huggingface:
   mpt-7b: /home/snowglobe/wdata/llm/mosaicml/mpt-7b
   mpt-7b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-chat
