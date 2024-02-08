@@ -35,6 +35,9 @@ class LLM():
             self.source_name = default_source_name
             self.model_name = default_model_name
         self.model_path = model_paths[self.source_name][self.model_name]
+        if self.model_path[0] != '/':
+            self.model_path = os.path.join(
+                os.path.split(__file__)[0], self.model_path)
 
         if self.source_name == 'openai':
 
