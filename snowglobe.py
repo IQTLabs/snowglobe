@@ -19,36 +19,36 @@ import langchain_community.llms
 verbose = 2
 
 class LLM():
-    def __init__(self, source_name=None, model_name=None, menu=None):
+    def __init__(self, source=None, model=None, menu=None):
 
         # Select large language model
-        default_source_name = 'llamacpp'
-        default_model_name = 'mistral-7b-openorca'
+        default_source = 'llamacpp'
+        default_model = 'mistral-7b-openorca'
         default_menu = os.path.join(os.path.split(__file__)[0], 'llms.yaml')
 
         self.menu = menu if menu is not None else default_menu
         model_paths = yaml.safe_load(open(self.menu, 'r'))
-        if source_name is not None and model_name is not None:
-            self.source_name = source_name
-            self.model_name = model_name
+        if source is not None and model is not None:
+            self.source = source
+            self.model = model
         else:
-            self.source_name = default_source_name
-            self.model_name = default_model_name
-        self.model_path = model_paths[self.source_name][self.model_name]
+            self.source = default_source
+            self.model = default_model
+        self.model_path = model_paths[self.source][self.model]
         if self.model_path[0] != '/':
             self.model_path = os.path.join(
                 os.path.split(__file__)[0], self.model_path)
 
-        if self.source_name == 'openai':
+        if self.source == 'openai':
 
             # Model Source: OpenAI (Cloud)
             self.llm = langchain_community.llms.OpenAI(
-                model_name=self.model_name,
+                model_name=self.model,
                 streaming=True,
             )
             self.bound = {}
 
-        elif self.source_name == 'llamacpp':
+        elif self.source == 'llamacpp':
 
             # Model Source: llama.cpp (Local)
             self.llm = langchain_community.llms.LlamaCpp(
@@ -62,7 +62,7 @@ class LLM():
             )
             self.bound = {'stop': '##'}
 
-        elif self.source_name == 'huggingface':
+        elif self.source == 'huggingface':
 
             # Model Source: Hugging Face (Local)
             device = torch.device('cuda:' + str(torch.cuda.current_device())
@@ -304,8 +304,8 @@ class Intelligent():
 
 
 class Control(Intelligent):
-    def __init__(self, llm_source_name=None, llm_model_name=None):
-        self.llm = LLM(source_name=llm_source_name, model_name=llm_model_name)
+    def __init__(self, source=None, model=None):
+        self.llm = LLM(source=source, model=model)
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
