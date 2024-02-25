@@ -7,6 +7,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     emacs \
     less \
     tree \
+    wget \
     cmake \
     git \
     && rm -rf /var/lib/apt/lists/*
@@ -37,5 +38,5 @@ USER $username
 WORKDIR /home/$username
 
 # Copy and download files
-# COPY * /home/$username
-# RUN download.sh
+# COPY . /home/$username
+# RUN ./download.sh
