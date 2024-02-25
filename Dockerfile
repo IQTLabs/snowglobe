@@ -35,3 +35,7 @@ RUN groupadd --gid $gid $groupname
 RUN adduser --uid $uid --gid $gid --disabled-password $username
 USER $username
 WORKDIR /home/$username
+
+# Copy and download files
+# COPY * /home/$username
+# RUN download.sh
