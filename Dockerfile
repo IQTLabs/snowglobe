@@ -38,5 +38,5 @@ USER $username
 WORKDIR /home/$username
 
 # Copy and download files
-# COPY . /home/$username
+# COPY --chown=$uid:$gid . /home/$username
 # RUN ./download.sh
