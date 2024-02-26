@@ -160,6 +160,8 @@ class History():
     def textonly(self):
         self.concrete()
         return '\n\n'.join([entry['text'] for entry in self.entries])
+    def clear(self):
+        self.entries = []
     def copy(self):
         history_copy = History()
         history_copy.entries = self.entries.copy()
