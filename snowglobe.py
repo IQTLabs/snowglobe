@@ -28,12 +28,8 @@ class LLM():
 
         self.menu = menu if menu is not None else default_menu
         model_paths = yaml.safe_load(open(self.menu, 'r'))
-        if source is not None and model is not None:
-            self.source = source
-            self.model = model
-        else:
-            self.source = default_source
-            self.model = default_model
+        self.source = source if source is not None else default_source
+        self.model = model if model is not None else default_model
         self.model_path = model_paths[self.source][self.model]
         if self.model_path[0] != '/':
             self.model_path = os.path.join(
