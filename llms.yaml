@@ -6,6 +6,7 @@ llamacpp:
   mistral-7b-instruct: models/mistral-7b-instruct-v0.2.Q5_K_M.gguf
   mixtral-8x7b-slimorca: models/mixtral-slimorca-8x7b.Q5_K_M.gguf
   mixtral-8x7b-instruct: models/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf
+  gemma-7b-it: models/gemma-7b-it.gguf
 huggingface:
   mpt-7b: /home/snowglobe/wdata/llm/mosaicml/mpt-7b
   mpt-7b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-chat
