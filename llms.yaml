@@ -12,4 +12,6 @@ huggingface:
   mpt-7b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-chat
   mpt-7b-instruct: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-instruct
   mpt-7b-storywriter: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-storywriter
+  mpt-7b8k-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-8k-chat
   mpt-30b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-30b-chat
+  gemma-7b-it: /home/snowglobe/wdata/llm/google/gemma-7b-it
