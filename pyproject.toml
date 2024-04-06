@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "snowglobe"
+version = "1.0.0"
+description = "Snow Globe multi-agent system for open-ended wargames with large language models"
+license = "Apache-2.0"
+authors = ["Daniel Hogan <dhogan@iqt.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.10"
+numpy = "*"
+torch = "*"
+torchvision = "*"
+transformers = "*"
+einops = "*"
+accelerate = "*"
+tqdm = "*"
+pyyaml = "*"
+fastapi = "*"
+langchain = "*"
+openai = "*"
+llama-cpp-python = "*"
+poetry = "*"
+triton = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
