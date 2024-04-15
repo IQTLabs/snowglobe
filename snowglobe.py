@@ -325,7 +325,7 @@ class Control(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def run(self):
+    def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
 
     def header(self, title, h=0, width=80):
