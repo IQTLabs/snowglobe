@@ -14,10 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import argparse
 import snowglobe
 
 class AzuristanCrimsonia(snowglobe.Control):
-    def __init__(self):
+    def __init__(self, human):
         super().__init__()
 
         persona_azuristan_dove = 'the leader of Azuristan.  Your goal is to avoid war at all costs, and to preserve the sovereignty of Azuristan if possible.'
@@ -27,12 +28,12 @@ class AzuristanCrimsonia(snowglobe.Control):
         self.azuristan = snowglobe.Player(
             llm=self.llm,
             name='President of Azuristan',
-            kind='ai',
+            kind='human' if human else 'ai',
             persona=persona_azuristan_dove)
         self.crimsonia = snowglobe.Player(
             llm=self.llm,
             name='Premier of Crimsonia',
-            kind='ai',
+            kind='human' if human else 'ai',
             persona=persona_crimsonia_dove)
 
         self.background = """\
@@ -87,5 +88,9 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
 
 
 if __name__ == '__main__':
-    sim = AzuristanCrimsonia()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--human', action='store_true')
+    args = parser.parse_args()
+
+    sim = AzuristanCrimsonia(human=args.human)
     sim()
