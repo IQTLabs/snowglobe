@@ -25,6 +25,8 @@ Or, simulate a political wargame about a geopolitical crisis.
 examples/ac.py
 ```
 
+In the latter case, you can use the chat interface to discuss the game afterwards, or just press `Enter` twice to exit.
+
 ## Human Players
 
 To play a game between two human players, launch the server from within the running container.  Also, start the game:
@@ -40,4 +42,4 @@ Then, open two browser windows (one per human player) and navigate to:
 http://myservername:8000
 ```
 
-The terminal output will include the ID number for each human player.  Type the number into that player's browser then click `Connect`.  Top textbox gives player prompts; bottom textbox is where player enters response.  Textboxes turn blue while waiting for the next prompt.
+The terminal output will include the ID number for each human player.  Type the number into that player's browser then click `Connect`.  The top textbox gives player prompts; the bottom textbox is where the player enters responses.  Textboxes turn blue while waiting for the next prompt.
