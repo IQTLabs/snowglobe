@@ -38,6 +38,7 @@ RUN adduser --uid $uid --gid $gid --disabled-password $username
 USER $username
 WORKDIR /home/$username
 
-# Copy and download files
-# COPY --chown=$uid:$gid . /home/$username
-# RUN ./download.sh
+# Install
+COPY --chown=$uid:$gid . /home/$username
+RUN pip install -e .
+RUN ./download.sh
