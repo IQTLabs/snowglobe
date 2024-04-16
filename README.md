@@ -29,17 +29,17 @@ In the latter case, you can use the chat interface to discuss the game afterward
 
 ## Human Players
 
-To play a game between two human players, launch the server from within the running container.  Also, start the game:
+To play a game between a human and an AI player, launch the server from within the running container.  Also, start the game:
 
 ```
 uvicorn api:app --host 0.0.0.0 --port 8000 &
-examples/ac.py --human
+examples/ac.py --human 1
 ```
 
-Then, open two browser windows (one per human player) and navigate to:
+Then, open a browser window and navigate to:
 
 ```
 http://myservername:8000
 ```
 
-The terminal output will include the ID number for each human player.  Type the number into that player's browser then click `Connect`.  The top textbox gives player prompts; the bottom textbox is where the player enters responses.  Textboxes turn blue while waiting for the next prompt.
+The terminal output will include the ID number for the human player.  Type the number into the browser then click `Connect`.  The top textbox gives player prompts; the bottom textbox is where the player enters responses.  Textboxes turn blue while waiting for the next prompt.
