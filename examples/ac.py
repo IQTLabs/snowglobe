@@ -28,12 +28,12 @@ class AzuristanCrimsonia(snowglobe.Control):
         self.azuristan = snowglobe.Player(
             llm=self.llm,
             name='President of Azuristan',
-            kind='human' if human else 'ai',
+            kind='human' if human >= 1 else 'ai',
             persona=persona_azuristan_dove)
         self.crimsonia = snowglobe.Player(
             llm=self.llm,
             name='Premier of Crimsonia',
-            kind='human' if human else 'ai',
+            kind='human' if human >= 2 else 'ai',
             persona=persona_crimsonia_dove)
 
         self.background = """\
@@ -89,7 +89,7 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--human', action='store_true')
+    parser.add_argument('--human', action='store', default=0, type=int)
     args = parser.parse_args()
 
     sim = AzuristanCrimsonia(human=args.human)
