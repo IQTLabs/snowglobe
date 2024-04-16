@@ -32,7 +32,7 @@ In the latter case, you can use the chat interface to discuss the game afterward
 To play a game between two human players, launch the server from within the running container.  Also, start the game:
 
 ```
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload &
+uvicorn api:app --host 0.0.0.0 --port 8000 &
 examples/ac.py --human
 ```
 
