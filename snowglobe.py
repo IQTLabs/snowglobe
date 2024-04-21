@@ -45,7 +45,7 @@ class LLM():
         self.source = source if source is not None else default_source
         self.model = model if model is not None else default_model
         self.model_path = model_paths[self.source][self.model]
-        if self.model_path[0] != '/':
+        if self.model_path is not None and self.model_path[0] != '/':
             self.model_path = os.path.join(
                 os.path.split(__file__)[0], self.model_path)
 
