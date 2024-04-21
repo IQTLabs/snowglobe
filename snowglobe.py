@@ -28,6 +28,7 @@ import numpy as np
 import transformers
 import langchain.chains
 import langchain.prompts
+import langchain.chat_models
 import langchain_community.llms
 
 verbose = 2
@@ -52,7 +53,7 @@ class LLM():
         if self.source == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            self.llm = langchain_community.llms.OpenAI(
+            self.llm = langchain.chat_models.ChatOpenAI(
                 model_name=self.model,
                 streaming=True,
             )
@@ -263,6 +264,8 @@ class Intelligent():
                 output = chain.invoke(variables).strip()
             else:
                 def handle(chunk):
+                    if type(chunk) is not str:
+                        chunk = chunk.content
                     print(chunk, end='', flush=True)
                     return chunk
                 output = ''.join(handle(x) for x in chain.stream(variables)
