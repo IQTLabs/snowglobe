@@ -39,6 +39,6 @@ USER $username
 WORKDIR /home/$username
 
 # Install
-COPY --chown=$uid:$gid . /home/$username
-RUN pip install -e .
-RUN ./download.sh
+#COPY --chown=$uid:$gid . /home/$username
+#RUN pip install -e .
+#RUN ./download.sh
