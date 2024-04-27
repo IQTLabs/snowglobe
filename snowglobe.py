@@ -57,7 +57,6 @@ class LLM():
                 model_name=self.model,
                 streaming=True,
             )
-            self.bound = {}
 
         elif self.source == 'llamacpp':
 
@@ -71,64 +70,32 @@ class LLM():
                 f16_kv=True,
                 verbose=False,
             )
-            self.bound = {'stop': '##'}
 
         elif self.source == 'huggingface':
 
             # Model Source: Hugging Face (Local)
-            device = torch.device('cuda:' + str(torch.cuda.current_device())
-                                  if torch.cuda.is_available() else 'cpu')
-            config = transformers.AutoConfig.from_pretrained(
-                self.model_path,
-                trust_remote_code=True,
-                init_device='cuda',
-                learned_pos_emb=False,
-                max_seq_len=2500,
-            )
-            # config.attn_config['attn_impl'] = 'torch'
-
             model = transformers.AutoModelForCausalLM.from_pretrained(
-                self.model_path,
-                config=config,
-                trust_remote_code=True,
-                torch_dtype=torch.bfloat16,
-            )
-            model.eval()
-            model.to(device)
-
+                self.model_path, device_map='auto')
             tokenizer = transformers.AutoTokenizer.from_pretrained(
-                self.model_path)
-
-            class StopOnTokens(transformers.StoppingCriteria):
-                def __call__(self, input_ids: torch.LongTensor,
-                             scores: torch.FloatTensor,
-                             **kwargs: typing.Any) -> bool:
-                    for stop_id in tokenizer.convert_tokens_to_ids(
-                            ['<|endoftext|>', '<|im_end|>']):
-                        if input_ids[0][-1] == stop_id:
-                            return True
-                    return False
-            stopping_criteria = transformers.StoppingCriteriaList(
-                [StopOnTokens()])
-
+                self.model_path, device_map='auto')
+            tokenizer.pad_token = tokenizer.eos_token
             streamer = transformers.TextStreamer(
-                tokenizer, skip_prompt=True, skip_special=True)
-
+                tokenizer, skip_prompt=True, skip_special_tokens=True) \
+                if verbose >= 1 else None
             pipeline = transformers.pipeline(
                 'text-generation',
                 model=model,
                 tokenizer=tokenizer,
-                device=device,
+                device_map='auto',
                 max_new_tokens=2048,
-                stopping_criteria=stopping_criteria,
                 repetition_penalty=1.05,
+                return_full_text=False,
                 streamer=streamer,
             )
-
             self.llm = langchain_community.llms.HuggingFacePipeline(
-                pipeline=pipeline,
-            )
-            self.bound = {}
+                pipeline=pipeline)
+
+        self.bound = {'stop': '##'}
 
 
 async def gather_plus(*args):
@@ -260,11 +227,11 @@ class Intelligent():
             print(prompt.format(**variables))
             print('^' * 8)
         for i in range(max_tries):
-            if not verbose >= 1:
+            if not verbose >= 1 or self.llm.source == 'huggingface':
                 output = chain.invoke(variables).strip()
             else:
                 def handle(chunk):
-                    if type(chunk) is not str:
+                    if self.llm.source == 'openai':
                         chunk = chunk.content
                     print(chunk, end='', flush=True)
                     return chunk
