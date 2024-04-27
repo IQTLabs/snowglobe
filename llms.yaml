@@ -7,6 +7,7 @@ llamacpp:
   mixtral-8x7b-slimorca: models/mixtral-slimorca-8x7b.Q5_K_M.gguf
   mixtral-8x7b-instruct: models/mixtral-8x7b-instruct-v0.1.Q5_K_M.gguf
   gemma-7b-it: models/gemma-7b-it.gguf
+  zephyr-7b-beta: models/zephyr-7b-beta.Q5_K_M.gguf
 huggingface:
   mpt-7b: /home/snowglobe/wdata/llm/mosaicml/mpt-7b
   mpt-7b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-chat
