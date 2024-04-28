@@ -1,5 +1,5 @@
 openai:
-  text-davinci-003:
+  gpt-3.5-turbo:
   gpt-4:
 llamacpp:
   mistral-7b-openorca: models/mistral-7b-openorca.Q5_K_M.gguf
