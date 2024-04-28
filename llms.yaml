@@ -9,10 +9,12 @@ llamacpp:
   gemma-7b-it: models/gemma-7b-it.gguf
   zephyr-7b-beta: models/zephyr-7b-beta.Q5_K_M.gguf
 huggingface:
-  mpt-7b: /home/snowglobe/wdata/llm/mosaicml/mpt-7b
-  mpt-7b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-chat
-  mpt-7b-instruct: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-instruct
-  mpt-7b-storywriter: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-storywriter
-  mpt-7b8k-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-7b-8k-chat
-  mpt-30b-chat: /home/snowglobe/wdata/llm/mosaicml/mpt-30b-chat
-  gemma-7b-it: /home/snowglobe/wdata/llm/google/gemma-7b-it
+  mpt-7b: models/hf/mosaicml/mpt-7b
+  mpt-7b-chat: models/hf/mosaicml/mpt-7b-chat
+  mpt-7b-instruct: models/hf/mosaicml/mpt-7b-instruct
+  mpt-7b-storywriter: models/hf/mosaicml/mpt-7b-storywriter
+  mpt-7b8k-chat: models/hf/mosaicml/mpt-7b-8k-chat
+  mpt-30b-chat: models/hf/mosaicml/mpt-30b-chat
+  mistral-7b-instruct: models/hf/mistralai/Mistral-7B-Instruct-v0.1
+  cerebras-gpt-13b: models/hf/cerebras/Cerebras-GPT-13B
+  gemma-7b-it: models/hf/google/gemma-7b-it
