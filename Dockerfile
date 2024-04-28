@@ -23,6 +23,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     fastapi[all] \
     langchain \
     openai \
+    langchain-openai \
     llama-cpp-python \
     poetry \
     triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python

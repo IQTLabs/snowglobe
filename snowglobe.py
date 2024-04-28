@@ -26,6 +26,7 @@ import asyncio
 import inspect
 import numpy as np
 import transformers
+import langchain_openai
 import langchain.chains
 import langchain.prompts
 import langchain.chat_models
@@ -53,7 +54,7 @@ class LLM():
         if self.source == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            self.llm = langchain.chat_models.ChatOpenAI(
+            self.llm = langchain_openai.ChatOpenAI(
                 model_name=self.model,
                 streaming=True,
             )
