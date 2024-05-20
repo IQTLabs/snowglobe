@@ -489,7 +489,7 @@ class Player(Intelligent):
         output = self.return_output(
             bind=bind,
             name=self.name,
-            persona=self.persona, persona_reminder=True,
+            persona=self.persona,
             history=history,
             query=query
         )
