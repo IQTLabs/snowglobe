@@ -285,6 +285,23 @@ class Intelligent():
                             % (self.human_label, self.human_count,
                                'answer' if answer else 'prompt'))
 
+    def multiple_choice(self, query, answer, mc):
+        mc_all = ["'" + x + "', " for x in mc]
+        mc_all[0] = 'Answer '
+        mc_all[-1] = 'or ' + mc_all[-1] + '.'
+        if len(mc_all) == 2:
+            mc_all[-2] = mc_all[-2][:-2] + ' '
+        mc_all = ''.join(mc_all)
+        print(mc_all)
+        # template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
+        # variables = {'history': history.textonly(), 'news': output}
+        # output = self.return_output(
+        #     template=template, variables=variables
+        # )
+        print('MC HERE')
+        output = answer
+        return output
+
 
 class Control(Intelligent):
     def __init__(self, source=None, model=None):
@@ -339,7 +356,8 @@ class Control(Intelligent):
             )
         return output
 
-    def assess(self, history=None, responses=None, query=None, short=False):
+    def assess(self, history=None, responses=None, query=None,
+               mc=None, short=False):
         responses_intro = 'Questions about what happened'
         if responses is None:
             query_format = 'twoline'
@@ -352,6 +370,8 @@ class Control(Intelligent):
             responses=responses, responses_intro=responses_intro,
             query=query, query_format=query_format
         )
+        if mc is not None:
+            output = self.multiple_choice(query, output, mc)
         return output
 
     def chat(self, history=None):
