@@ -298,6 +298,12 @@ class Intelligent():
             bind=bind,
             template=template, variables=variables
         )
+        output = output.strip().strip('"' + "'" + '.,;').lower()
+        mc_ref = [x.lower() for x in mc]
+        if output in mc_ref:
+            output = mc[mc_ref.index(output)]
+        else:
+            output = None
         return output
 
 
