@@ -286,20 +286,18 @@ class Intelligent():
                                'answer' if answer else 'prompt'))
 
     def multiple_choice(self, query, answer, mc):
-        mc_all = ["'" + x + "', " for x in mc]
-        mc_all[0] = 'Answer '
-        mc_all[-1] = 'or ' + mc_all[-1] + '.'
-        if len(mc_all) == 2:
-            mc_all[-2] = mc_all[-2][:-2] + ' '
-        mc_all = ''.join(mc_all)
-        print(mc_all)
-        # template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
-        # variables = {'history': history.textonly(), 'news': output}
-        # output = self.return_output(
-        #     template=template, variables=variables
-        # )
-        print('MC HERE')
-        output = answer
+        mc_parts = ["'" + x + "'," for x in mc]
+        if len(mc_parts) == 2:
+            mc_parts[0] = mc_parts[0][:-1]
+        mc_parts[-1] = 'or ' + mc_parts[-1][:-1]
+        mc_string = ' '.join(mc_parts)
+        template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Restate your answer as {mc_string} only.\n\nAnswer: '
+        variables = {'query': query, 'answer': answer, 'mc_string': mc_string}
+        bind = {'stop': ['\n\n']}
+        output = self.return_output(
+            bind=bind,
+            template=template, variables=variables
+        )
         return output
 
 
