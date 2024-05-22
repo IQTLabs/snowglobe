@@ -303,7 +303,7 @@ class Intelligent():
         if output in mc_ref:
             output = mc[mc_ref.index(output)]
         else:
-            output = None
+            output = ''
         return output
 
 
@@ -469,22 +469,22 @@ class Team():
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None):
+    def respond(self, history=None, query=None, mc=None):
         member_responses = History()
         for member in self.members:
             if verbose >= 2:
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
-                history=history, query=query))
+                history=history, query=query, mc=mc))
         if verbose >= 2:
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
-            history=history, responses=member_responses, query=query)
+            history=history, responses=member_responses, query=query, mc=mc)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, query=None):
+    def synthesize(self, history=None, responses=None, query=None, mc=None):
         return self.leader.synthesize(
-            history=history, responses=responses, query=query)
+            history=history, responses=responses, query=query, mc=mc)
 
     def info(self, offset=0):
         print(' ' * offset + 'Team:', self.name)
@@ -506,7 +506,7 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None):
+    def respond(self, history=None, query=None, mc=None):
         if query is None:
             query = 'What action or actions do you take in response?'
         bind = {'stop': ['Narrator:']}
@@ -517,9 +517,11 @@ class Player(Intelligent):
             history=history,
             query=query
         )
+        if mc is not None:
+            output = self.multiple_choice(query, output, mc)
         return output
 
-    def synthesize(self, history=None, responses=None, query=None):
+    def synthesize(self, history=None, responses=None, query=None, mc=None):
         if query is None:
             responses_intro = 'These are the actions your team members recommend you take in response'
             synthesize_query = 'Combine the recommended actions given above'
@@ -533,6 +535,8 @@ class Player(Intelligent):
             responses=responses, responses_intro=responses_intro,
             query=synthesize_query, query_format='oneline'
         )
+        if mc is not None:
+            output = self.multiple_choice(query, output, mc)
         return output
 
     def info(self, offset=0):
