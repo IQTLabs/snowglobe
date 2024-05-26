@@ -311,9 +311,6 @@ class Intelligent():
                 output = mc[search_flags.index(True)]
             else:
                 output = ''
-            print('*********************')
-            print(search_flags)
-            print(output)
         return output
 
 
