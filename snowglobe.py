@@ -32,7 +32,7 @@ import langchain.prompts
 import langchain.chat_models
 import langchain_community.llms
 
-verbose = 3
+verbose = 2
 
 class LLM():
     def __init__(self, source=None, model=None, menu=None):
