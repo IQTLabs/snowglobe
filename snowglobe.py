@@ -306,7 +306,14 @@ class Intelligent():
         if output in mc_ref:
             output = mc[mc_ref.index(output)]
         else:
-            output = ''
+            search_flags = [x in output for x in mc_ref]
+            if sum(search_flags) == 1:
+                output = mc[search_flags.index(True)]
+            else:
+                output = ''
+            print('*********************')
+            print(search_flags)
+            print(output)
         return output
 
 
