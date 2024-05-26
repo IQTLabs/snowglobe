@@ -32,7 +32,7 @@ import langchain.prompts
 import langchain.chat_models
 import langchain_community.llms
 
-verbose = 2
+verbose = 3
 
 class LLM():
     def __init__(self, source=None, model=None, menu=None):
@@ -168,7 +168,7 @@ class Intelligent():
         return output
 
     def return_template(self, name=None,
-                        persona=None, persona_reminder=None,
+                        persona=None, reminder=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
                         query=None, query_format=None, query_subtitle=None,
@@ -203,8 +203,11 @@ class Intelligent():
             variables['responses'] = responses.str(name=name)
         if query_format is None or query_format == 'twoline':
             template += '### Question:\n\n{query}'
-            if persona is not None and persona_reminder:
+            if reminder == 2 and persona is not None:
                 template += ' (Remember, you are {persona}.)'
+            elif reminder == 1 and name is not None:
+                template += ' (Remember, you are {name}.)'
+                variables['name'] = name
             template += '\n\n### Answer:\n\n'
         elif query_format == 'oneline':
             template += '### {query}:\n\n'
@@ -506,15 +509,14 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None,
-                persona_reminder=True, mc=None):
+    def respond(self, history=None, query=None, reminder=2, mc=None):
         if query is None:
             query = 'What action or actions do you take in response?'
         bind = {'stop': ['Narrator:']}
         output = self.return_output(
             bind=bind,
             name=self.name,
-            persona=self.persona, persona_reminder=persona_reminder,
+            persona=self.persona, reminder=reminder,
             history=history,
             query=query
         )
