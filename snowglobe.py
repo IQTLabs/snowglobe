@@ -506,14 +506,15 @@ class Player(Intelligent):
         if self.kind == 'human':
             self.set_id()
 
-    def respond(self, history=None, query=None, mc=None):
+    def respond(self, history=None, query=None,
+                persona_reminder=True, mc=None):
         if query is None:
             query = 'What action or actions do you take in response?'
         bind = {'stop': ['Narrator:']}
         output = self.return_output(
             bind=bind,
             name=self.name,
-            persona=self.persona,
+            persona=self.persona, persona_reminder=persona_reminder,
             history=history,
             query=query
         )
