@@ -27,10 +27,13 @@ import inspect
 import numpy as np
 import transformers
 import langchain_openai
+import langchain_chroma
 import langchain.chains
 import langchain.prompts
 import langchain.chat_models
+import langchain_text_splitters
 import langchain_community.llms
+import langchain_community.embeddings
 
 verbose = 2
 
@@ -58,6 +61,7 @@ class LLM():
                 model_name=self.model,
                 streaming=True,
             )
+            self.embeddings = langchain_openai.OpenAIEmbeddings()
 
         elif self.source == 'llamacpp':
 
@@ -71,6 +75,9 @@ class LLM():
                 f16_kv=True,
                 verbose=False,
             )
+            self.embeddings = \
+                langchain_community.embeddings.LlamaCppEmbeddings(
+                    model_path=self.model_path, f16_kv=True, verbose=False)
 
         elif self.source == 'huggingface':
 
@@ -504,7 +511,8 @@ class Team():
 
 
 class Player(Intelligent):
-    def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None):
+    def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
+                 loader=None, chunk_size=1000, chunk_overlap=200):
         self.llm = llm
         self.name = name
         self.kind = kind
@@ -512,6 +520,14 @@ class Player(Intelligent):
         self.history = History()
         if self.kind == 'human':
             self.set_id()
+
+        if loader is not None:
+            docs = loader.load()
+            splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            splits = splitter.split_documents(docs)
+            vectorstore = langchain_chroma.Chroma.from_documents(
+                documents=splits, embedding=self.llm.embeddings)
 
     def respond(self, history=None, query=None, reminder=2, mc=None):
         if query is None:
