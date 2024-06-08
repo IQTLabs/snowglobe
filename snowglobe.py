@@ -526,6 +526,7 @@ class Player(Intelligent):
             splits = splitter.split_documents(docs)
             vectorstore = langchain_chroma.Chroma.from_documents(
                 documents=splits, embedding=self.llm.embeddings)
+            self.retriever = vectorstore.as_retriever()
 
     def respond(self, history=None, query=None, reminder=2, mc=None):
         if query is None:
