@@ -27,8 +27,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     langchain-chroma \
     langchain-community \
     llama-cpp-python \
-    poetry \
-    triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
+    poetry
 ENV LLAMA_CPP_LIB=/usr/local/lib/python3.10/dist-packages/llama_cpp/libllama.so
 
 # User account

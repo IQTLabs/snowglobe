@@ -27,7 +27,6 @@ langchain-chroma = "*"
 langchain-community = "*"
 llama-cpp-python = "*"
 poetry = "*"
-triton = "*"
 
 [build-system]
 requires = ["poetry-core"]
