@@ -179,6 +179,7 @@ class Intelligent():
 
     def return_template(self, name=None,
                         persona=None, reminder=None,
+                        retriever=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
                         query=None, query_format=None, query_subtitle=None,
@@ -198,6 +199,14 @@ class Intelligent():
         if persona is not None:
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
+        if retriever is not None and history is not None:
+            rag_query = 'What situations are similar to the following?'
+            rag_intro = 'This is how you responded to similar situations in the past'
+            docs = retriever.invoke(rag_query + '\n\n'
+                                    + history.entries[-1]['text'])
+            ragstring = '\n'.join(doc.page_content for doc in docs)
+            template += '### ' + rag_intro + ':\n\n{rag}\n\n'
+            variables['rag'] = ragstring
         if history is not None:
             if not history_over:
                 history_intro = 'This is what has happened so far'
@@ -543,6 +552,7 @@ class Player(Intelligent):
             bind=bind,
             name=self.name,
             persona=self.persona, reminder=reminder,
+            retriever=self.retriever,
             history=history,
             query=query
         )
