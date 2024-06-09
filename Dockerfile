@@ -24,6 +24,7 @@ RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
     langchain \
     openai \
     langchain-openai \
+    langchain-huggingface \
     langchain-chroma \
     langchain-community \
     llama-cpp-python \
