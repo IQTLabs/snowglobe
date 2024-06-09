@@ -29,6 +29,7 @@ import langchain_chroma
 import langchain.chains
 import langchain.prompts
 import langchain.chat_models
+import langchain_huggingface
 import langchain_text_splitters
 import langchain_community.llms
 import langchain_community.embeddings
@@ -98,8 +99,11 @@ class LLM():
                 return_full_text=False,
                 streamer=streamer,
             )
-            self.llm = langchain_community.llms.HuggingFacePipeline(
+            self.llm = langchain_huggingface.llms.HuggingFacePipeline(
                 pipeline=pipeline)
+            self.embeddings = \
+                langchain_huggingface.embeddings.HuggingFaceEmbeddings(
+                    model_name=self.model_path, show_progress=True)
 
         self.bound = {'stop': '##'}
 
