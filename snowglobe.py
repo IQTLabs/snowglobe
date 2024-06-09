@@ -76,7 +76,8 @@ class LLM():
             )
             self.embeddings = \
                 langchain_community.embeddings.LlamaCppEmbeddings(
-                    model_path=self.model_path, f16_kv=True, verbose=False)
+                    model_path=self.model_path, n_gpu_layers=-1, n_batch=512,
+                    n_ctx=8192, f16_kv=True, verbose=False)
 
         elif self.source == 'huggingface':
 
