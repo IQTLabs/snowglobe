@@ -201,12 +201,16 @@ class Intelligent():
             variables['persona'] = persona
         if retriever is not None and history is not None:
             rag_query = 'What situations are similar to the following?'
-            rag_intro = 'This is how you responded to similar situations in the past'
+            rag_intro = 'Your response will be similar to these previous events'
             docs = retriever.invoke(rag_query + '\n\n'
                                     + history.entries[-1]['text'])
             ragstring = '\n'.join(doc.page_content for doc in docs)
             template += '### ' + rag_intro + ':\n\n{rag}\n\n'
             variables['rag'] = ragstring
+            if verbose >= 2:
+                print('***')
+                print(ragstring)
+                print('***')
         if history is not None:
             if not history_over:
                 history_intro = 'This is what has happened so far'
