@@ -200,17 +200,11 @@ class Intelligent():
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
         if retriever is not None and history is not None:
-            rag_query = 'What situations are similar to the following?'
-            rag_intro = 'Your response will be similar to these previous events'
-            docs = retriever.invoke(rag_query + '\n\n'
-                                    + history.entries[-1]['text'])
+            rag_intro = 'Previously, you handled a similar situation like this'
+            docs = retriever.invoke(history.entries[-1]['text'])
             ragstring = '\n'.join(doc.page_content for doc in docs)
             template += '### ' + rag_intro + ':\n\n{rag}\n\n'
             variables['rag'] = ragstring
-            if verbose >= 2:
-                print('***')
-                print(ragstring)
-                print('***')
         if history is not None:
             if not history_over:
                 history_intro = 'This is what has happened so far'
@@ -544,7 +538,7 @@ class Player(Intelligent):
             splits = splitter.split_documents(docs)
             vectorstore = langchain_chroma.Chroma.from_documents(
                 documents=splits, embedding=self.llm.embeddings)
-            self.retriever = vectorstore.as_retriever()
+            self.retriever = vectorstore.as_retriever(search_kwargs={'k': 1})
         else:
             self.retriever = None
 
