@@ -202,7 +202,8 @@ class KeywordRAG():
         bytestore = langchain.storage.InMemoryByteStore()
         id_key = 'split'
         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
-            vectorstore=vectorstore, byte_store=bytestore, id_key=id_key)
+            vectorstore=vectorstore, byte_store=bytestore, id_key=id_key,
+            search_kwargs={'k': count})
 
         # Create keyword lists
         split_ids = [str(uuid.uuid4()) for _ in splits]
