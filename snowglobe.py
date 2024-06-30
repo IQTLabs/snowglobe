@@ -204,8 +204,11 @@ class KeywordRAG():
             vectorstore=vectorstore, byte_store=bytestore, id_key=id_key)
 
         # Create keyword lists
-        template = 'Question: Give a comma-separated list of keywords to describe the situation or problem faced by {name} in the following text.\n\n{text}\n\nAnswer: '
+        template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
         variables = {'name': self.name}
+        #query_intro = 'Give some keywords to describe the situation or problem faced by %s in the following text:\n' % (self.name,)
+        #query = query.replace('{text}',
+        #query = 'Give some keywords to describe the situation or problem faced by %s.\n' % (self.name,)
         bind = {'stop': ['\n\n']}
         split_ids = [str(uuid.uuid4()) for _ in splits]
         keyword_strings = []
@@ -213,7 +216,14 @@ class KeywordRAG():
             print('=' * 80)
             print(split.page_content)
             print('*' * 3)
+            #history = History()
+            #history.add('Narrator', split.page_content)
             variables['text'] = split.page_content
+            # output = self.return_output(
+            #     bind=bind,
+            #     history=history, history_over=True,
+            #     query=query, query_format='twoline'
+            # )
             output = self.return_output(
                 bind=bind,
                 template=template, variables=variables
@@ -222,8 +232,8 @@ class KeywordRAG():
 
         # Keep for later
         self.rag_retriever = retriever
-        self.rag_template = template
-        self.rag_variables = variables
+        #self.rag_template = template
+        #self.rag_variables = variables
         
     def rag_invoke(self, text):
         pass
