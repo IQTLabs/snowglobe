@@ -154,6 +154,47 @@ class History():
         return history_copy
 
 
+class ClassicRAG():
+    def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
+                 count=None):
+        if chunk_size is None:
+            chunk_size = 1000
+        if chunk_overlap is None:
+            chunk_overlap = 200
+        if count is None:
+            count = 1
+
+        docs = loader.load()
+        splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        splits = splitter.split_documents(docs)
+        vectorstore = langchain_chroma.Chroma.from_documents(
+            documents=splits, embedding=llm.embeddings)
+        self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
+
+    def invoke(self, string):
+        return self.retriever.invoke(string)
+
+class KeywordRAG():
+    def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
+                 count=None):
+        pass
+    def _build_chain(self):
+        pass
+    def _build_retriever(self, loader, chunk_size=None, chunk_overlap=None):
+        if chunk_size is None:
+            chunk_size = 1000
+        if chunk_overlap is None:
+            chunk_overlap = 200
+
+        docs = loader.load()
+        splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        splits = splitter.split_documents(docs)
+    def invoke(self, string):
+        pass
+
+
 class Intelligent():
     def return_output(self, kind=None, bind=None,
                       template=None, variables=None, **kwargs):
@@ -176,7 +217,7 @@ class Intelligent():
 
     def return_template(self, name=None,
                         persona=None, reminder=None,
-                        retriever=None,
+                        rag=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
                         query=None, query_format=None, query_subtitle=None,
@@ -196,9 +237,9 @@ class Intelligent():
         if persona is not None:
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
-        if retriever is not None and history is not None:
+        if rag is not None and history is not None:
             rag_intro = 'Previously, you handled a similar situation like this'
-            docs = retriever.invoke(history.entries[-1]['text'])
+            docs = rag.invoke(history.entries[-1]['text'])
             ragstring = '\n'.join(doc.page_content for doc in docs)
             template += '### ' + rag_intro + ':\n\n{rag}\n\n'
             variables['rag'] = ragstring
@@ -519,7 +560,7 @@ class Team():
 
 class Player(Intelligent):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
-                 loader=None, chunk_size=1000, chunk_overlap=200):
+                 loader=None, chunk_size=None, chunk_overlap=None):
         self.llm = llm
         self.name = name
         self.kind = kind
@@ -529,15 +570,9 @@ class Player(Intelligent):
             self.set_id()
 
         if loader is not None:
-            docs = loader.load()
-            splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
-                chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-            splits = splitter.split_documents(docs)
-            vectorstore = langchain_chroma.Chroma.from_documents(
-                documents=splits, embedding=self.llm.embeddings)
-            self.retriever = vectorstore.as_retriever(search_kwargs={'k': 1})
+            self.rag = ClassicRAG(llm, loader, chunk_size, chunk_overlap)
         else:
-            self.retriever = None
+            self.rag = None
 
     def respond(self, history=None, query=None, reminder=2, mc=None):
         if query is None:
@@ -547,7 +582,7 @@ class Player(Intelligent):
             bind=bind,
             name=self.name,
             persona=self.persona, reminder=reminder,
-            retriever=self.retriever,
+            rag=self.rag,
             history=history,
             query=query
         )
