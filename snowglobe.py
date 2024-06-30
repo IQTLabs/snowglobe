@@ -18,6 +18,7 @@ import os
 import re
 import yaml
 import json
+import uuid
 import random
 import asyncio
 import inspect
@@ -26,6 +27,8 @@ import transformers
 import langchain_openai
 import langchain_chroma
 import langchain.prompts
+import langchain.storage
+import langchain.retrievers
 import langchain_huggingface
 import langchain_text_splitters
 import langchain_community.llms
@@ -178,19 +181,37 @@ class ClassicRAG():
 class KeywordRAG():
     def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
-        pass
+        self.chain = self._build_chain()
+        self.retriever = self._build_retriever(
+            llm, loader, chunk_size, chunk_overlap, count)
     def _build_chain(self):
-        pass
-    def _build_retriever(self, loader, chunk_size=None, chunk_overlap=None):
+        chain = (
+            
+        )
+        return chain
+    def _build_retriever(self, llm, loader, chunk_size=None,
+                         chunk_overlap=None, count=None):
         if chunk_size is None:
             chunk_size = 1000
         if chunk_overlap is None:
             chunk_overlap = 200
+        if count is None:
+            count = 1
 
         docs = loader.load()
         splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = splitter.split_documents(docs)
+        vectorstore = langchain_chroma.Chroma(
+            collection_name = 'summaries', embedding_function=llm.embeddings)
+        bytestore = langchain.storage.InMemoryByteStore()
+        id_key = 'split'
+        retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
+            vectorstore = vectorstore,
+            byte_store = bytestore,
+            id_key = id_key
+        )
+        split_ids = [str(uuid.uuid4()) for _ in splits]
     def invoke(self, string):
         pass
 
@@ -570,7 +591,7 @@ class Player(Intelligent):
             self.set_id()
 
         if loader is not None:
-            self.rag = ClassicRAG(llm, loader, chunk_size, chunk_overlap)
+            self.rag = KeywordRAG(llm, loader, chunk_size, chunk_overlap)
         else:
             self.rag = None
 
