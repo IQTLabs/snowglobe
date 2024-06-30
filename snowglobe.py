@@ -31,6 +31,7 @@ import langchain.storage
 import langchain.retrievers
 import langchain_huggingface
 import langchain_text_splitters
+import langchain_core.documents
 import langchain_community.llms
 import langchain_community.embeddings
 
@@ -204,39 +205,39 @@ class KeywordRAG():
             vectorstore=vectorstore, byte_store=bytestore, id_key=id_key)
 
         # Create keyword lists
-        template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
-        variables = {'name': self.name}
-        #query_intro = 'Give some keywords to describe the situation or problem faced by %s in the following text:\n' % (self.name,)
-        #query = query.replace('{text}',
-        #query = 'Give some keywords to describe the situation or problem faced by %s.\n' % (self.name,)
-        bind = {'stop': ['\n\n']}
         split_ids = [str(uuid.uuid4()) for _ in splits]
         keyword_strings = []
         for split in splits:
             print('=' * 80)
             print(split.page_content)
             print('*' * 3)
-            #history = History()
-            #history.add('Narrator', split.page_content)
-            variables['text'] = split.page_content
-            # output = self.return_output(
-            #     bind=bind,
-            #     history=history, history_over=True,
-            #     query=query, query_format='twoline'
-            # )
-            output = self.return_output(
-                bind=bind,
-                template=template, variables=variables
-            )
+            output = self.rag_keywords(split.page_content)
             keyword_strings.append(output)
+        keyword_docs = [
+            langchain_core.documents.Document(
+                page_content=keyword_string, metadata={id_key: split_ids[i]})
+            for i, keyword_string in enumerate(keyword_strings)
+        ]
 
-        # Keep for later
+        # Store splits and keywords to retriever
+        retriever.vectorstore.add_documents(keyword_docs)
+        retriever.docstore.mset(list(zip(split_ids, splits)))
         self.rag_retriever = retriever
-        #self.rag_template = template
-        #self.rag_variables = variables
+
+    def rag_keywords(self, text):
+        template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
+        variables = {'name': self.name, 'text': text}
+        bind = {'stop': ['\n\n']}
+        output = self.return_output(
+            bind=bind,
+            template=template, variables=variables
+        )
+        return output
         
     def rag_invoke(self, text):
-        pass
+        keywords = self.rag_keywords(text)
+        splits = self.rag_retriever.invoke(keywords)
+        return splits
 
 
 class Intelligent():
