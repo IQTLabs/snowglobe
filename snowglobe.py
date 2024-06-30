@@ -158,7 +158,7 @@ class History():
 
 
 class ClassicRAG():
-    def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
+    def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
         if chunk_size is None:
             chunk_size = 1000
@@ -172,14 +172,14 @@ class ClassicRAG():
             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = splitter.split_documents(docs)
         vectorstore = langchain_chroma.Chroma.from_documents(
-            documents=splits, embedding=llm.embeddings)
+            documents=splits, embedding=self.llm.embeddings)
         self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
 
-    def invoke(self, text):
+    def rag_invoke(self, text):
         return self.retriever.invoke(text)
 
 class KeywordRAG():
-    def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
+    def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
         if chunk_size is None:
             chunk_size = 1000
@@ -196,34 +196,36 @@ class KeywordRAG():
 
         # Create retriever
         vectorstore = langchain_chroma.Chroma(
-            collection_name='summaries', embedding_function=llm.embeddings)
+            collection_name='summaries',
+            embedding_function=self.llm.embeddings)
         bytestore = langchain.storage.InMemoryByteStore()
         id_key = 'split'
         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
             vectorstore=vectorstore, byte_store=bytestore, id_key=id_key)
 
         # Create keyword lists
-        template = 'Give some keywords to describe the situation or problem faced by {name} in the following text.\n\n{text}'
-        variables = {'name': ''}
+        template = 'Question: Give a comma-separated list of keywords to describe the situation or problem faced by {name} in the following text.\n\n{text}\n\nAnswer: '
+        variables = {'name': self.name}
+        bind = {'stop': ['\n\n']}
         split_ids = [str(uuid.uuid4()) for _ in splits]
         keyword_strings = []
         for split in splits:
+            print('=' * 80)
+            print(split.page_content)
+            print('*' * 3)
             variables['text'] = split.page_content
             output = self.return_output(
+                bind=bind,
                 template=template, variables=variables
             )
             keyword_strings.append(output)
-            print('***************************')
-            print(split.page_content)
-            print('====')
-            print(output)
 
         # Keep for later
-        self.retriever = retriever
-        self.template = template
-        self.variables = variables
+        self.rag_retriever = retriever
+        self.rag_template = template
+        self.rag_variables = variables
         
-    def invoke(self, string):
+    def rag_invoke(self, text):
         pass
 
 
@@ -271,7 +273,7 @@ class Intelligent():
             variables['persona'] = persona
         if rag is not None and history is not None:
             rag_intro = 'Previously, you handled a similar situation like this'
-            docs = rag.invoke(history.entries[-1]['text'])
+            docs = self.rag_invoke(history.entries[-1]['text'])
             ragstring = '\n'.join(doc.page_content for doc in docs)
             template += '### ' + rag_intro + ':\n\n{rag}\n\n'
             variables['rag'] = ragstring
@@ -590,7 +592,7 @@ class Team():
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent):
+class Player(Intelligent, KeywordRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None):
         self.llm = llm
@@ -602,7 +604,8 @@ class Player(Intelligent):
             self.set_id()
 
         if loader is not None:
-            self.rag = KeywordRAG(llm, loader, chunk_size, chunk_overlap)
+            self.rag_init(loader, chunk_size, chunk_overlap)
+            self.rag = True
         else:
             self.rag = None
 
