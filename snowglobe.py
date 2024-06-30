@@ -175,22 +175,12 @@ class ClassicRAG():
             documents=splits, embedding=llm.embeddings)
         self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
 
-    def invoke(self, string):
-        return self.retriever.invoke(string)
+    def invoke(self, text):
+        return self.retriever.invoke(text)
 
 class KeywordRAG():
     def __init__(self, llm, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
-        self.chain = self._build_chain()
-        self.retriever = self._build_retriever(
-            llm, loader, chunk_size, chunk_overlap, count)
-    def _build_chain(self):
-        chain = (
-            
-        )
-        return chain
-    def _build_retriever(self, llm, loader, chunk_size=None,
-                         chunk_overlap=None, count=None):
         if chunk_size is None:
             chunk_size = 1000
         if chunk_overlap is None:
@@ -198,20 +188,41 @@ class KeywordRAG():
         if count is None:
             count = 1
 
+        # Create splits
         docs = loader.load()
         splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = splitter.split_documents(docs)
+
+        # Create retriever
         vectorstore = langchain_chroma.Chroma(
-            collection_name = 'summaries', embedding_function=llm.embeddings)
+            collection_name='summaries', embedding_function=llm.embeddings)
         bytestore = langchain.storage.InMemoryByteStore()
         id_key = 'split'
         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
-            vectorstore = vectorstore,
-            byte_store = bytestore,
-            id_key = id_key
-        )
+            vectorstore=vectorstore, byte_store=bytestore, id_key=id_key)
+
+        # Create keyword lists
+        template = 'Give some keywords to describe the situation or problem faced by {name} in the following text.\n\n{text}'
+        variables = {'name': ''}
         split_ids = [str(uuid.uuid4()) for _ in splits]
+        keyword_strings = []
+        for split in splits:
+            variables['text'] = split.page_content
+            output = self.return_output(
+                template=template, variables=variables
+            )
+            keyword_strings.append(output)
+            print('***************************')
+            print(split.page_content)
+            print('====')
+            print(output)
+
+        # Keep for later
+        self.retriever = retriever
+        self.template = template
+        self.variables = variables
+        
     def invoke(self, string):
         pass
 
