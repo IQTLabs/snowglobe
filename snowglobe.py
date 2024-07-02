@@ -209,9 +209,10 @@ class KeywordRAG():
         split_ids = [str(uuid.uuid4()) for _ in splits]
         keyword_strings = []
         for split in splits:
-            print('=' * 80)
-            print(split.page_content)
-            print('*' * 3)
+            if verbose >= 3:
+                print('=' * 80)
+                print(split.page_content)
+                print('*' * 3)
             output = self.rag_keywords(split.page_content)
             keyword_strings.append(output)
         keyword_docs = [
