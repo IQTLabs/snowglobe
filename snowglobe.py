@@ -209,10 +209,6 @@ class KeywordRAG():
         split_ids = [str(uuid.uuid4()) for _ in splits]
         keyword_strings = []
         for split in splits:
-            if verbose >= 3:
-                print('=' * 80)
-                print(split.page_content)
-                print('*' * 3)
             output = self.rag_keywords(split.page_content)
             keyword_strings.append(output)
         keyword_docs = [
@@ -227,7 +223,8 @@ class KeywordRAG():
         self.rag_retriever = retriever
 
     def rag_keywords(self, text):
-        template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
+        #template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
+        template = 'Question:\n\nIn one sentence, describe the problem {name} is facing in the following text.\n\n{text}\n\nAnswer:\n\n'
         variables = {'name': self.name, 'text': text}
         bind = {'stop': ['\n\n']}
         output = self.return_output(
