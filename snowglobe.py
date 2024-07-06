@@ -268,11 +268,7 @@ class Intelligent():
                         responses=None, responses_intro=None,
                         query=None, query_format=None, query_subtitle=None,
                         ):
-        # Set defaults
-        if name is None:
-            pass # Add code to use player name
-        if persona is None:
-            pass # Add code to use player persona
+        # Punctuation edit
         if persona is not None:
             if persona[-1:] == '.':
                 persona = persona[:-1]
