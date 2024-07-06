@@ -393,12 +393,7 @@ class Intelligent():
             mc_parts[0] = mc_parts[0][:-1]
         mc_parts[-1] = 'or ' + mc_parts[-1][:-1]
         mc_string = ' '.join(mc_parts)
-        #template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Restate your answer as {mc_string} only.\n\nAnswer: '
-        #template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Repeat the same answer as {mc_string} only.\n\nAnswer: '
         template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Which multiple choice response best summarizes the previous answer?: {mc_string}.\n\nAnswer: '
-        if set((c.lower() for c in mc)) == set(('yes', 'no')):
-            #template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Answer yes or no.\n\nAnswer: '
-            template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Is that a yes or no?  Answer in one word.\n\nAnswer: '
         variables = {'query': query, 'answer': answer, 'mc_string': mc_string}
         bind = {'stop': ['\n\n']}
         output = self.return_output(
