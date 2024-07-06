@@ -257,6 +257,8 @@ class Intelligent():
             output = self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
             output = self.return_from_human(prompt, variables)
+        elif kind == 'preset':
+            output = self.return_from_preset()
         return output
 
     def return_template(self, name=None,
@@ -366,6 +368,15 @@ class Intelligent():
             answer_json = json.load(f)
         answer_content = answer_json['content']
         return answer_content
+
+    def return_from_preset(self):
+        return next(self.preset_generator, '')
+
+    def set_preset_generator(self, presets):
+        for preset in presets:
+            if verbose >= 2:
+                print(preset)
+            yield preset
 
     def set_id(self):
         self.human_label = random.randint(100000, 999999)
@@ -604,7 +615,8 @@ class Team():
 
 class Player(Intelligent, KeywordRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
-                 loader=None, chunk_size=None, chunk_overlap=None):
+                 loader=None, chunk_size=None, chunk_overlap=None, count=None,
+                 presets=None):
         self.llm = llm
         self.name = name
         self.kind = kind
@@ -614,10 +626,13 @@ class Player(Intelligent, KeywordRAG):
             self.set_id()
 
         if loader is not None:
-            self.rag_init(loader, chunk_size, chunk_overlap)
+            self.rag_init(loader, chunk_size, chunk_overlap, count)
             self.rag = True
         else:
             self.rag = None
+
+        if presets is not None:
+            self.preset_generator = self.set_preset_generator(presets)
 
     def respond(self, history=None, query=None, reminder=2, mc=None):
         if query is None:
