@@ -324,9 +324,9 @@ class Intelligent():
             llm = llm.bind(**bind)
         chain = prompt | llm
         if verbose >= 3:
-            print('v' * 8)
+            print('v' * 80)
             print(prompt.format(**variables))
-            print('^' * 8)
+            print('^' * 80)
         for i in range(max_tries):
             if not verbose >= 1 or self.llm.source == 'huggingface':
                 output = chain.invoke(variables).strip()
