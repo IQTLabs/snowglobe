@@ -425,7 +425,7 @@ class Stateful():
         if timestep is None:
             label = 'Narrator'
         else:
-            label = timestep.title() + ' ' + str(len(self.history) + 1)
+            label = timestep.title() + ' ' + str(len(self.history))
         self.history.add(label, narration)
 
     def record_response(self, player_name, player_response):
