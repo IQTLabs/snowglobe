@@ -420,7 +420,15 @@ class Intelligent():
         return output
 
 
-class Control(Intelligent):
+class Stateful():
+    def record_narration(self, narration):
+        self.history.add('Narrator', narration)
+
+    def record_response(self, player_name, player_response):
+        self.history.add(player_name, player_response)
+
+
+class Control(Intelligent, Stateful):
     def __init__(self, source=None, model=None):
         self.llm = LLM(source=source, model=model)
         self.name = 'Control'
@@ -445,12 +453,6 @@ class Control(Intelligent):
             print('-' * min(len(title), width))
         else:
             print(title)
-
-    def record_narration(self, narration):
-        self.history.add('Narrator', narration)
-
-    def record_response(self, player_name, player_response):
-        self.history.add(player_name, player_response)
 
     def adjudicate(self, history=None, responses=None, query=None,
                    nature=True, timeframe='week', summarize=False):
@@ -575,7 +577,7 @@ class Control(Intelligent):
         return output
 
 
-class Team():
+class Team(Stateful):
     def __init__(self, name='Anonymous', leader=None, members=None):
         self.name = name
         self.leader = leader
@@ -609,7 +611,7 @@ class Team():
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent, KeywordRAG):
+class Player(Intelligent, Stateful, KeywordRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
                  presets=None):
