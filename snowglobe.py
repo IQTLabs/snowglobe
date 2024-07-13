@@ -541,7 +541,7 @@ class Control(Intelligent, Stateful):
         return output
 
     def create_players(self, scenario, max_players=None, query=None,
-                       npcs=False, pattern_sep=None, pattern_left=None):
+                       others=False, pattern_sep=None, pattern_left=None):
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
         if pattern_sep is None:
@@ -558,16 +558,16 @@ class Control(Intelligent, Stateful):
         names = [name for name in names if len(name) > 0]
         if max_players is None:
             player_names = names
-            npc_names = []
+            other_names = []
         else:
             player_names = names[:max_players]
-            npc_names = names[max_players:]
+            other_names = names[max_players:]
         players = [Player(llm=self.llm, name=name, persona=name)
                    for name in player_names]
-        if not npcs:
+        if not others:
             return players
         else:
-            return players, npc_names
+            return players, other_names
 
     def create_inject(self, history=None, query=None):
         if query is None:
