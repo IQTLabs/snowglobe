@@ -421,11 +421,11 @@ class Intelligent():
 
 
 class Stateful():
-    def record_narration(self, narration, timeframe=None):
-        if timeframe is None:
+    def record_narration(self, narration, timestep=None):
+        if timestep is None:
             label = 'Narrator'
         else:
-            label = timeframe.title() + ' ' + str(len(self.history) + 1)
+            label = timestep.title() + ' ' + str(len(self.history) + 1)
         self.history.add(label, narration)
 
     def record_response(self, player_name, player_response):
@@ -459,10 +459,10 @@ class Control(Intelligent, Stateful):
             print(title)
 
     def adjudicate(self, history=None, responses=None, query=None,
-                   nature=True, timeframe='week', summarize=False):
+                   nature=True, timestep='week', summarize=False):
         responses_intro = 'These are the plans for each person or group'
         if query is None:
-            query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timeframe + '.'
+            query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timestep + '.'
             if random.random() < nature:
                 query += ' Include unexpected consequences.'
         output = self.return_output(
