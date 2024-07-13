@@ -179,7 +179,7 @@ class ClassicRAG():
     def rag_invoke(self, text):
         return self.retriever.invoke(text)
 
-class KeywordRAG():
+class DescriptionRAG():
     def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
         if chunk_size is None:
@@ -205,24 +205,22 @@ class KeywordRAG():
             vectorstore=vectorstore, byte_store=bytestore, id_key=id_key,
             search_kwargs={'k': count})
 
-        # Create keyword lists
+        # Create descriptions
         split_ids = [str(uuid.uuid4()) for _ in splits]
-        keyword_strings = []
+        description_strings = []
         for split in splits:
-            output = self.rag_keywords(split.page_content)
-            keyword_strings.append(output)
-        keyword_docs = [
-            langchain_core.documents.Document(
-                page_content=keyword_string, metadata={id_key: split_ids[i]})
-            for i, keyword_string in enumerate(keyword_strings)
-        ]
+            output = self.rag_description(split.page_content)
+            description_strings.append(output)
+        description_docs = [langchain_core.documents.Document(
+            page_content=description_string, metadata={id_key: split_ids[i]})
+            for i, description_string in enumerate(description_strings)]
 
-        # Store splits and keywords to retriever
-        retriever.vectorstore.add_documents(keyword_docs)
+        # Store splits and descriptions to retriever
+        retriever.vectorstore.add_documents(description_docs)
         retriever.docstore.mset(list(zip(split_ids, splits)))
         self.rag_retriever = retriever
 
-    def rag_keywords(self, text):
+    def rag_description(self, text):
         #template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
         template = 'Question:\n\nIn one sentence, describe the problem {name} is facing in the following text.\n\n{text}\n\nAnswer:\n\n'
         variables = {'name': self.name, 'text': text}
@@ -234,8 +232,8 @@ class KeywordRAG():
         return output
         
     def rag_invoke(self, text):
-        keywords = self.rag_keywords(text)
-        splits = self.rag_retriever.invoke(keywords)
+        description = self.rag_description(text)
+        splits = self.rag_retriever.invoke(description)
         return splits
 
 
@@ -615,7 +613,7 @@ class Team(Stateful):
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent, Stateful, KeywordRAG):
+class Player(Intelligent, Stateful, DescriptionRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
                  presets=None):
