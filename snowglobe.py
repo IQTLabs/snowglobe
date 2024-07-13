@@ -419,11 +419,13 @@ class Intelligent():
 
 
 class Stateful():
-    def record_narration(self, narration, timestep=None):
-        if timestep is None:
+    def record_narration(self, narration, timestep=None, index=None):
+        if timestep is None and index is None:
             label = 'Narrator'
         else:
-            label = timestep.title() + ' ' + str(len(self.history))
+            part1 = timestep.title() + ' ' if timestep is not None else ''
+            part2 = str(index) if index is not None else str(len(self.history))
+            label = part1 + part2
         self.history.add(label, narration)
 
     def record_response(self, player_name, player_response):
