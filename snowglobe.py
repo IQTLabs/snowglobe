@@ -421,8 +421,12 @@ class Intelligent():
 
 
 class Stateful():
-    def record_narration(self, narration):
-        self.history.add('Narrator', narration)
+    def record_narration(self, narration, timeframe=None):
+        if timeframe is None:
+            label = 'Narrator'
+        else:
+            label = timeframe.title() + ' ' + str(len(self.history) + 1)
+        self.history.add(label, narration)
 
     def record_response(self, player_name, player_response):
         self.history.add(player_name, player_response)
