@@ -51,15 +51,13 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
         ]
 
         self.moves = 3
-        self.timeframe = 'month'
+        self.timestep = 'month'
         self.nature = True
 
     def __call__(self):
         self.header('Azuristan and Crimsonia', h=0)
         self.header(self.background, h=2)
-        #self.record_narration(self.background)
-        #self.history.add('Context', self.background)
-        self.history.add(self.timeframe.title() + ' 0', self.background)
+        self.record_narration(self.background, timestep=self.timestep)
 
         for move in range(self.moves):
             self.header('Move ' + str(move + 1), h=1)
@@ -73,10 +71,8 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
             self.header('### Result', h=2)
             r_response = self.adjudicate(
                 history=self.history, responses=responses,
-                nature=self.nature, timeframe=self.timeframe)
-            #self.record_narration(r_response)
-            self.history.add(self.timeframe.title() + ' ' + str(move + 1),
-                             r_response)
+                nature=self.nature, timestep=self.timestep)
+            self.record_narration(r_response, timestep=self.timestep)
 
         self.header('Assessment', h=0)
         self.header('History', h=1)
