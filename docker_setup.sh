@@ -13,5 +13,5 @@ fi
 
 docker run --name $container_name \
        --runtime=nvidia \
-       -it --ipc=host --shm-size=64g -p 8000:8000 \
+       -it --shm-size=64g -p 8000:8000 \
        $image_name
