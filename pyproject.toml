@@ -5,15 +5,13 @@ description = "Snow Globe multi-agent system for open-ended wargames with large 
 license = "Apache-2.0"
 authors = ["Daniel Hogan <dhogan@iqt.org>"]
 readme = "README.md"
-packages = [
-	 {include = "llms.yaml"}
-]
+packages = [{include = "snowglobe.py"}]
 
 [tool.poetry.dependencies]
-python = "~3.10"
+python = "^3.10"
 numpy = "*"
-torch = "*"
-torchvision = "*"
+torch = {version = "*", source = "torch"}
+torchvision = {version = "*", source = "torch"}
 transformers = "*"
 einops = "*"
 accelerate = "*"
@@ -26,8 +24,13 @@ langchain-openai = "*"
 langchain-huggingface = "*"
 langchain-chroma = "*"
 langchain-community = "*"
-llama-cpp-python = "*"
+llama-cpp-python = "0.2.79"
 poetry = "*"
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu122"
+secondary = true
 
 [build-system]
 requires = ["poetry-core"]
