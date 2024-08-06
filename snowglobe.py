@@ -38,7 +38,7 @@ import langchain_community.embeddings
 verbose = 2
 
 class LLM():
-    def __init__(self, source=None, model=None, menu=None):
+    def __init__(self, source=None, model=None, menu=None, embed=None):
 
         # Select large language model
         default_source = 'llamacpp'
@@ -61,7 +61,8 @@ class LLM():
                 model_name=self.model,
                 streaming=True,
             )
-            self.embeddings = langchain_openai.OpenAIEmbeddings()
+            if embed is True:
+                self.embeddings = langchain_openai.OpenAIEmbeddings()
 
         elif self.source == 'llamacpp':
 
@@ -75,10 +76,11 @@ class LLM():
                 f16_kv=True,
                 verbose=False,
             )
-            self.embeddings = \
-                langchain_community.embeddings.LlamaCppEmbeddings(
-                    model_path=self.model_path, n_gpu_layers=-1, n_batch=512,
-                    n_ctx=8192, f16_kv=True, verbose=False)
+            if embed is True:
+                self.embeddings = \
+                    langchain_community.embeddings.LlamaCppEmbeddings(
+                        model_path=self.model_path, n_gpu_layers=-1,
+                        n_batch=512, n_ctx=8192, f16_kv=True, verbose=False)
 
         elif self.source == 'huggingface':
 
@@ -103,9 +105,10 @@ class LLM():
             )
             self.llm = langchain_huggingface.llms.HuggingFacePipeline(
                 pipeline=pipeline)
-            self.embeddings = \
-                langchain_huggingface.embeddings.HuggingFaceEmbeddings(
-                    model_name=self.model_path, show_progress=True)
+            if embed is True:
+                self.embeddings = \
+                    langchain_huggingface.embeddings.HuggingFaceEmbeddings(
+                        model_name=self.model_path, show_progress=True)
 
         self.bound = {'stop': '##'}
 
