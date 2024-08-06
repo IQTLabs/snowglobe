@@ -11,25 +11,6 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     cmake \
     git \
     && rm -rf /var/lib/apt/lists/*
-RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip3 install \
-    numpy \
-    torch \
-    torchvision \
-    transformers \
-    einops \
-    accelerate \
-    tqdm \
-    pyyaml \
-    fastapi[all] \
-    langchain \
-    openai \
-    langchain-openai \
-    langchain-huggingface \
-    langchain-chroma \
-    langchain-community \
-    llama-cpp-python \
-    poetry
-ENV LLAMA_CPP_LIB=/usr/local/lib/python3.10/dist-packages/llama_cpp/libllama.so
 
 # User account
 ARG username=snowglobe
@@ -43,5 +24,5 @@ WORKDIR /home/$username
 
 # Install
 COPY --chown=$uid:$gid . /home/$username
-RUN pip install -e .
+RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install -e .
 RUN ./download.sh
