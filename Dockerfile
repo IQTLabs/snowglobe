@@ -24,5 +24,7 @@ WORKDIR /home/$username
 
 # Install
 COPY --chown=$uid:$gid . /home/$username
-RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install -e .
 RUN ./download.sh
+USER root
+RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install -e .
+USER $username
