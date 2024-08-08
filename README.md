@@ -43,3 +43,7 @@ http://myservername:8000
 ```
 
 The terminal output will include the ID number for the human player.  Type the number into the browser then click `Connect`.  The top textbox gives player prompts; the bottom textbox is where the player enters responses.  Textboxes turn blue while waiting for the next prompt.
+
+## License
+
+This repo is released under the [Apache License Version 2.0](LICENSE), except for [jQuery](terminal/jquery-3.7.1.min.js) which is released under the [MIT License](https://github.com/jquery/jquery/blob/main/LICENSE.txt).
