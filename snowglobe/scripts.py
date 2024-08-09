@@ -32,14 +32,10 @@ def config(source='llamacpp', name='mistral-7b-openorca',
     config_path = os.path.join(config_dir, config_file)
     os.makedirs(cache_dir, exist_ok=True)
     os.makedirs(config_dir, exist_ok=True)
-    print(cache_dir)
-    print(config_dir)
     config_content = {'openai': {}, 'llamacpp': {}, 'huggingface': {}}
     config_content['openai']['gpt-3.5-turbo'] = ''
     config_content['openai']['gpt-4'] = ''
     config_content[source][name] = model_path
-    print(config_content)
-    print(config_path)
     if not os.path.exists(config_dir):
         os.makedirs(cofig_dir, exists_ok=True)
     with open(config_path, 'w') as config_file:
