@@ -18,9 +18,9 @@ import os
 import uvicorn
 import platformdirs
 
-def snowglobe_config(source='llamacpp', name='mistral-7b-openorca',
-                     url='https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF/resolve/main/mistral-7b-openorca.Q5_K_M.gguf'
-                     ):
+def config(source='llamacpp', name='mistral-7b-openorca',
+           url='https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF/resolve/main/mistral-7b-openorca.Q5_K_M.gguf'
+           ):
     cache_dir = platformdirs.user_cache_dir('snowglobe')
     config_dir = platformdirs.user_config_dir('snowglobe')
     os.makedirs(cache_dir, exist_ok=True)
@@ -28,5 +28,5 @@ def snowglobe_config(source='llamacpp', name='mistral-7b-openorca',
     print(cache_dir)
     print(config_dir)
 
-def snowglobe_server(host='0.0.0.0', port=8000, log_level='warning'):
+def server(host='0.0.0.0', port=8000, log_level='warning'):
     uvicorn.run('api:app', host=host, port=port, log_level=log_level)

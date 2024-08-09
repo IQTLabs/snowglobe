@@ -32,6 +32,10 @@ name = "torch"
 url = "https://download.pytorch.org/whl/cu122"
 secondary = true
 
+[tool.poetry.scripts]
+snowglobe_config = "snowglobe:scripts.config"
+snowglobe_server = "snowglobe:scripts.server"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
