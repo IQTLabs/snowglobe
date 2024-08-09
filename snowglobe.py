@@ -44,7 +44,9 @@ class LLM():
         # Select large language model
         default_source = 'llamacpp'
         default_model = 'mistral-7b-openorca'
-        default_menu = os.path.join(os.path.split(__file__)[0], 'llms.yaml')
+        config_dir = platformdirs.user_config_dir('snowglobe')
+        config_file = 'llms.yaml'
+        default_menu = os.path.join(config_dir, config_file)
 
         self.menu = menu if menu is not None else default_menu
         model_paths = yaml.safe_load(open(self.menu, 'r'))
