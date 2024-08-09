@@ -44,4 +44,4 @@ def config(source='llamacpp', name='mistral-7b-openorca',
     urllib.request.urlretrieve(url, model_path)
 
 def server(host='0.0.0.0', port=8000, log_level='warning'):
-    uvicorn.run('api:app', host=host, port=port, log_level=log_level)
+    uvicorn.run('snowglobe.api:app', host=host, port=port, log_level=log_level)
