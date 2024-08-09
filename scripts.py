@@ -15,6 +15,9 @@
 #   limitations under the License.
 
 import os
+import yaml
+import urllib
+import urllib.request
 import uvicorn
 import platformdirs
 
@@ -23,10 +26,26 @@ def config(source='llamacpp', name='mistral-7b-openorca',
            ):
     cache_dir = platformdirs.user_cache_dir('snowglobe')
     config_dir = platformdirs.user_config_dir('snowglobe')
+    model_file = os.path.basename(urllib.parse.urlparse(url).path)
+    model_path = os.path.join(cache_dir, model_file)
+    config_file = 'llms.yaml'
+    config_path = os.path.join(config_dir, config_file)
     os.makedirs(cache_dir, exist_ok=True)
     os.makedirs(config_dir, exist_ok=True)
     print(cache_dir)
     print(config_dir)
+    config_content = {'openai': {}, 'llamacpp': {}, 'huggingface': {}}
+    config_content['openai']['gpt-3.5-turbo'] = ''
+    config_content['openai']['gpt-4'] = ''
+    config_content[source][name] = model_path
+    print(config_content)
+    print(config_path)
+    if not os.path.exists(config_dir):
+        os.makedirs(cofig_dir, exists_ok=True)
+    with open(config_path, 'w') as config_file:
+        yaml.dump(config_content, config_file,
+                  default_flow_style=False, sort_keys=False)
+    urllib.request.urlretrieve(url, model_path)
 
 def server(host='0.0.0.0', port=8000, log_level='warning'):
     uvicorn.run('api:app', host=host, port=port, log_level=log_level)
