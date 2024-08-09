@@ -23,6 +23,7 @@ import random
 import asyncio
 import inspect
 import numpy as np
+import platformdirs
 import transformers
 import langchain_openai
 import langchain_chroma
@@ -352,6 +353,8 @@ class Intelligent():
         # Write prompt to disk
         prompt_content = prompt.format(**variables)
         prompt_json = {'content': prompt_content}
+        if not os.path.exists(os.path.dirname(prompt_path)):
+            os.makedirs(os.path.dirname(prompt_path), exist_ok=True)
         with open(prompt_path, 'w') as f:
             json.dump(prompt_json, f)
 
@@ -383,14 +386,15 @@ class Intelligent():
         intro_path = self.get_iopath(False)
         intro_json = {'name': self.name, 'persona':
                       self.persona if self.persona is not None else ''}
+        if not os.path.exists(os.path.dirname(intro_path)):
+            os.makedirs(os.path.dirname(intro_path), exist_ok=True)
         with open(intro_path, 'w') as f:
             json.dump(intro_json, f)
         self.human_count += 1
 
     def get_iopath(self, answer=False, base_path=None):
         if base_path is None:
-            base_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'messages')
+            base_path = platformdirs.user_data_dir('snowglobe')
         return os.path.join(base_path, '%i_%i_%s.json'
                             % (self.human_label, self.human_count,
                                'answer' if answer else 'prompt'))

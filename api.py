@@ -19,10 +19,11 @@ import json
 import fastapi
 import fastapi.staticfiles
 from pydantic import BaseModel
+import platformdirs
 
 app = fastapi.FastAPI()
 here = os.path.dirname(os.path.abspath(__file__))
-base_path = os.path.join(here, 'messages')
+base_path = platformdirs.user_data_dir('snowglobe')
 term_path = os.path.join(here, 'terminal')
 
 class Answer(BaseModel):
@@ -40,6 +41,8 @@ async def prompt(label: int, count: int):
 @app.post('/answer/{label}/{count}')
 async def answer(label: int, count: int, answer: Answer):
     path = os.path.join(base_path, '%i_%i_answer.json' % (label, count))
+    if not os.path.exists(base_path):
+        os.makedirs(base_path, exist_ok=True)
     with open(path, 'w') as f:
         json.dump(answer.dict(), f)
     return 0
