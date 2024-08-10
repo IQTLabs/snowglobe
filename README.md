@@ -32,7 +32,7 @@ In the latter case, you can use the chat interface to discuss the game afterward
 To play a game between a human and an AI player, launch the server from within the running container.  Also, start the game:
 
 ```
-uvicorn api:app --host 0.0.0.0 --port 8000 &
+snowglobe_server &
 examples/ac.py --human 1
 ```
 
