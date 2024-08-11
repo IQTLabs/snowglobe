@@ -4,6 +4,7 @@ LABEL org.iqt.name="snowglobe"
 RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     python3 \
     python3-pip \
+    python3-venv \
     emacs \
     less \
     tree \
