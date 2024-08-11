@@ -1,5 +1,5 @@
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
-LABEL org.iqtlabs.name="snowglobe"
+LABEL org.iqt.name="snowglobe"
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     python3 \

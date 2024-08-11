@@ -7,7 +7,7 @@ if [ -z "$(docker images -q $image_name)" ]; then
     docker build -f Dockerfile -t $image_name \
 	   --build-arg uid=$(id -u) \
 	   --build-arg gid=$(id -g) \
-	   --label "org.iqtlabs.user=$USER" \
+	   --label "org.iqt.user=$USER" \
 	   ./
 fi
 
