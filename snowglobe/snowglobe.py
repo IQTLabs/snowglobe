@@ -19,12 +19,14 @@ import re
 import yaml
 import json
 import uuid
+import urllib
 import random
 import asyncio
 import inspect
 import numpy as np
 import platformdirs
 import transformers
+import urllib.request
 import langchain_openai
 import langchain_chroma
 import langchain.prompts
@@ -37,6 +39,29 @@ import langchain_community.llms
 import langchain_community.embeddings
 
 verbose = 2
+
+def config(source='llamacpp', name='mistral-7b-openorca',
+           url='https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF/resolve/main/mistral-7b-openorca.Q5_K_M.gguf'
+           ):
+    cache_dir = platformdirs.user_cache_dir('snowglobe')
+    config_dir = platformdirs.user_config_dir('snowglobe')
+    model_file = os.path.basename(urllib.parse.urlparse(url).path)
+    model_path = os.path.join(cache_dir, model_file)
+    config_file = 'llms.yaml'
+    config_path = os.path.join(config_dir, config_file)
+    os.makedirs(cache_dir, exist_ok=True)
+    os.makedirs(config_dir, exist_ok=True)
+    config_content = {'openai': {}, 'llamacpp': {}, 'huggingface': {}}
+    config_content['openai']['gpt-3.5-turbo'] = ''
+    config_content['openai']['gpt-4'] = ''
+    config_content[source][name] = model_path
+    if not os.path.exists(config_dir):
+        os.makedirs(cofig_dir, exists_ok=True)
+    with open(config_path, 'w') as config_file:
+        yaml.dump(config_content, config_file,
+                  default_flow_style=False, sort_keys=False)
+    urllib.request.urlretrieve(url, model_path)
+
 
 class LLM():
     def __init__(self, source=None, model=None, menu=None, embed=None):
