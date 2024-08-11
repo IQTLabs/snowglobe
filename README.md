@@ -46,4 +46,4 @@ The terminal output will include the ID number for the human player.  Type the n
 
 ## License
 
-This repo is released under the [Apache License Version 2.0](LICENSE), except for [jQuery](terminal/jquery-3.7.1.min.js) which is released under the [MIT License](https://github.com/jquery/jquery/blob/main/LICENSE.txt).
+This repo is released under the [Apache License Version 2.0](LICENSE), except for [jQuery](snowglobe/terminal/jquery-3.7.1.min.js) which is released under the [MIT License](https://github.com/jquery/jquery/blob/main/LICENSE.txt).
