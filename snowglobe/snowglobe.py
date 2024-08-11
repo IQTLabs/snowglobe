@@ -19,13 +19,13 @@ import re
 import yaml
 import json
 import uuid
-import urllib
 import random
 import asyncio
 import inspect
 import numpy as np
 import platformdirs
 import transformers
+import urllib.parse
 import urllib.request
 import langchain_openai
 import langchain_chroma
