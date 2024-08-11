@@ -85,7 +85,8 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--human', action='store', default=0, type=int)
+    parser.add_argument('--human', action='store', default=0, type=int,
+                        choices=[0, 1, 2], help='Number of human players')
     args = parser.parse_args()
 
     sim = AzuristanCrimsonia(human=args.human)
