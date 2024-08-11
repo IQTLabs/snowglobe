@@ -7,7 +7,7 @@ authors = ["Daniel Hogan <6313241+dphogan@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10"
 numpy = "*"
 torch = {version = "*", source = "torch"}
 torchvision = {version = "*", source = "torch"}
