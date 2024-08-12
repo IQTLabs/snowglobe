@@ -60,7 +60,9 @@ def config(source='llamacpp', name='mistral-7b-openorca',
     with open(config_path, 'w') as config_file:
         yaml.dump(config_content, config_file,
                   default_flow_style=False, sort_keys=False)
+    print('Downloading model weights... ', end='', flush=True)
     urllib.request.urlretrieve(url, model_path)
+    print('Done', flush=True)
 
 
 class LLM():
