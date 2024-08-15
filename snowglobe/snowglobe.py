@@ -65,8 +65,8 @@ def read_yaml(path):
     if os.path.exists(path):
         with open(path, 'r') as obj:
             content = yaml.safe_load(obj)
-            if content is None:
-                content = {}
+        if content is None:
+            content = {}
     else:
         content = {}
     return content
