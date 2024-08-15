@@ -40,51 +40,90 @@ import langchain_community.embeddings
 
 verbose = 2
 
-def config(source='llamacpp', name='mistral-7b-openorca',
-           url='https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF/resolve/main/mistral-7b-openorca.Q5_K_M.gguf'
-           ):
-    cache_dir = platformdirs.user_cache_dir('snowglobe')
-    config_dir = platformdirs.user_config_dir('snowglobe')
-    model_file = os.path.basename(urllib.parse.urlparse(url).path)
-    model_path = os.path.join(cache_dir, model_file)
-    config_file = 'llms.yaml'
-    config_path = os.path.join(config_dir, config_file)
-    os.makedirs(cache_dir, exist_ok=True)
-    os.makedirs(config_dir, exist_ok=True)
-    config_content = {'openai': {}, 'llamacpp': {}, 'huggingface': {}}
-    config_content['openai']['gpt-3.5-turbo'] = ''
-    config_content['openai']['gpt-4'] = ''
-    config_content[source][name] = model_path
-    if not os.path.exists(config_dir):
-        os.makedirs(cofig_dir, exists_ok=True)
-    with open(config_path, 'w') as config_file:
-        yaml.dump(config_content, config_file,
-                  default_flow_style=False, sort_keys=False)
-    print('Downloading model weights... ', end='', flush=True)
-    urllib.request.urlretrieve(url, model_path)
-    print('Done', flush=True)
+
+def settings():
+    s = {}
+    # Standard paths
+    s['config_dir'] = platformdirs.user_config_dir('snowglobe')
+    s['cache_dir'] = platformdirs.user_cache_dir('snowglobe')
+    s['data_dir'] = platformdirs.user_data_dir('snowglobe')
+    s['menu_file'] = 'llms.yaml'
+    s['menu_path'] = os.path.join(s['config_dir'], s['menu_file'])
+
+    # Default model
+    s['default_source'] = 'llamacpp'
+    s['default_model'] = 'mistral-7b-openorca'
+    s['default_url'] = 'https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF/resolve/main/mistral-7b-openorca.Q5_K_M.gguf'
+    s['default_file'] = os.path.basename(
+        urllib.parse.urlparse(s['default_url']).path)
+    s['default_path'] = os.path.join(s['cache_dir'], s['default_file'])
+    return s
+
+
+def read_yaml(path):
+    # Reads YAML file, expressing empty or nonexistent file as empty dictionary
+    if os.path.exists(path):
+        with open(path, 'r') as obj:
+            content = yaml.safe_load(obj)
+            if content is None:
+                content = {}
+    else:
+        content = {}
+    return content
+
+
+def write_yaml(data, path):
+    # Writes YAML file, creating empty directory if needed
+    if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as obj:
+        yaml.dump(data, obj, default_flow_style=False, sort_keys=False)
+
+
+def config(menu=None, source=None, model=None, url=None, path=None,
+           update_menu=True, download_weights=True):
+    s = settings()
+    menu = menu if menu is not None else s['menu_path']
+    source = source if source is not None else s['default_source']
+    model = model if model is not None else s['default_model']
+    url = url if url is not None else s['default_url']
+    path = path if path is not None else s['default_path']
+
+    # Update menu of source+model options
+    if update_menu:
+        options = read_yaml(menu)
+        if source not in options:
+            options[source] = {}
+        options[source][model] = path
+        write_yaml(options, menu)
+
+    # Download model weights
+    if download_weights:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        print('Downloading model weights... ', end='', flush=True)
+        urllib.request.urlretrieve(url, path)
+        print('Done', flush=True)
 
 
 class LLM():
     def __init__(self, source=None, model=None, menu=None, embed=None):
 
-        # Select large language model
-        default_source = 'llamacpp'
-        default_model = 'mistral-7b-openorca'
-        config_dir = platformdirs.user_config_dir('snowglobe')
-        config_file = 'llms.yaml'
-        default_menu = os.path.join(config_dir, config_file)
+        s = settings()
+        self.menu = menu if menu is not None else s['menu_path']
+        self.source = source if source is not None else s['default_source']
+        self.model = model if model is not None else s['default_model']
 
-        self.menu = menu if menu is not None else default_menu
-        model_paths = yaml.safe_load(open(self.menu, 'r'))
-        self.source = source if source is not None else default_source
-        self.model = model if model is not None else default_model
-        self.model_path = model_paths[self.source][self.model]
-        if self.model_path is not None:
+        if not self.source in ['openai']:
+            options = read_yaml(self.menu)
+            # When using the default model and standard menu path,
+            # if the model is not found then auto-install it.
+            if (self.source not in options or self.model not in options[self.source]) and self.source == s['default_source'] and self.model == s['default_model'] and self.menu == s['menu_path']:
+                config()
+                options = read_yaml(self.menu)
+            self.model_path = options[self.source][self.model]
             self.model_path = os.path.expanduser(self.model_path)
             if not os.path.isabs(self.model_path):
-                self.model_path = os.path.join(
-                    os.path.split(__file__)[0], self.model_path)
+                self.model_path = os.path.join(self.menu, self.model_path)
 
         if self.source == 'openai':
 
