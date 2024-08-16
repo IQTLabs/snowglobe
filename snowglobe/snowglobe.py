@@ -454,8 +454,7 @@ class Intelligent():
         if verbose >= 2:
             print('ID %i: %s' % (self.human_label, self.name))
         intro_path = self.get_iopath(False)
-        intro_json = {'name': self.name, 'persona':
-                      self.persona if self.persona is not None else ''}
+        intro_json = {'name': self.name}
         if not os.path.exists(os.path.dirname(intro_path)):
             os.makedirs(os.path.dirname(intro_path), exist_ok=True)
         with open(intro_path, 'w') as f:

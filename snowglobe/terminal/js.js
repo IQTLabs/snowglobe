@@ -29,7 +29,6 @@ $(document).ready(function(){
 	    if (Object.keys(json).length > 0) {
 		if (globals.count == 0) {
 		    $("#name").val(json["name"]);
-		    $("#persona").val(json["persona"]);
 		    $("#id").attr("readonly", "readonly");
 		    $("#connect").attr("disabled", "disabled");
 		    $("#prompt, #answer").addClass("waiting");
