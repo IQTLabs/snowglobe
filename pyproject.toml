@@ -5,6 +5,7 @@ description = "Snow Globe multi-agent system for open-ended wargames with large 
 license = "Apache-2.0"
 authors = ["Daniel Hogan <6313241+dphogan@users.noreply.github.com>"]
 readme = "README.md"
+homepage = "https://github.com/IQTLabs/snowglobe"
 
 [tool.poetry.dependencies]
 python = ">=3.10"
