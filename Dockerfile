@@ -26,6 +26,6 @@ WORKDIR /home/$username
 # Install
 COPY --chown=$uid:$gid . /home/$username
 USER root
-RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install .
+RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install .
 USER $username
 RUN snowglobe_config
