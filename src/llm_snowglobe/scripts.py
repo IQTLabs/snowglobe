@@ -15,9 +15,9 @@
 #   limitations under the License.
 
 def config():
-    import snowglobe
+    import llm_snowglobe as snowglobe
     snowglobe.config()
 
 def server(host='0.0.0.0', port=8000, log_level='warning'):
     import uvicorn
-    uvicorn.run('snowglobe.api:app', host=host, port=port, log_level=log_level)
+    uvicorn.run('llm_snowglobe.api:app', host=host, port=port, log_level=log_level)

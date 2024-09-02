@@ -17,7 +17,7 @@
 import os
 import csv
 import random
-import snowglobe
+import llm_snowglobe as snowglobe
 
 def load_csv(path):
     # Load a CSV file as a list of dictionaries

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "snowglobe"
+name = "llm-snowglobe"
 version = "0.1.0"
 description = "Snow Globe multi-agent system for open-ended wargames with large language models"
 license = "Apache-2.0"
@@ -35,8 +35,8 @@ url = "https://download.pytorch.org/whl/cu122"
 secondary = true
 
 [tool.poetry.scripts]
-snowglobe_config = "snowglobe:scripts.config"
-snowglobe_server = "snowglobe:scripts.server"
+snowglobe_config = "llm_snowglobe.scripts:config"
+snowglobe_server = "llm_snowglobe.scripts:server"
 
 [build-system]
 requires = ["poetry-core"]

@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 import argparse
-import snowglobe
+import llm_snowglobe as snowglobe
 
 class AzuristanCrimsonia(snowglobe.Control):
     def __init__(self, human):
