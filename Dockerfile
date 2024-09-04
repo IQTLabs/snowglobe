@@ -20,12 +20,11 @@ ARG uid=1000
 ARG gid=$uid
 RUN groupadd --gid $gid $groupname
 RUN adduser --uid $uid --gid $gid --disabled-password $username
-USER $username
 WORKDIR /home/$username
 
 # Install
 COPY --chown=$uid:$gid . /home/$username
-USER root
+RUN pip install cmake
 RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install .
 USER $username
 RUN snowglobe_config
