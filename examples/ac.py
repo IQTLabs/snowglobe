@@ -70,8 +70,8 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
             responses.add(self.crimsonia.name, c_response)
             self.header('### Result', h=2)
             r_response = self.adjudicate(
-                history=self.history, responses=responses,
-                nature=self.nature, timestep=self.timestep)
+                history=self.history, responses=responses, nature=self.nature,
+                timestep=self.timestep, mode=['geopol'])
             self.record_narration(r_response, timestep=self.timestep)
 
         self.header('Assessment', h=0)
