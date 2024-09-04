@@ -535,10 +535,14 @@ class Control(Intelligent, Stateful):
             print(title)
 
     def adjudicate(self, history=None, responses=None, query=None,
-                   nature=True, timestep='week', summarize=False):
+                   nature=True, timestep='week', mode=[]):
         responses_intro = 'These are the plans for each person or group'
+        if 'geopol' in mode:
+            responses_intro = 'These are the plans ordered by each leader'
         if query is None:
             query = 'Weave these plans into a cohesive narrative of what happens in the next ' + timestep + '.'
+            if 'geopol' in mode:
+                query = 'Describe these plans being carried out, assuming the leaders above issue no further orders.'
             if random.random() < nature:
                 query += ' Include unexpected consequences.'
         output = self.return_output(
@@ -546,7 +550,7 @@ class Control(Intelligent, Stateful):
             responses=responses, responses_intro=responses_intro,
             query=query, query_format='oneline'
         )
-        if summarize:
+        if 'summarize' in mode:
             print('\n### Summary\n')
             template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
             variables = {'history': history.textonly(), 'news': output}
