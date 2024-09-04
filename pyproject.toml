@@ -28,7 +28,7 @@ langchain-huggingface = "*"
 langchain-chroma = "*"
 langchain-community = "*"
 langchain-text-splitters = "*"
-llama-cpp-python = "0.2.90"
+llama-cpp-python = ">=0.2.90"
 
 [tool.poetry.scripts]
 snowglobe_config = "llm_snowglobe.scripts:config"
