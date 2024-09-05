@@ -75,8 +75,6 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
             self.record_narration(r_response, timestep=self.timestep)
 
         self.header('Assessment', h=0)
-        self.header('History', h=1)
-        print(self.history.str())
         for question in self.questions:
             self.header(question, h=1)
             self.assess(history=self.history, query=question)
