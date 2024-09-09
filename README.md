@@ -43,7 +43,7 @@ In the latter case, you can use the chat interface to discuss the game afterward
 
 ## Human Players
 
-To play a game between a human and an AI player, launch the server and then start the game:
+To play a game between a human and an AI player, launch the server and start a game:
 
 ```
 snowglobe_server &
@@ -53,10 +53,10 @@ examples/ac.py --human 1
 Then, open a browser window and navigate to:
 
 ```
-http://myservername:8000
+http://localhost:8000
 ```
 
-The terminal output will include the ID number for the human player.  Type the number into the browser then click `Connect`.  The top textbox gives player prompts; the bottom textbox is where the player enters responses.  Textboxes turn blue while waiting for the next prompt.
+The terminal output will include the ID number for the human player.  Type the number into the ID box then click `Connect`.  The top text box gives player prompts; the bottom text box is where the player enters responses.  Text boxes turn blue while waiting for the next prompt.
 
 ## License
 
