@@ -3,7 +3,9 @@
 
 Snow Globe, an ongoing applied research project and resulting software package, uses large language models (LLMs) for automated play of "open-ended" text-based wargames, such as seminar games and political wargames.  LLMs enable a light, flexible architecture in which player actions are not restricted to predefined options.  The system allows humans to play against or alongside AI agents with specific personas.  Every stage of the wargame from scenario preparation to post-game analysis can be optionally carried out by AI, humans, or a combination thereof.
 
-## Setup
+Read more [here](https://arxiv.org/abs/2404.11446).
+
+## Installation
 
 Build the Docker image and run a container.
 
@@ -11,9 +13,21 @@ Build the Docker image and run a container.
 ./docker_setup.sh
 ```
 
+Or, install Snow Globe from PyPI.  For CPU only:
+
+```
+pip install llm-snowglobe
+```
+
+For GPU support:
+
+```
+CMAKE_ARGS="-DGGML_CUDA=on" pip install llm-snowglobe
+```
+
 ## Demos
 
-Once inside the running container (see Setup above), you can simulate a tabletop exercise about an AI incident response.
+After installation, you can simulate a tabletop exercise about an AI incident response.
 
 ```
 examples/haiwire.py
