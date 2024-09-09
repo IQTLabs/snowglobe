@@ -43,7 +43,7 @@ In the latter case, you can use the chat interface to discuss the game afterward
 
 ## Human Players
 
-To play a game between a human and an AI player, launch the server from within the running container.  Also, start the game:
+To play a game between a human and an AI player, launch the server and then start the game:
 
 ```
 snowglobe_server &
