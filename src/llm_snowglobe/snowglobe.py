@@ -464,7 +464,7 @@ class Intelligent():
     def get_iopath(self, answer=False, base_path=None):
         if base_path is None:
             base_path = settings()['data_dir']
-        return os.path.join(base_path, '%i_%i_%s.json'
+        return os.path.join(base_path, str(self.human_label), '%i_%i_%s.json'
                             % (self.human_label, self.human_count,
                                'answer' if answer else 'prompt'))
 

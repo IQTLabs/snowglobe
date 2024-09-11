@@ -31,7 +31,8 @@ class Answer(BaseModel):
 
 @app.get('/prompt/{label}/{count}')
 async def prompt(label: int, count: int):
-    path = os.path.join(base_path, '%i_%i_prompt.json' % (label, count))
+    path = os.path.join(
+        base_path, str(label), '%i_%i_prompt.json' % (label, count))
     if not os.path.exists(path):
         return {}
     with open(path, 'r') as f:
@@ -40,7 +41,8 @@ async def prompt(label: int, count: int):
 
 @app.post('/answer/{label}/{count}')
 async def answer(label: int, count: int, answer: Answer):
-    path = os.path.join(base_path, '%i_%i_answer.json' % (label, count))
+    path = os.path.join(
+        base_path, str(label), '%i_%i_answer.json' % (label, count))
     if not os.path.exists(base_path):
         os.makedirs(base_path, exist_ok=True)
     with open(path, 'w') as f:
