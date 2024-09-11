@@ -452,7 +452,7 @@ class Intelligent():
         self.human_label = random.randint(100000, 999999)
         self.human_count = 0
         if verbose >= 2:
-            print('ID %i: %s' % (self.human_label, self.name))
+            print('ID %i : %s' % (self.human_label, self.name))
         intro_path = self.get_iopath(False)
         intro_json = {'name': self.name}
         if not os.path.exists(os.path.dirname(intro_path)):
