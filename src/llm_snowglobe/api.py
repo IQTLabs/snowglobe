@@ -43,8 +43,10 @@ async def prompt(label: int, count: int):
 async def answer(label: int, count: int, answer: Answer):
     path = os.path.join(
         base_path, str(label), '%i_%i_answer.json' % (label, count))
-    if not os.path.exists(os.path.join(base_path, str(label))):
-        os.makedirs(os.path.join(base_path, str(label)), exist_ok=True)
+    if not os.path.exists(os.path.dirname(path)):
+        # os.makedirs(os.path.dirname(path), exist_ok=True)
+        raise Exception('! Unexpected API response [ID %i # %i]'
+                        % (label, count))
     with open(path, 'w') as f:
         json.dump(answer.dict(), f)
     return 0
