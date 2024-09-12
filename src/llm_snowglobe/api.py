@@ -36,18 +36,16 @@ async def prompt(label: int, count: int):
     if not os.path.exists(path):
         return {}
     with open(path, 'r') as f:
-        j = json.load(f)
-    return j
+        return json.load(f)
 
 @app.post('/answer/{label}/{count}')
 async def answer(label: int, count: int, answer: Answer):
     path = os.path.join(
         base_path, str(label), '%i_%i_answer.json' % (label, count))
-    if not os.path.exists(os.path.dirname(path)):
+    if os.path.exists(os.path.dirname(path)):
+        with open(path, 'w') as f:
+            json.dump(answer.dict(), f)
+    else:
         print('Unexpected API response [ID %i # %i]' % (label, count))
-        return 1
-    with open(path, 'w') as f:
-        json.dump(answer.dict(), f)
-    return 0
 
 app.mount('/', fastapi.staticfiles.StaticFiles(directory=term_path, html=True), name='terminal')
