@@ -20,6 +20,7 @@ import yaml
 import json
 import uuid
 import random
+import shutil
 import asyncio
 import inspect
 import numpy as np
@@ -230,6 +231,14 @@ class History():
         history_copy = History()
         history_copy.entries = self.entries.copy()
         return history_copy
+
+
+class EphemeralDir():
+    def __init__(self, path, mode=0o777, exist_ok=False):
+        self.path = path
+        os.makedirs(path, mode=mode, exist_ok=exist_ok)
+    def __del__(self):
+        shutil.rmtree(self.path) # Note: Parent dirs of path not deleted
 
 
 class ClassicRAG():
@@ -456,7 +465,8 @@ class Intelligent():
         intro_path = self.get_iopath(False)
         intro_json = {'name': self.name}
         if not os.path.exists(os.path.dirname(intro_path)):
-            os.makedirs(os.path.dirname(intro_path), exist_ok=True)
+            self.human_log = EphemeralDir(
+                os.path.dirname(intro_path), exist_ok=True)
         with open(intro_path, 'w') as f:
             json.dump(intro_json, f)
         self.human_count += 1
