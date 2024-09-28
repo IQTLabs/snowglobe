@@ -519,8 +519,8 @@ class Stateful():
 
 
 class Control(Intelligent, Stateful):
-    def __init__(self, source=None, model=None):
-        self.llm = LLM(source=source, model=model)
+    def __init__(self, source=None, model=None, menu=None, embed=None):
+        self.llm = LLM(source=source, model=model, menu=menu, embed=embed)
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
