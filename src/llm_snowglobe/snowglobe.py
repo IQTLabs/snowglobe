@@ -107,12 +107,15 @@ def config(menu=None, source=None, model=None, url=None, path=None,
 
 
 class LLM():
-    def __init__(self, source=None, model=None, menu=None, embed=None):
+    def __init__(
+            self, source=None, model=None, menu=None, gen=None, embed=None):
 
         s = settings()
         self.menu = menu if menu is not None else s['menu_path']
         self.source = source if source is not None else s['default_source']
         self.model = model if model is not None else s['default_model']
+        self.gen = gen if gen is not None else True
+        self.embed = embed if embed is not None else False
 
         if not self.source in ['openai']:
             options = read_yaml(self.menu)
@@ -129,26 +132,28 @@ class LLM():
         if self.source == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            self.llm = langchain_openai.ChatOpenAI(
-                model_name=self.model,
-                streaming=True,
-            )
-            if embed is True:
+            if gen:
+                self.llm = langchain_openai.ChatOpenAI(
+                    model_name=self.model,
+                    streaming=True,
+                )
+            if embed:
                 self.embeddings = langchain_openai.OpenAIEmbeddings()
 
         elif self.source == 'llamacpp':
 
             # Model Source: llama.cpp (Local)
-            self.llm = langchain_community.llms.LlamaCpp(
-                model_path=self.model_path,
-                n_gpu_layers=-1,
-                max_tokens=1000,
-                n_batch=512,
-                n_ctx=8192,
-                f16_kv=True,
-                verbose=False,
-            )
-            if embed is True:
+            if gen:
+                self.llm = langchain_community.llms.LlamaCpp(
+                    model_path=self.model_path,
+                    n_gpu_layers=-1,
+                    max_tokens=1000,
+                    n_batch=512,
+                    n_ctx=8192,
+                    f16_kv=True,
+                    verbose=False,
+                )
+            if embed:
                 self.embeddings = \
                     langchain_community.embeddings.LlamaCppEmbeddings(
                         model_path=self.model_path, n_gpu_layers=-1,
@@ -157,27 +162,28 @@ class LLM():
         elif self.source == 'huggingface':
 
             # Model Source: Hugging Face (Local)
-            model = transformers.AutoModelForCausalLM.from_pretrained(
-                self.model_path, device_map='auto')
-            tokenizer = transformers.AutoTokenizer.from_pretrained(
-                self.model_path, device_map='auto')
-            tokenizer.pad_token = tokenizer.eos_token
-            streamer = transformers.TextStreamer(
-                tokenizer, skip_prompt=True, skip_special_tokens=True) \
-                if verbose >= 1 else None
-            pipeline = transformers.pipeline(
-                'text-generation',
-                model=model,
-                tokenizer=tokenizer,
-                device_map='auto',
-                max_new_tokens=2048,
-                repetition_penalty=1.05,
-                return_full_text=False,
-                streamer=streamer,
-            )
-            self.llm = langchain_huggingface.llms.HuggingFacePipeline(
-                pipeline=pipeline)
-            if embed is True:
+            if gen:
+                model = transformers.AutoModelForCausalLM.from_pretrained(
+                    self.model_path, device_map='auto')
+                tokenizer = transformers.AutoTokenizer.from_pretrained(
+                    self.model_path, device_map='auto')
+                tokenizer.pad_token = tokenizer.eos_token
+                streamer = transformers.TextStreamer(
+                    tokenizer, skip_prompt=True, skip_special_tokens=True) \
+                    if verbose >= 1 else None
+                pipeline = transformers.pipeline(
+                    'text-generation',
+                    model=model,
+                    tokenizer=tokenizer,
+                    device_map='auto',
+                    max_new_tokens=2048,
+                    repetition_penalty=1.05,
+                    return_full_text=False,
+                    streamer=streamer,
+                )
+                self.llm = langchain_huggingface.llms.HuggingFacePipeline(
+                    pipeline=pipeline)
+            if embed:
                 self.embeddings = \
                     langchain_huggingface.embeddings.HuggingFaceEmbeddings(
                         model_name=self.model_path, show_progress=True)
@@ -519,8 +525,10 @@ class Stateful():
 
 
 class Control(Intelligent, Stateful):
-    def __init__(self, source=None, model=None, menu=None, embed=None):
-        self.llm = LLM(source=source, model=model, menu=menu, embed=embed)
+    def __init__(
+            self, source=None, model=None, menu=None, gen=None, embed=None):
+        self.llm = LLM(
+            source=source, model=model, menu=menu, gen=gen, embed=embed)
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
