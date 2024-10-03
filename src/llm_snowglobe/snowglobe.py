@@ -132,18 +132,18 @@ class LLM():
         if self.source == 'openai':
 
             # Model Source: OpenAI (Cloud)
-            if gen:
+            if self.gen:
                 self.llm = langchain_openai.ChatOpenAI(
                     model_name=self.model,
                     streaming=True,
                 )
-            if embed:
+            if self.embed:
                 self.embeddings = langchain_openai.OpenAIEmbeddings()
 
         elif self.source == 'llamacpp':
 
             # Model Source: llama.cpp (Local)
-            if gen:
+            if self.gen:
                 self.llm = langchain_community.llms.LlamaCpp(
                     model_path=self.model_path,
                     n_gpu_layers=-1,
@@ -153,7 +153,7 @@ class LLM():
                     f16_kv=True,
                     verbose=False,
                 )
-            if embed:
+            if self.embed:
                 self.embeddings = \
                     langchain_community.embeddings.LlamaCppEmbeddings(
                         model_path=self.model_path, n_gpu_layers=-1,
@@ -162,7 +162,7 @@ class LLM():
         elif self.source == 'huggingface':
 
             # Model Source: Hugging Face (Local)
-            if gen:
+            if self.gen:
                 model = transformers.AutoModelForCausalLM.from_pretrained(
                     self.model_path, device_map='auto')
                 tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -183,7 +183,7 @@ class LLM():
                 )
                 self.llm = langchain_huggingface.llms.HuggingFacePipeline(
                     pipeline=pipeline)
-            if embed:
+            if self.embed:
                 self.embeddings = \
                     langchain_huggingface.embeddings.HuggingFaceEmbeddings(
                         model_name=self.model_path, show_progress=True)
