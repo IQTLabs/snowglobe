@@ -516,7 +516,9 @@ class Intelligent():
         chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
-            self.header(instructions, h=1)
+            print('-' * len(instructions))
+            print(instructions)
+            print('-' * len(instructions))
         while True:
             # Get user input, which may be multiline if no line is blank
             usertext = ''
