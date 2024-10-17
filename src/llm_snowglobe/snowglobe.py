@@ -512,6 +512,7 @@ class Intelligent():
     def chat_backend(self, name=None, persona=None, history=None):
         chatlog = History()
         nb = 2
+        username = 'User'
         chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
@@ -527,19 +528,19 @@ class Intelligent():
             if len(usertext) == nb and usertext[-nb:] == '\n' * nb:
                 break
             usertext = usertext.strip()
-            chatlog.add('User', usertext)
+            chatlog.add(username, usertext)
 
             # Get response
-            bind = {'stop': ['User:', 'Control:', 'Narrator:']}
+            bind = {'stop': [username + ':', name + ':', 'Narrator:']}
             output = self.return_output(
                 bind=bind,
                 persona=persona,
                 history=history, history_over=True,
                 responses=chatlog, responses_intro=chat_intro,
-                query='Control:\n\n', query_format='oneline_simple'
+                query=name + ':\n\n', query_format='oneline_simple'
             )
             print()
-            chatlog.add('Control', output)
+            chatlog.add(name, output)
 
 
 class Stateful():
