@@ -708,6 +708,9 @@ class Team(Stateful):
         return self.leader.synthesize(
             history=history, responses=responses, query=query, mc=mc)
 
+    def chat(self, history=None):
+        self.leader.chat(history)
+
     def info(self, offset=0):
         print(' ' * offset + 'Team:', self.name)
         print(' ' * offset + '  Leader:', self.leader.name)
@@ -772,6 +775,13 @@ class Player(Intelligent, Stateful, DescriptionRAG):
         if mc is not None:
             output = self.multiple_choice(query, output, mc)
         return output
+
+    def chat(self, history=None):
+        name = self.name
+        persona = self.persona
+        if history is None:
+            history = self.history
+        self.chat_backend(name=name, persona=persona, history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Player:', self.name)
