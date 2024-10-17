@@ -596,11 +596,15 @@ class Control(Intelligent, Stateful):
         return output
 
     def chat(self, history=None):
+        name = self.name
+        persona = 'the Control (a.k.a. moderator) of a simulated scenario'
         if history is None:
             history = self.history
+        self.chat_backend(name=name, persona=persona, history=history)
+
+    def chat_backend(self, name=None, persona=None, history=None):
         chatlog = History()
         nb = 2
-        persona = 'the Control (a.k.a. moderator) of a simulated scenario'
         chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
