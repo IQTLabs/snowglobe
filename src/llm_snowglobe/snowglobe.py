@@ -509,6 +509,38 @@ class Intelligent():
                 output = ''
         return output
 
+    def chat_backend(self, name=None, persona=None, history=None):
+        chatlog = History()
+        nb = 2
+        chat_intro = 'This is a conversation about what happened'
+        if verbose >= 2:
+            instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
+            self.header(instructions, h=1)
+        while True:
+            # Get user input, which may be multiline if no line is blank
+            usertext = ''
+            while True:
+                userline = input()
+                usertext += userline + '\n'
+                if len(usertext) >= nb and usertext[-nb:] == '\n' * nb:
+                    break
+            if len(usertext) == nb and usertext[-nb:] == '\n' * nb:
+                break
+            usertext = usertext.strip()
+            chatlog.add('User', usertext)
+
+            # Get response
+            bind = {'stop': ['User:', 'Control:', 'Narrator:']}
+            output = self.return_output(
+                bind=bind,
+                persona=persona,
+                history=history, history_over=True,
+                responses=chatlog, responses_intro=chat_intro,
+                query='Control:\n\n', query_format='oneline_simple'
+            )
+            print()
+            chatlog.add('Control', output)
+
 
 class Stateful():
     def record_narration(self, narration, timestep=None, index=None):
@@ -601,38 +633,6 @@ class Control(Intelligent, Stateful):
         if history is None:
             history = self.history
         self.chat_backend(name=name, persona=persona, history=history)
-
-    def chat_backend(self, name=None, persona=None, history=None):
-        chatlog = History()
-        nb = 2
-        chat_intro = 'This is a conversation about what happened'
-        if verbose >= 2:
-            instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
-            self.header(instructions, h=1)
-        while True:
-            # Get user input, which may be multiline if no line is blank
-            usertext = ''
-            while True:
-                userline = input()
-                usertext += userline + '\n'
-                if len(usertext) >= nb and usertext[-nb:] == '\n' * nb:
-                    break
-            if len(usertext) == nb and usertext[-nb:] == '\n' * nb:
-                break
-            usertext = usertext.strip()
-            chatlog.add('User', usertext)
-
-            # Get response
-            bind = {'stop': ['User:', 'Control:', 'Narrator:']}
-            output = self.return_output(
-                bind=bind,
-                persona=persona,
-                history=history, history_over=True,
-                responses=chatlog, responses_intro=chat_intro,
-                query='Control:\n\n', query_format='oneline_simple'
-            )
-            print()
-            chatlog.add('Control', output)
 
     def create_scenario(self, query=None, clip=0):
         if query is None:
