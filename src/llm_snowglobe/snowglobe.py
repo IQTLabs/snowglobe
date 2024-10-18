@@ -516,6 +516,7 @@ class Intelligent():
         chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
             instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
+            print()
             print('-' * len(instructions))
             print(instructions)
             print('-' * len(instructions))
@@ -633,8 +634,6 @@ class Control(Intelligent, Stateful):
     def chat(self, history=None):
         name = self.name
         persona = 'the Control (a.k.a. moderator) of a simulated scenario'
-        if history is None:
-            history = self.history
         self.chat_backend(name=name, persona=persona, history=history)
 
     def create_scenario(self, query=None, clip=0):
@@ -711,7 +710,7 @@ class Team(Stateful):
             history=history, responses=responses, query=query, mc=mc)
 
     def chat(self, history=None):
-        self.leader.chat(history)
+        self.leader.chat(history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Team:', self.name)
@@ -781,8 +780,6 @@ class Player(Intelligent, Stateful, DescriptionRAG):
     def chat(self, history=None):
         name = self.name
         persona = self.persona
-        if history is None:
-            history = self.history
         self.chat_backend(name=name, persona=persona, history=history)
 
     def info(self, offset=0):

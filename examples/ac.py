@@ -78,7 +78,7 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
         for question in self.questions:
             self.header(question, h=1)
             self.assess(history=self.history, query=question)
-        self.chat()
+        self.chat(history=self.history)
 
 
 if __name__ == '__main__':
