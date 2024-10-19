@@ -509,7 +509,7 @@ class Intelligent():
                 output = ''
         return output
 
-    def chat_backend(self, name=None, persona=None, history=None):
+    def chat_backend(self, name=None, persona=None, rag=None, history=None):
         chatlog = History()
         nb = 2
         username = 'User'
@@ -538,6 +538,7 @@ class Intelligent():
             output = self.return_output(
                 bind=bind,
                 persona=persona,
+                rag=rag,
                 history=history, history_over=True,
                 responses=chatlog, responses_intro=chat_intro,
                 query=name + ':\n\n', query_format='oneline_simple'
@@ -780,7 +781,8 @@ class Player(Intelligent, Stateful, DescriptionRAG):
     def chat(self, history=None):
         name = self.name
         persona = self.persona
-        self.chat_backend(name=name, persona=persona, history=history)
+        rag = self.rag
+        self.chat_backend(name=name, persona=persona, rag=rag, history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Player:', self.name)
