@@ -262,7 +262,7 @@ class ClassicRAG():
             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = splitter.split_documents(docs)
         vectorstore = langchain_chroma.Chroma.from_documents(
-            documents=splits, embedding=self.llm.embeddings)
+            documents=splits, embedding=self.rag_llm.embeddings)
         self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
 
     def rag_invoke(self, text):
@@ -287,7 +287,7 @@ class DescriptionRAG():
         # Create retriever
         vectorstore = langchain_chroma.Chroma(
             collection_name='summaries',
-            embedding_function=self.llm.embeddings)
+            embedding_function=self.rag_llm.embeddings)
         bytestore = langchain.storage.InMemoryByteStore()
         id_key = 'split'
         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
@@ -353,7 +353,7 @@ class Intelligent():
                         rag=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
-                        query=None, query_format=None, query_subtitle=None,
+                        query=None, query_format=None, query_subtitle=None
                         ):
         # Punctuation edit
         if persona is not None:
@@ -726,7 +726,7 @@ class Team(Stateful):
 class Player(Intelligent, Stateful, DescriptionRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
-                 presets=None):
+                 rag_llm=None, presets=None):
         self.llm = llm
         self.name = name
         self.kind = kind
@@ -736,6 +736,7 @@ class Player(Intelligent, Stateful, DescriptionRAG):
             self.set_id()
 
         if loader is not None:
+            self.rag_llm = rag_llm if rag_llm is not None else llm
             self.rag_init(loader, chunk_size, chunk_overlap, count)
             self.rag = True
         else:
