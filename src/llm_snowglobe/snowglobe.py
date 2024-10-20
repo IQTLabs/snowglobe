@@ -723,7 +723,7 @@ class Team(Stateful):
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent, Stateful, DescriptionRAG):
+class Player(Intelligent, Stateful, ClassicRAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
                  rag_llm=None, presets=None):
