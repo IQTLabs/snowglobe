@@ -16,6 +16,7 @@
 
 import os
 import re
+import sys
 import yaml
 import json
 import uuid
@@ -147,10 +148,11 @@ class LLM():
                 self.llm = langchain_community.llms.LlamaCpp(
                     model_path=self.model_path,
                     n_gpu_layers=-1,
-                    max_tokens=1000,
-                    n_batch=512,
+                    seed=random.randint(0, sys.maxsize),
                     n_ctx=8192,
+                    n_batch=512,
                     f16_kv=True,
+                    max_tokens=1000,
                     verbose=False,
                 )
             if self.embed:
@@ -180,6 +182,7 @@ class LLM():
                     repetition_penalty=1.05,
                     return_full_text=False,
                     streamer=streamer,
+                    do_sample=True,
                 )
                 self.llm = langchain_huggingface.llms.HuggingFacePipeline(
                     pipeline=pipeline)
