@@ -430,7 +430,8 @@ class Intelligent():
                                  ).strip()
             if len(output) > 0:
                 break
-        print()
+        if verbose >= 1:
+            print()
         return output
 
     async def return_from_human(self, prompt, variables, delay=2):
