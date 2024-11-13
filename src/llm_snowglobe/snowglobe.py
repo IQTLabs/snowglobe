@@ -697,13 +697,13 @@ class Team(Stateful):
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None, mc=None):
+    def respond(self, history=None, query=None, mc=None, short=False):
         member_responses = History()
         for member in self.members:
             if verbose >= 2:
                 print('\n### ' + member.name)
             member_responses.add(member.name, member.respond(
-                history=history, query=query, mc=mc))
+                history=history, query=query, mc=mc, short=short))
         if verbose >= 2:
             print('\n### Leader: ' + self.leader.name)
         leader_response = self.leader.synthesize(
@@ -749,10 +749,11 @@ class Player(Intelligent, Stateful, ClassicRAG):
         if presets is not None:
             self.preset_generator = self.set_preset_generator(presets)
 
-    def respond(self, history=None, query=None, reminder=2, mc=None):
+    def respond(self, history=None, query=None, reminder=2, mc=None,
+                short=False):
         if query is None:
             query = 'What action or actions do you take in response?'
-        bind = {'stop': ['Narrator:']}
+        bind = {'stop': ['\n\n']} if short else {'stop': ['Narrator:']}
         output = self.return_output(
             bind=bind,
             name=self.name,
