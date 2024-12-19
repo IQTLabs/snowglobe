@@ -353,7 +353,7 @@ class Intelligent():
 
     def return_template(self, name=None,
                         persona=None, reminder=None,
-                        rag=None,
+                        rag=None, rag_intro=None,
                         history=None, history_over=None, history_merged=None,
                         responses=None, responses_intro=None,
                         query=None, query_format=None, query_subtitle=None
@@ -370,7 +370,8 @@ class Intelligent():
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
         if rag is not None and history is not None:
-            rag_intro = 'Previously, you handled a similar situation like this'
+            if rag_intro is None:
+                rag_intro = 'Previously, you handled a similar situation like this'
             docs = self.rag_invoke(history.entries[-1]['text'])
             ragstring = '\n'.join(doc.page_content for doc in docs)
             template += '### ' + rag_intro + ':\n\n{rag}\n\n'
