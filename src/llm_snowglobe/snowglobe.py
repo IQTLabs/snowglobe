@@ -328,6 +328,9 @@ class DescriptionRAG():
         splits = self.rag_retriever.invoke(description)
         return splits
 
+class RAG(ClassicRag):
+    pass
+
 
 class Intelligent():
     def return_output(self, kind=None, bind=None,
@@ -728,7 +731,7 @@ class Team(Stateful):
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent, Stateful, ClassicRAG):
+class Player(Intelligent, Stateful, RAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
                  rag_llm=None, presets=None):
