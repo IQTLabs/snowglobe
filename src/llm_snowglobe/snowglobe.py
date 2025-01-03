@@ -328,7 +328,7 @@ class DescriptionRAG():
         splits = self.rag_retriever.invoke(description)
         return splits
 
-class RAG(ClassicRag):
+class RAG(ClassicRAG):
     pass
 
 
