@@ -11,7 +11,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     wget \
     cmake \
     git \
-    ninja \
+    ninja-build \
     twine \
     jupyter
 
