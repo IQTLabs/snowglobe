@@ -11,7 +11,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     wget \
     cmake \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    ninja
 
 # User account
 ARG username=snowglobe
