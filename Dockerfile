@@ -1,7 +1,7 @@
-FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
 LABEL org.iqt.name="snowglobe"
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
+RUN apt update && apt install -y \
     python3 \
     python3-pip \
     python3-venv \
@@ -24,7 +24,9 @@ WORKDIR /home/$username
 
 # Install
 COPY --chown=$uid:$gid . /home/$username
+USER $username
+RUN python3 -m venv /home/$username/.venv
+ENV PATH="/home/"$username"/.venv/bin:$PATH"
 RUN pip install cmake
 RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install .
-USER $username
 RUN snowglobe_config
