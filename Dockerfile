@@ -21,12 +21,12 @@ ARG gid=$uid
 RUN groupadd --gid $gid $groupname
 RUN adduser --uid $uid --gid $gid --disabled-password $username
 WORKDIR /home/$username
+USER $username
 
 # Install
 COPY --chown=$uid:$gid . /home/$username
-USER $username
 RUN python3 -m venv /home/$username/.venv
-ENV PATH="/home/"$username"/.venv/bin:$PATH"
+ENV PATH=/home/$username/.venv/bin:"$PATH"
 RUN pip install cmake
 RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install .
 RUN snowglobe_config
