@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2023-2024 IQT Labs LLC
+#   Copyright 2023-2025 IQT Labs LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import random
 import shutil
 import asyncio
 import inspect
+import readline
 import numpy as np
 import platformdirs
 import transformers
