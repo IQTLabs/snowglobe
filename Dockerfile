@@ -18,7 +18,8 @@ ARG username=snowglobe
 ARG groupname=$username
 ARG uid=1000
 ARG gid=$uid
-RUN groupadd --gid $gid $groupname
+RUN deluser --remove-home ubuntu
+RUN addgroup --gid $gid $groupname
 RUN adduser --uid $uid --gid $gid --disabled-password $username
 WORKDIR /home/$username
 USER $username
