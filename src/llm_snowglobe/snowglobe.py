@@ -518,7 +518,8 @@ class Intelligent():
                 output = ''
         return output
 
-    def chat_backend(self, name=None, persona=None, rag=None, history=None):
+    def chat_backend(self, name='Assistant', persona=None, rag=None,
+                     history=None):
         chatlog = History()
         nb = 2
         username = 'User'
