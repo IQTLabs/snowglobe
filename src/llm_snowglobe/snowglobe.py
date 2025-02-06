@@ -525,7 +525,7 @@ class Intelligent():
         username = 'User'
         chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
-            instructions = 'Start typing to discuss the simulation, or press Enter twice to exit.'
+            instructions = 'Chat | Press Enter twice after each message or to exit.'
             print()
             print('-' * len(instructions))
             print(instructions)
