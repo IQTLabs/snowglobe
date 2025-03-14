@@ -571,17 +571,31 @@ class Stateful():
         self.history.add(player_name, player_response)
 
 
-class Control(Intelligent, Stateful):
+class Control(Intelligent, Stateful, RAG):
     def __init__(
-            self, source=None, model=None, menu=None, gen=None, embed=None):
+            self, source=None, model=None, menu=None, gen=None, embed=None,
+            llm=None, rag_llm=None, presets=None,
+            loader=None, chunk_size=None, chunk_overlap=None, count=None,
+    ):
         self.llm = LLM(
-            source=source, model=model, menu=menu, gen=gen, embed=embed)
+            source=source, model=model, menu=menu, gen=gen, embed=embed
+        ) if llm is None else llm
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
         self.history = History()
         if self.kind == 'human':
             self.set_id()
+
+        if loader is not None:
+            self.rag_llm = rag_llm if rag_llm is not None else self.llm
+            self.rag_init(loader, chunk_size, chunk_overlap, count)
+            self.rag = True
+        else:
+            self.rag = None
+
+        if presets is not None:
+            self.preset_generator = self.set_preset_generator(presets)
 
     def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
