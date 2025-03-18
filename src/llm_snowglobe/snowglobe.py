@@ -351,6 +351,8 @@ class Intelligent():
             output = self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
             output = self.return_from_human(prompt, variables)
+        elif kind == 'api':
+            output = self.return_from_api(prompt, variables)
         elif kind == 'preset':
             output = self.return_from_preset()
         return output
@@ -440,9 +442,12 @@ class Intelligent():
         return output
 
     async def return_from_human(self, prompt, variables, delay=2):
+        pass
+
+    async def return_from_api(self, prompt, variables, delay=2):
         prompt_path = self.get_iopath(False)
         answer_path = self.get_iopath(True)
-        self.human_count += 1
+        self.api_count += 1
 
         # Write prompt to disk
         prompt_content = prompt.format(**variables)
@@ -457,7 +462,7 @@ class Intelligent():
             await asyncio.sleep(delay)
             if verbose >= 2:
                 print('Awaiting %s [ID %i # %i]'
-                      % (self.name, self.human_label, self.human_count - 1))
+                      % (self.name, self.api_label, self.api_count - 1))
         with open(answer_path, 'r') as f:
             answer_json = json.load(f)
         answer_content = answer_json['content']
@@ -473,24 +478,24 @@ class Intelligent():
             yield preset
 
     def set_id(self):
-        self.human_label = random.randint(100000, 999999)
-        self.human_count = 0
+        self.api_label = random.randint(100000, 999999)
+        self.api_count = 0
         if verbose >= 2:
-            print('ID %i : %s' % (self.human_label, self.name))
+            print('ID %i : %s' % (self.api_label, self.name))
         intro_path = self.get_iopath(False)
         intro_json = {'name': self.name}
         if not os.path.exists(os.path.dirname(intro_path)):
-            self.human_log = EphemeralDir(
+            self.api_log = EphemeralDir(
                 os.path.dirname(intro_path), exist_ok=True)
         with open(intro_path, 'w') as f:
             json.dump(intro_json, f)
-        self.human_count += 1
+        self.api_count += 1
 
     def get_iopath(self, answer=False, base_path=None):
         if base_path is None:
             base_path = settings()['data_dir']
-        return os.path.join(base_path, str(self.human_label), '%i_%i_%s.json'
-                            % (self.human_label, self.human_count,
+        return os.path.join(base_path, str(self.api_label), '%i_%i_%s.json'
+                            % (self.api_label, self.api_count,
                                'answer' if answer else 'prompt'))
 
     def multiple_choice(self, query, answer, mc):
@@ -583,6 +588,7 @@ class Control(Intelligent, Stateful, RAG):
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
+        self.presets = presets
         self.history = History()
         if self.kind == 'human':
             self.set_id()
@@ -755,6 +761,7 @@ class Player(Intelligent, Stateful, RAG):
         self.name = name
         self.kind = kind
         self.persona = persona
+        self.presets = presets
         self.history = History()
         if self.kind == 'human':
             self.set_id()
