@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from nicegui import ui, context, Tailwind
+from nicegui import ui
 
 messages = {}
 
