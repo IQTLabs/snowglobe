@@ -334,7 +334,7 @@ class RAG(ClassicRAG):
 
 
 class Intelligent():
-    def setup_kind(kind):
+    def setup_kind(self, kind):
         if kind == 'ai':
             pass
         elif kind == 'human':
@@ -508,6 +508,13 @@ class Intelligent():
         return os.path.join(base_path, str(self.api_label), '%i_%i_%s.json'
                             % (self.api_label, self.api_count,
                                'answer' if answer else 'prompt'))
+
+    def set_interface_id(self):
+        self.interface_label = random.randint(100000, 999999)
+        import interface
+        if not interface.interface_running:
+            interface.snowglobe_interface()
+        interface_users[self.interface_label] = self
 
     def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
@@ -773,7 +780,7 @@ class Player(Intelligent, Stateful, RAG):
         self.setup_kind(self.kind)
 
         if loader is not None:
-            self.rag_llm = rag_llm if rag_llm is not None else llm
+            self.rag_llm = rag_llm if rag_llm is not None else self.llm
             self.rag_init(loader, chunk_size, chunk_overlap, count)
             self.rag = True
         else:
