@@ -6,10 +6,7 @@ messages = {}
 
 @ui.page('/')
 def chat_page():
-    # Vertical height adjustment
-    # context.client.content.classes('h-[100vh]')
-    # ui.add_head_html('<style>.q-textarea.flex-grow .q-field__control { height: 100% }</style>')
-
+    ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
             ui.image('../terminal/snowglobe.png').props('width=150px').style('border-radius: 5%')
@@ -20,16 +17,13 @@ def chat_page():
         chattab = ui.tab('Chat')
         infotab = ui.tab('Info')
     ui.separator()
-    with ui.tab_panels(tabs, value=chattab).classes('w-full h-96%'):
-        with ui.tab_panel(chattab).classes('h-96%'):
-            with ui.splitter(horizontal=True, value="400px", reverse=True).classes('w-full h-96%') as splitter:
-                with splitter.before:
-                    ui.scroll_area().classes('w-full flex-grow')
-                with splitter.after:
-                    with ui.column().classes('w-full items-center h-96%'):
-                        text = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border flex-grow').style('padding: 0px 5px')
-                        ui.button('Send', on_click=ui.fullscreen().toggle)
-                        ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
+    with ui.tab_panels(tabs, value=chattab).classes('w-full'):
+        with ui.tab_panel(chattab).classes(''):
+            with ui.column().classes('w-full items-center'):
+                ui.scroll_area().classes('w-full h-[50vh] border')
+                ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
+                ui.button('Send', on_click=ui.fullscreen().toggle)
+                ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab):
             ui.label('Information')
 
