@@ -2,10 +2,10 @@
 
 from nicegui import ui
 
-messages = {}
+interface_users = {}
 
 @ui.page('/')
-def chat_page():
+def interface_page():
     ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
@@ -27,5 +27,10 @@ def chat_page():
         with ui.tab_panel(infotab):
             ui.label('Information')
 
+
+def snowglobe_interface(host='0.0.0.0', port=8000):
+    ui.run(host=host, port=port, title='Snow Globe User Interface', favicon='terminal/favicon.ico')
+
+
 if __name__ in {'__main__', '__mp_main__'}:
-    ui.run(host='0.0.0.0', port=8000, title='Snow Globe Chat', favicon='terminal/favicon.ico')
+    snowglobe_interface()
