@@ -334,6 +334,17 @@ class RAG(ClassicRAG):
 
 
 class Intelligent():
+    def setup_kind(kind):
+        if kind == 'ai':
+            pass
+        elif kind == 'human':
+            pass
+        elif kind == 'api':
+            self.set_api_id()
+        elif kind == 'preset':
+            if self.presets is not None:
+                self.preset_generator = self.set_preset_generator(self.presets)
+
     def return_output(self, kind=None, bind=None,
                       template=None, variables=None, **kwargs):
         # Set defaults
@@ -477,7 +488,7 @@ class Intelligent():
                 print(preset)
             yield preset
 
-    def set_id(self):
+    def set_api_id(self):
         self.api_label = random.randint(100000, 999999)
         self.api_count = 0
         if verbose >= 2:
@@ -590,8 +601,7 @@ class Control(Intelligent, Stateful, RAG):
         self.persona = None
         self.presets = presets
         self.history = History()
-        if self.kind == 'human':
-            self.set_id()
+        self.setup_kind(self.kind)
 
         if loader is not None:
             self.rag_llm = rag_llm if rag_llm is not None else self.llm
@@ -599,9 +609,6 @@ class Control(Intelligent, Stateful, RAG):
             self.rag = True
         else:
             self.rag = None
-
-        if presets is not None:
-            self.preset_generator = self.set_preset_generator(presets)
 
     def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -763,8 +770,7 @@ class Player(Intelligent, Stateful, RAG):
         self.persona = persona
         self.presets = presets
         self.history = History()
-        if self.kind == 'human':
-            self.set_id()
+        self.setup_kind(self.kind)
 
         if loader is not None:
             self.rag_llm = rag_llm if rag_llm is not None else llm
@@ -772,9 +778,6 @@ class Player(Intelligent, Stateful, RAG):
             self.rag = True
         else:
             self.rag = None
-
-        if presets is not None:
-            self.preset_generator = self.set_preset_generator(presets)
 
     def respond(self, history=None, query=None, reminder=2, mc=None,
                 short=False):
