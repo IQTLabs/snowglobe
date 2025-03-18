@@ -9,7 +9,7 @@ def chat_page():
     ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
-            ui.image('../terminal/snowglobe.png').props('width=150px').style('border-radius: 5%')
+            ui.image('terminal/snowglobe.png').props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
@@ -28,4 +28,4 @@ def chat_page():
             ui.label('Information')
 
 if __name__ in {'__main__', '__mp_main__'}:
-    ui.run(host='0.0.0.0', port=8000, title='Snow Globe Chat', favicon='../terminal/favicon.ico')
+    ui.run(host='0.0.0.0', port=8000, title='Snow Globe Chat', favicon='terminal/favicon.ico')
