@@ -2,6 +2,7 @@
 
 from nicegui import ui
 
+interface_running = False
 interface_users = {}
 
 @ui.page('/')
@@ -30,6 +31,7 @@ def interface_page():
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface', favicon='terminal/favicon.ico')
+    interface_running = True
 
 
 if __name__ in {'__main__', '__mp_main__'}:
