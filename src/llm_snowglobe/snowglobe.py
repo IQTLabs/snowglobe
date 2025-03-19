@@ -696,7 +696,7 @@ class Control(Intelligent, Stateful, RAG):
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
         if pattern_sep is None:
-            pattern_sep = '[\.\,;\n0-9]+'
+            pattern_sep = r'[\.\,;\n0-9]+'
         if pattern_left is None:
             pattern_left = ' ()-'
         template = 'Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: '
