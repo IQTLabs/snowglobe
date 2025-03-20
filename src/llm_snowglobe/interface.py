@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
+import os
 from nicegui import ui
 
 interface_running = False
 interface_users = {}
+interface_here = os.path.dirname(os.path.abspath(__file__))
 
 @ui.page('/')
 def interface_page():
     ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
-            ui.image('terminal/snowglobe.png').props('width=150px').style('border-radius: 5%')
+            ui.image(os.path.join(interface_here, 'terminal/snowglobe.png')).props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
@@ -30,9 +32,13 @@ def interface_page():
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
-    ui.run(host=host, port=port, title='Snow Globe User Interface', favicon='terminal/favicon.ico')
+    ui.run(host=host, port=port, title='Snow Globe User Interface',
+           favicon=os.path.join(interface_here, 'terminal/favicon.ico'),
+           reload=False)
     interface_running = True
 
 
 if __name__ in {'__main__', '__mp_main__'}:
     snowglobe_interface()
+
+# ui.run(host='0.0.0.0', port=8000, title='Snow Globe User Interface', favicon=os.path.join(interface_here, 'terminal/favicon.ico'))
