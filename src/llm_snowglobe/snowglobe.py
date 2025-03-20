@@ -19,6 +19,7 @@ import re
 import sys
 import yaml
 import json
+import time
 import uuid
 import random
 import shutil
@@ -40,6 +41,8 @@ import langchain_text_splitters
 import langchain_core.documents
 import langchain_community.llms
 import langchain_community.embeddings
+
+# from . import interface
 
 verbose = 2
 
@@ -338,7 +341,7 @@ class Intelligent():
         if kind == 'ai':
             pass
         elif kind == 'human':
-            pass
+            self.set_interface_id()
         elif kind == 'api':
             self.set_api_id()
         elif kind == 'preset':
@@ -511,10 +514,24 @@ class Intelligent():
 
     def set_interface_id(self):
         self.interface_label = random.randint(100000, 999999)
-        import interface
-        if not interface.interface_running:
-            interface.snowglobe_interface()
-        interface_users[self.interface_label] = self
+        self.interface_log = []
+        if verbose >= 2:
+            print('ID %i : %s' % (self.interface_label, self.name))
+        # if not interface.interface_running:
+        #     interface.snowglobe_interface()
+        # interface.interface_users[self.interface_label] = self
+
+    def interface_send(self, recipient, text):
+        # Immediately add message to recipient into their interface log
+        message = {'text': text,
+                   'name': self.name,
+                   'stamp': time.ctime(),
+                   'sent': False}
+        recipient.interface_log.append(message)
+
+    def interface_get(self, sender):
+        # Await addition of message from recipient into their interface log
+        pass
 
     def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
