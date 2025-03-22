@@ -3,8 +3,6 @@
 import os
 from nicegui import ui
 
-interface_running = False
-interface_users = {}
 interface_here = os.path.dirname(os.path.abspath(__file__))
 
 async def load_id():
@@ -44,10 +42,7 @@ def snowglobe_interface(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface',
            favicon=os.path.join(interface_here, 'terminal/favicon.ico'),
            reload=True)
-    interface_running = True
 
 
 if __name__ in {'__main__', '__mp_main__'}:
     snowglobe_interface()
-
-# ui.run(host='0.0.0.0', port=8000, title='Snow Globe User Interface', favicon=os.path.join(interface_here, 'terminal/favicon.ico'))
