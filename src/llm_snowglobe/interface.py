@@ -7,6 +7,9 @@ interface_running = False
 interface_users = {}
 interface_here = os.path.dirname(os.path.abspath(__file__))
 
+async def load_id():
+    pass
+
 @ui.page('/')
 def interface_page():
     ui.context.client.content.classes('h-screen')
@@ -16,6 +19,12 @@ def interface_page():
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
+            with ui.row():
+                ui.input('ID', placeholder='Player ID #').props('size=8')
+                ui.button('Connect', on_click=load_id)
+            with ui.row():
+                ui.label('ID')
+                ui.label('Name')
     with ui.tabs().classes('w-full') as tabs:
         chattab = ui.tab('Chat')
         infotab = ui.tab('Info')
@@ -34,7 +43,7 @@ def interface_page():
 def snowglobe_interface(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface',
            favicon=os.path.join(interface_here, 'terminal/favicon.ico'),
-           reload=False)
+           reload=True)
     interface_running = True
 
 
