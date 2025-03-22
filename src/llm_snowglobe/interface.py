@@ -14,6 +14,7 @@ async def load_id(idval):
 @ui.page('/')
 async def interface_page():
     await ui.context.client.connected()
+    app.storage.tab['logged_in'] = False
     ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
@@ -22,7 +23,7 @@ async def interface_page():
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in', backward=lambda x: not x):
-                login_id = ui.number('ID', placeholder='Player ID #', format='%d').props('size=8')
+                login_id = ui.input('ID', placeholder='Player ID #').props('size=8')
                 ui.button('Connect', on_click=lambda x: load_id(login_id.value))
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
