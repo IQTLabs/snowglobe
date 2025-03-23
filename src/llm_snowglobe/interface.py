@@ -15,21 +15,42 @@
 #   limitations under the License.
 
 import os
+import json
 import asyncio
 from nicegui import ui, app
 
 here = os.path.dirname(os.path.abspath(__file__))
+datapath = 'databank.json'
+databank = None
 
-async def load_id(idval):
-    app.storage.tab['id'] = idval
-    app.storage.tab['logged_in'] = True
+def load_databank():
+    if os.path.exists(datapath):
+        with open(datapath, 'r') as f:
+            globals()['databank'] = json.load(f)
+    else:
+        globals()['databank'] = {'players': {}, 'chatrooms': {},
+                                 'infodocs': {}, 'editdocs': {}}
+
+def save_databank():
+    with open(datapath, 'w') as f:
+        json.dump(globals()['databank'], f)
+
+app.on_startup(load_databank)
+app.on_shutdown(save_databank)
+app.on_exception(save_databank)
 
 
 @ui.page('/')
 async def interface_page():
+
+    async def load_id(idval):
+        if len(idval) > 0:
+            app.storage.tab['id'] = idval
+            app.storage.tab['logged_in'] = True
+            login_name.text = databank['players'][idval]['name']
+
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
-    ui.context.client.content.classes('h-screen')
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
             ui.image(os.path.join(here, 'terminal/snowglobe.png')).props('width=150px').style('border-radius: 5%')
@@ -41,7 +62,7 @@ async def interface_page():
                 ui.button('Connect', on_click=lambda x: load_id(login_id.value))
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
-                login_name = ui.label('Name')
+                login_name = ui.label('Error: ID Not Found')
     with ui.tabs().classes('w-full') as tabs:
         chattab = ui.tab('Chat')
         infotab = ui.tab('Info')
@@ -51,7 +72,7 @@ async def interface_page():
             with ui.column().classes('w-full items-center'):
                 ui.scroll_area().classes('w-full h-[50vh] border')
                 ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=ui.fullscreen().toggle)
+                ui.button('Send', on_click=lambda: ui.notify('Click!'))
                 ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab):
             ui.label('Information')
