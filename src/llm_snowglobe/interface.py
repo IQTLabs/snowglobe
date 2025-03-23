@@ -33,7 +33,7 @@ def load_databank():
 
 def save_databank():
     with open(datapath, 'w') as f:
-        json.dump(globals()['databank'], f)
+        json.dump(globals()['databank'], f, indent=4)
 
 app.on_startup(load_databank)
 app.on_shutdown(save_databank)
@@ -44,7 +44,11 @@ app.on_exception(save_databank)
 async def interface_page():
 
     async def load_id(idval):
-        if len(idval) > 0:
+        if len(idval) == 0:
+            ui.notify('Enter your ID.')
+        elif not idval in databank['players']:
+            ui.notify('ID not found.')
+        else:
             app.storage.tab['id'] = idval
             app.storage.tab['logged_in'] = True
             login_name.text = databank['players'][idval]['name']
@@ -62,7 +66,7 @@ async def interface_page():
                 ui.button('Connect', on_click=lambda x: load_id(login_id.value))
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
-                login_name = ui.label('Error: ID Not Found')
+                login_name = ui.label('Name')
     with ui.tabs().classes('w-full') as tabs:
         chattab = ui.tab('Chat')
         infotab = ui.tab('Info')
