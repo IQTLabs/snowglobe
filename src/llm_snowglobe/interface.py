@@ -54,6 +54,7 @@ async def interface_page():
             app.storage.tab['logged_in'] = True
             login_name.text = databank['players'][idval]['name']
             infocontent.text = databank['infodocs'][databank['players'][idval]['infodocs'][0]]['content'] # TODO: Bind for live updates
+            display_messages.refresh()
 
     async def send_message():
         idval = app.storage.tab['id']
@@ -61,13 +62,14 @@ async def interface_page():
             'text': chattext.value,
             'name': databank['players'][idval]['name'],
             'stamp': time.ctime(),
-            'avatar': os.path.join(here, 'terminal/favicon.ico'),
+            # 'avatar': os.path.join(here, 'terminal/favicon.ico'), TODO: Fix
         }
         chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
         if not 'log' in chatroom:
             chatroom['log'] = []
         chatroom['log'].append(message)
         display_messages.refresh()
+        chattext.set_value('')
         save_databank()
 
     @ui.refreshable
