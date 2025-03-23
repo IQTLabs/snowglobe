@@ -109,6 +109,29 @@ def config(menu=None, source=None, model=None, url=None, path=None,
         print('Done', flush=True)
 
 
+class UI():
+    @classmethod
+    def path(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(here, '.nicegui', 'storage-general.json')
+    @classmethod
+    def create(self, overwrite=False):
+        path = self.path()
+        if (not os.path.exists(path)) or overwrite:
+            data = {'players': {}, 'chatrooms': {},
+                    'infodocs': {}, 'editdocs': {}}
+            with open(path, 'w') as f:
+                json.dump(data, f)
+    @classmethod
+    def get(self):
+        with open(self.path(), 'r') as f:
+            return json.load(f)
+    @classmethod
+    def set(self, data):
+        with open(self.path(), 'w') as f:
+            json.dump(data, f)
+
+
 class LLM():
     def __init__(
             self, source=None, model=None, menu=None, gen=None, embed=None):
