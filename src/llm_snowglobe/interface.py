@@ -16,6 +16,7 @@
 
 import os
 import json
+import time
 import asyncio
 from nicegui import ui, app
 
@@ -52,6 +53,31 @@ async def interface_page():
             app.storage.tab['id'] = idval
             app.storage.tab['logged_in'] = True
             login_name.text = databank['players'][idval]['name']
+            infocontent.text = databank['infodocs'][databank['players'][idval]['infodocs'][0]]['content'] # TODO: Bind for live updates
+
+    async def send_message():
+        idval = app.storage.tab['id']
+        message = {
+            'text': chattext.value,
+            'name': databank['players'][idval]['name'],
+            'stamp': time.ctime(),
+            'avatar': os.path.join(here, 'terminal/favicon.ico'),
+        }
+        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+        if not 'log' in chatroom:
+            chatroom['log'] = []
+        chatroom['log'].append(message)
+        display_messages.refresh()
+        save_databank()
+
+    @ui.refreshable
+    def display_messages():
+        if 'id' in app.storage.tab:
+            idval = app.storage.tab['id']
+            name = databank['players'][idval]['name']
+            chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+            for message in chatroom['log']:
+                ui.chat_message(sent=name == message['name'], **message)
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
@@ -74,12 +100,13 @@ async def interface_page():
     with ui.tab_panels(tabs, value=chattab).classes('w-full'):
         with ui.tab_panel(chattab).classes(''):
             with ui.column().classes('w-full items-center'):
-                ui.scroll_area().classes('w-full h-[50vh] border')
-                ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=lambda: ui.notify('Click!'))
+                with ui.scroll_area().classes('w-full h-[50vh] border'):
+                    display_messages()
+                chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
+                ui.button('Send', on_click=send_message)
                 ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab):
-            ui.label('Information')
+            infocontent = ui.label('Information')
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
