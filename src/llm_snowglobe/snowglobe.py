@@ -112,8 +112,7 @@ def config(menu=None, source=None, model=None, url=None, path=None,
 class UI():
     @classmethod
     def path(self):
-        here = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(here, '.nicegui', 'storage-general.json')
+        return 'databank.json'
     @classmethod
     def create(self, overwrite=False):
         path = self.path()
@@ -362,7 +361,7 @@ class Intelligent():
         if kind == 'ai':
             pass
         elif kind == 'human':
-            self.set_interface_id()
+            self.interface_setup()
         elif kind == 'api':
             self.set_api_id()
         elif kind == 'preset':
@@ -533,24 +532,44 @@ class Intelligent():
                             % (self.api_label, self.api_count,
                                'answer' if answer else 'prompt'))
 
-    def set_interface_id(self):
-        self.interface_label = random.randint(100000, 999999)
-        self.interface_log = []
+    def interface_setup(self):
+        # Assign ID
+        if self.ioid is not None:
+            self.interface_label = str(self.ioid)
+        else:
+            self.interface_label = str(random.randint(100000, 999999))
         if verbose >= 2:
-            print('ID %i : %s' % (self.interface_label, self.name))
-        # if not interface.interface_running:
-        #     interface.snowglobe_interface()
-        # interface.interface_users[self.interface_label] = self
+            print('ID %s : %s' % (self.interface_label, self.name))
 
-    def interface_send(self, recipient, text):
-        # Immediately add message to recipient into their interface log
+        # Create info for UI interface
+        pdict = self.iodict if self.iodict is not None else {
+            'chatrooms': [], 'infodocs': [], 'editdocs': []}
+        pdict['name'] = self.name
+
+        # Export info for UI interface
+        UI.create()
+        data = UI.get()
+        data['players'][self.interface_label] = pdict
+        for chatroom in pdict['chatrooms']:
+            if chatroom not in data['chatrooms']:
+                data['chatrooms'][chatroom] = {'log': []}
+        for infodoc in pdict['infodocs']:
+            if infodoc not in data['infodocs']:
+                data['infodocs'][infodoc] = {'content': '', 'format': 'plaintext'}
+        for editdoc in pdict['editdocs']:
+            if editdoc not in data['editdocs']:
+                data['editdocs'][editdoc] = {'content': ''}
+        UI.set(data)
+
+    def interface_send_message(self, chatroom, text):
         message = {'text': text,
                    'name': self.name,
-                   'stamp': time.ctime(),
-                   'sent': False}
-        recipient.interface_log.append(message)
+                   'stamp': time.ctime()}
+        data = UI.get()
+        data['chatrooms'][chatroom]['log'].append(message)
+        UI.set(data)
 
-    def interface_get(self, sender):
+    def interface_get_message(self, chatroom):
         # Await addition of message from recipient into their interface log
         pass
 
@@ -635,8 +654,8 @@ class Stateful():
 class Control(Intelligent, Stateful, RAG):
     def __init__(
             self, source=None, model=None, menu=None, gen=None, embed=None,
-            llm=None, rag_llm=None, presets=None,
             loader=None, chunk_size=None, chunk_overlap=None, count=None,
+            llm=None, rag_llm=None, ioid=None, iodict=None, presets=None,
     ):
         self.llm = LLM(
             source=source, model=model, menu=menu, gen=gen, embed=embed
@@ -644,6 +663,8 @@ class Control(Intelligent, Stateful, RAG):
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
+        self.ioid = ioid
+        self.iodict = iodict
         self.presets = presets
         self.history = History()
         self.setup_kind(self.kind)
@@ -808,11 +829,13 @@ class Team(Stateful):
 class Player(Intelligent, Stateful, RAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
-                 rag_llm=None, presets=None):
+                 rag_llm=None, ioid=None, iodict=None, presets=None):
         self.llm = llm
         self.name = name
         self.kind = kind
         self.persona = persona
+        self.ioid = ioid
+        self.iodict = iodict
         self.presets = presets
         self.history = History()
         self.setup_kind(self.kind)
