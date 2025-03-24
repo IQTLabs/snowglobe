@@ -637,9 +637,13 @@ class Intelligent():
             chatlog.add(name, output)
 
     def chat_response(self, chatlog, name='Assistant', persona=None, rag=None,
-                      history=None):
+                      history=None, username=None):
         # Get single response, given prexisting chatlog
-        bind = {'stop': [username + ':', name + ':', 'Narrator:']}
+        chat_intro = 'This is a conversation about what happened'
+        if username is None:
+            bind = {'stop': [name + ':', 'Narrator:']}
+        else:
+            bind = {'stop': [username + ':', name + ':', 'Narrator:']}
         output = self.return_output(
             bind=bind,
             persona=persona,
