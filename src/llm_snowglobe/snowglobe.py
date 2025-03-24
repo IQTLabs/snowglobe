@@ -120,7 +120,7 @@ class UI():
             data = {'players': {}, 'chatrooms': {},
                     'infodocs': {}, 'editdocs': {}}
             with open(path, 'w') as f:
-                json.dump(data, f)
+                json.dump(data, f, indent=4)
     @classmethod
     def get(self):
         with open(self.path(), 'r') as f:
@@ -128,7 +128,7 @@ class UI():
     @classmethod
     def set(self, data):
         with open(self.path(), 'w') as f:
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
 
 
 class LLM():
@@ -635,6 +635,23 @@ class Intelligent():
             )
             print()
             chatlog.add(name, output)
+
+    def chat_response(self, chatlog, name='Assistant', persona=None, rag=None,
+                      history=None):
+        # Get single response, given prexisting chatlog
+        bind = {'stop': [username + ':', name + ':', 'Narrator:']}
+        output = self.return_output(
+            bind=bind,
+            persona=persona,
+            rag=rag,
+            history=history, history_over=True,
+            responses=chatlog, responses_intro=chat_intro,
+            query=name + ':\n\n', query_format='oneline_simple'
+        )
+        # if verbose >= 1:
+        #     print()
+        # chatlog.add(name, output)
+        return output
 
 
 class Stateful():
