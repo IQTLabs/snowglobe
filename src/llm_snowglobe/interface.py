@@ -59,6 +59,8 @@ async def interface_page():
             display_infodoc.refresh()
 
     async def send_message():
+        if not 'id' in app.storage.tab:
+            return
         idval = app.storage.tab['id']
         message = {
             'text': chattext.value,
