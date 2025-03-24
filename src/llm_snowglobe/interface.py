@@ -18,6 +18,7 @@ import os
 import json
 import time
 import asyncio
+import watchfiles
 from nicegui import ui, app
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -72,6 +73,13 @@ async def interface_page():
         chattext.set_value('')
         save_databank()
 
+    async def get_disk_updates():
+        while True:
+            async for changes in watchfiles.awatch(datapath):
+                break
+            load_databank()
+            display_messages.refresh()
+
     @ui.refreshable
     def display_messages():
         if 'id' in app.storage.tab:
@@ -83,6 +91,8 @@ async def interface_page():
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
+    ui.timer(0, get_disk_updates, once=True)
+
     with ui.left_drawer(bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
             ui.image(os.path.join(here, 'terminal/snowglobe.png')).props('width=150px').style('border-radius: 5%')
