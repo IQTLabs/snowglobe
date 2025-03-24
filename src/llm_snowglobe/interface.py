@@ -54,8 +54,8 @@ async def interface_page():
             app.storage.tab['id'] = idval
             app.storage.tab['logged_in'] = True
             login_name.text = databank['players'][idval]['name']
-            infocontent.text = databank['infodocs'][databank['players'][idval]['infodocs'][0]]['content'] # TODO: Bind for live updates
             display_messages.refresh()
+            display_infodoc.refresh()
 
     async def send_message():
         idval = app.storage.tab['id']
@@ -79,6 +79,7 @@ async def interface_page():
                 break
             load_databank()
             display_messages.refresh()
+            display_infodoc.refresh()
 
     @ui.refreshable
     def display_messages():
@@ -88,6 +89,18 @@ async def interface_page():
             chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
             for message in chatroom['log']:
                 ui.chat_message(sent=name == message['name'], **message)
+
+    @ui.refreshable
+    def display_infodoc():
+        if 'id' in app.storage.tab:
+            idval = app.storage.tab['id']
+            infodoc = databank['infodocs'][databank['players'][idval]['infodocs'][0]]
+            if 'format' not in infodoc or infodoc['format'] == 'plaintext':
+                infocontent = ui.label(infodoc['content'])
+            elif infodoc['format'] == 'markdown':
+                infocontent = ui.markdown(infodoc['content'])
+            elif infodoc['format'] == 'html':
+                infocontent = ui.html(infodoc['content'])
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
@@ -118,7 +131,7 @@ async def interface_page():
                 ui.button('Send', on_click=send_message)
                 ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab):
-            infocontent = ui.label('Information')
+            display_infodoc()
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
