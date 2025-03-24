@@ -53,6 +53,7 @@ async def interface_page():
         else:
             app.storage.tab['id'] = idval
             app.storage.tab['logged_in'] = True
+            app.storage.tab['message_count'] = 0
             login_name.text = databank['players'][idval]['name']
             display_messages.refresh()
             display_infodoc.refresh()
@@ -89,6 +90,9 @@ async def interface_page():
             chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
             for message in chatroom['log']:
                 ui.chat_message(sent=name == message['name'], **message)
+            if len(chatroom['log']) > app.storage.tab['message_count']:
+                message_window.scroll_to(percent=100)
+                app.storage.tab['message_count'] = len(chatroom['log'])
 
     @ui.refreshable
     def display_infodoc():
@@ -125,7 +129,7 @@ async def interface_page():
     with ui.tab_panels(tabs, value=chattab).classes('w-full'):
         with ui.tab_panel(chattab).classes(''):
             with ui.column().classes('w-full items-center'):
-                with ui.scroll_area().classes('w-full h-[50vh] border'):
+                with ui.scroll_area().classes('w-full h-[50vh] border') as message_window:
                     display_messages()
                 chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=send_message)
