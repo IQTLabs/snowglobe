@@ -173,7 +173,7 @@ class LLM():
                     model_path=self.model_path,
                     n_gpu_layers=-1,
                     seed=random.randint(0, sys.maxsize),
-                    n_ctx=8192,
+                    n_ctx=32768,
                     n_batch=512,
                     f16_kv=True,
                     max_tokens=1000,
