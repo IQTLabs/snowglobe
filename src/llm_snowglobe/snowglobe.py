@@ -142,7 +142,7 @@ class LLM():
         self.gen = gen if gen is not None else True
         self.embed = embed if embed is not None else False
 
-        if not self.source in ['openai']:
+        if not self.source in ['openai', 'azure']:
             options = read_yaml(self.menu)
             # When using the default model and standard menu path,
             # if the model is not found then auto-install it.
@@ -153,6 +153,12 @@ class LLM():
             self.model_path = os.path.expanduser(self.model_path)
             if not os.path.isabs(self.model_path):
                 self.model_path = os.path.join(self.menu, self.model_path)
+        elif self.source in ['azure']:
+            options = read_yaml(self.menu)
+            self.azure_deployment = options[self.source][self.model][
+                'deployment']
+            self.azure_endpoint = options[self.source][self.model]['endpoint']
+            self.azure_version = options[self.source][self.model]['version']
 
         if self.source == 'openai':
 
@@ -164,6 +170,19 @@ class LLM():
                 )
             if self.embed:
                 self.embeddings = langchain_openai.OpenAIEmbeddings()
+
+        elif self.source == 'azure':
+
+            # Model Source: Azure OpenAI (Cloud)
+            if self.gen:
+                self.llm = langchain_openai.AzureChatOpenAI(
+                    azure_deployment=self.azure_deployment,
+                    azure_endpoint=self.azure_endpoint,
+                    api_version=self.azure_version,
+                    streaming=True,
+                )
+            if self.embed:
+                self.embeddings = langchain_openai.AzureOpenAIEmbeddings()
 
         elif self.source == 'llamacpp':
 
@@ -463,7 +482,7 @@ class Intelligent():
                 output = chain.invoke(variables).strip()
             else:
                 def handle(chunk):
-                    if self.llm.source == 'openai':
+                    if self.llm.source in ['openai', 'azure']:
                         chunk = chunk.content
                     print(chunk, end='', flush=True)
                     return chunk
