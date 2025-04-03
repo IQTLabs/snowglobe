@@ -128,10 +128,10 @@ async def interface_page():
         with ui.tabs().classes('w-full') as tabs:
             chattab = ui.tab('Chat')
             infotab = ui.tab('Info')
-    with ui.tab_panels(tabs, value=chattab).classes('w-full'):
-        with ui.tab_panel(chattab).classes(''):
-            with ui.column().classes('w-full items-center'):
-                with ui.scroll_area().classes('w-full h-[50vh] border') as message_window:
+    with ui.tab_panels(tabs, value=chattab).classes('absolute-full'):
+        with ui.tab_panel(chattab).classes('h-full'):
+            with ui.column().classes('w-full items-center h-full'):
+                with ui.scroll_area().classes('w-full h-full border') as message_window:
                     display_messages()
                 chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=send_message)
