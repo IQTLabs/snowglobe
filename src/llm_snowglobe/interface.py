@@ -112,7 +112,7 @@ async def interface_page():
     app.storage.tab['logged_in'] = False
     ui.timer(0, get_disk_updates, once=True)
 
-    with ui.left_drawer(bordered=True).classes('items-center'):
+    with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
             ui.image(os.path.join(here, 'terminal/snowglobe.png')).props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
@@ -124,10 +124,10 @@ async def interface_page():
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
                 login_name = ui.label('Name')
-    with ui.tabs().classes('w-full') as tabs:
-        chattab = ui.tab('Chat')
-        infotab = ui.tab('Info')
-    ui.separator()
+    with ui.header().style('background-color: #B4C7E7'):
+        with ui.tabs().classes('w-full') as tabs:
+            chattab = ui.tab('Chat')
+            infotab = ui.tab('Info')
     with ui.tab_panels(tabs, value=chattab).classes('w-full'):
         with ui.tab_panel(chattab).classes(''):
             with ui.column().classes('w-full items-center'):
