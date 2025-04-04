@@ -61,6 +61,7 @@ async def interface_page():
             login_name.text = databank['players'][idval]['name']
             display_messages.refresh()
             display_infodoc.refresh()
+            display_editdoc.refresh()
 
     async def send_message():
         if not 'id' in app.storage.tab:
@@ -87,6 +88,7 @@ async def interface_page():
             load_databank()
             display_messages.refresh()
             display_infodoc.refresh()
+            display_editdoc.refresh()
 
     @ui.refreshable
     def display_messages():
@@ -111,6 +113,16 @@ async def interface_page():
                 infocontent = ui.markdown(infodoc['content'].replace('\\n', chr(10)))
             elif infodoc['format'] == 'html':
                 infocontent = ui.html(infodoc['content'])
+            infocontent.classes('w-full h-full')
+
+    @ui.refreshable
+    def display_editdoc():
+        if 'id' in app.storage.tab:
+            idval = app.storage.tab['id']
+            editdocname = databank['players'][idval]['editdocs'][0]
+            editdoc = databank['editdocs'][editdocname]
+            editcontent = ui.editor().bind_value(app.storage.general, editdocname).classes('w-full h-full')
+            # ui.editor() or ui.textarea()
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
@@ -132,6 +144,7 @@ async def interface_page():
         with ui.tabs().classes('w-full') as tabs:
             chattab = ui.tab('Chat')
             infotab = ui.tab('Info')
+            edittab = ui.tab('Edit')
     with ui.tab_panels(tabs, value=chattab).classes('absolute-full'):
         with ui.tab_panel(chattab).classes('h-full'):
             with ui.column().classes('w-full items-center h-full'):
@@ -140,9 +153,11 @@ async def interface_page():
                 chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=send_message)
                 ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
-        with ui.tab_panel(infotab):
-            with ui.scroll_area().classes('w-full h-full'):
+        with ui.tab_panel(infotab).classes('absolute-full'):
+            with ui.scroll_area().classes('w-full h-full absolute-full'):
                 display_infodoc()
+        with ui.tab_panel(edittab).classes('absolute-full'):
+            display_editdoc()
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
