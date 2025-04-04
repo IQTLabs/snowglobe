@@ -41,6 +41,10 @@ app.on_startup(load_databank)
 app.on_shutdown(save_databank)
 app.on_exception(save_databank)
 
+app.add_static_file(url_path='/ai.png', local_file=os.path.join(
+    here, 'assets/ai.png'))
+app.add_static_file(url_path='/human.png', local_file=os.path.join(
+    here, 'assets/human.png'))
 
 @ui.page('/')
 async def interface_page():
@@ -66,7 +70,7 @@ async def interface_page():
             'text': chattext.value,
             'name': databank['players'][idval]['name'],
             'stamp': time.ctime(),
-            # 'avatar': os.path.join(here, 'terminal/favicon.ico'), TODO: Fix
+            'avatar': 'human.png',
         }
         chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
         if not 'log' in chatroom:
@@ -114,7 +118,7 @@ async def interface_page():
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
-            ui.image(os.path.join(here, 'terminal/snowglobe.png')).props('width=150px').style('border-radius: 5%')
+            ui.image(os.path.join(here, 'assets/snowglobe.png')).props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
