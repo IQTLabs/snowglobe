@@ -81,6 +81,23 @@ async def interface_page():
         chattext.set_value('')
         save_databank()
 
+    async def submit_editdoc():
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        editdocname = databank['players'][idval]['editdocs'][0]
+        editdoc = databank['editdocs'][editdocname]
+        editdoc['content'] = app.storage.general[editdocname]
+        if not 'history' in editdoc:
+            editdoc['history'] = []
+        editdoc['history'].append({
+            'text': editdoc['content'],
+            'name': databank['players'][idval]['name'],
+            'stamp': time.ctime(),
+        })
+        save_databank()
+        ui.notify('Document submitted')
+
     async def get_disk_updates():
         while True:
             async for changes in watchfiles.awatch(datapath):
@@ -108,25 +125,24 @@ async def interface_page():
             idval = app.storage.tab['id']
             infodoc = databank['infodocs'][databank['players'][idval]['infodocs'][0]]
             if 'format' not in infodoc or infodoc['format'] == 'plaintext':
-                infocontent = ui.label(infodoc['content'])
+                ui.label(infodoc['content']).classes('w-full h-full')
             elif infodoc['format'] == 'markdown':
-                infocontent = ui.markdown(infodoc['content'].replace('\\n', chr(10)))
+                ui.markdown(infodoc['content'].replace('\\n', chr(10))).classes('w-full h-full')
             elif infodoc['format'] == 'html':
-                infocontent = ui.html(infodoc['content'])
-            infocontent.classes('w-full h-full')
+                ui.html(infodoc['content']).classes('w-full h-full')
 
     @ui.refreshable
     def display_editdoc():
         if 'id' in app.storage.tab:
             idval = app.storage.tab['id']
             editdocname = databank['players'][idval]['editdocs'][0]
-            editdoc = databank['editdocs'][editdocname]
-            editcontent = ui.editor().bind_value(app.storage.general, editdocname).classes('w-full h-full')
+            ui.editor().bind_value(app.storage.general, editdocname).classes('w-full h-full')
             # ui.editor() or ui.textarea()
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
     ui.timer(0, get_disk_updates, once=True)
+    ui.add_css('.q-editor__toolbar { display: none }')
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
@@ -152,12 +168,15 @@ async def interface_page():
                     display_messages()
                 chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=send_message)
-                ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
+                ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab).classes('absolute-full'):
             with ui.scroll_area().classes('w-full h-full absolute-full'):
                 display_infodoc()
         with ui.tab_panel(edittab).classes('absolute-full'):
-            display_editdoc()
+            with ui.column().classes('w-full items-center h-full'):
+                editcontent = display_editdoc()
+                ui.button('Submit', on_click=submit_editdoc)
+                ui.label('Do not type or submit sensitive or personal information.').style('font-size: 10px')
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
