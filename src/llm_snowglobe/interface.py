@@ -95,7 +95,7 @@ async def interface_page():
             name = databank['players'][idval]['name']
             chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
             for message in chatroom['log']:
-                ui.chat_message(sent=name == message['name'], **message)
+                ui.chat_message(sent=name == message['name'], **message).classes('w-full')
             if len(chatroom['log']) > app.storage.tab['message_count']:
                 message_window.scroll_to(percent=100)
                 app.storage.tab['message_count'] = len(chatroom['log'])
@@ -141,7 +141,8 @@ async def interface_page():
                 ui.button('Send', on_click=send_message)
                 ui.label('Do not submit sensitive or personal information.').style('font-size: 10px')
         with ui.tab_panel(infotab):
-            display_infodoc()
+            with ui.scroll_area().classes('w-full h-full'):
+                display_infodoc()
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
