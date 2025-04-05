@@ -446,7 +446,9 @@ class Intelligent():
             else:
                 history_intro = 'This is what happened'
             template += '### ' + history_intro + ':\n\n{history}\n\n'
-            if not history_merged:
+            if isinstance(history, str):
+                variables['history'] = history
+            elif not history_merged:
                 variables['history'] = history.str(name=name)
             else:
                 variables['history'] = history.textonly()
@@ -585,9 +587,11 @@ class Intelligent():
         UI.set(data)
 
     def interface_send_message(self, chatroom, text):
+        avatar = 'ai.png' if self.kind == 'ai' else 'human.png'
         message = {'text': text,
                    'name': self.name,
-                   'stamp': time.ctime()}
+                   'stamp': time.ctime(),
+                   'avatar': avatar}
         data = UI.get()
         data['chatrooms'][chatroom]['log'].append(message)
         UI.set(data)
