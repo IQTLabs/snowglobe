@@ -179,6 +179,7 @@ class LLM():
                     azure_deployment=self.azure_deployment,
                     azure_endpoint=self.azure_endpoint,
                     api_version=self.azure_version,
+                    max_tokens=1000,
                     streaming=True,
                 )
             if self.embed:
