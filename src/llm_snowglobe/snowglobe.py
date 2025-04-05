@@ -26,6 +26,7 @@ import shutil
 import asyncio
 import inspect
 import readline
+import watchfiles
 import numpy as np
 import platformdirs
 import transformers
@@ -129,6 +130,10 @@ class UI():
     def set(self, data):
         with open(self.path(), 'w') as f:
             json.dump(data, f, indent=4)
+    @classmethod
+    def wait(self):
+        for changes in watchfiles.watch(self.path()):
+            break
 
 
 class LLM():
@@ -562,8 +567,7 @@ class Intelligent():
 
         # Create info for UI interface
         pdict = self.iodict if self.iodict is not None else {
-            'chatrooms': [], 'infodocs': [], 'editdocs': []}
-        pdict['name'] = self.name
+            'name': self.name, 'chatrooms': [], 'infodocs': [], 'editdocs': []}
 
         # Export info for UI interface
         UI.create()
