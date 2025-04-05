@@ -101,13 +101,10 @@ async def interface_page():
     async def update_editdoc_cursor(event: events.ValueChangeEventArguments):
         if not 'id' in app.storage.tab:
             return
-        # update_editdoc_cursor.post_cursor = editobj.selectionStart
-        # print(event)
-        # print(update_editdoc_cursor.post_cursor)
-        # idval = app.storage.tab['id']
-        # name = databank['players'][idval]['name']
-        # print(event)
-        # print('%s %i %i' % ())
+        #update_editdoc_cursor.post_cursor = editobj.selectionStart
+        print(event)
+        #print(update_editdoc_cursor.post_cursor)
+        editobj.set_selection_range(3,5)
 
     async def get_disk_updates():
         while True:
@@ -149,11 +146,8 @@ async def interface_page():
         if 'id' in app.storage.tab:
             idval = app.storage.tab['id']
             editdocname = databank['players'][idval]['editdocs'][0]
-            #editobj = ui.editor(on_change=update_editdoc_cursor).bind_value(app.storage.general, editdocname).classes('w-full h-full')
-            editobj = ui.textarea(on_change=update_editdoc_cursor).bind_value(app.storage.general, editdocname).props('input-class=w-full,h-full')
-            # ui.editor() or ui.textarea()
-            print(editobj)
-            return editobj
+            editobj.bind_value(app.storage.general, editdocname)
+            editobj.on_value_change(update_editdoc_cursor)
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
@@ -191,7 +185,11 @@ async def interface_page():
                 display_infodoc()
         with ui.tab_panel(edittab).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
-                editobj = display_editdoc()
+                #editobj = ui.editor().classes('w-full h-full')
+                editobj = ui.textarea().classes('w-full').props('input-class=h-64')
+                #editobj = ui.element('textarea').classes('w-full h-full').style('border: 1px solid #e5e7eb; padding: 5px')
+                #editobj = ui.input().classes('w-full h-full')
+                display_editdoc()
                 ui.button('Submit', on_click=submit_editdoc)
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
