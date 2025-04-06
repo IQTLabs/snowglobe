@@ -32,8 +32,15 @@ async def load_databank():
                                  'infodocs': {}, 'editdocs': {}}
         save_databank()
     while True:
-        with open(datapath, 'r') as f:
-            globals()['databank'] = json.load(f)
+        while True:
+            try:
+                with open(datapath, 'r') as f:
+                    globals()['databank'] = json.load(f)
+            except json.decoder.JSONDecodeError:
+                print('! Databank load error')
+                time.sleep(0.1)
+            else:
+                break
         app.storage.general['datastep'] += 1
         async for changes in watchfiles.awatch(datapath):
             break
@@ -63,6 +70,7 @@ async def interface_page():
             app.storage.tab['message_count'] = 0
             login_name.text = databank['players'][idval]['name']
             display_all()
+            display_editdoc()
 
     async def send_message():
         if not 'id' in app.storage.tab:
@@ -110,7 +118,7 @@ async def interface_page():
     def display_all():
         display_messages.refresh()
         display_infodoc.refresh()
-        display_editdoc.refresh()
+        # display_editdoc.refresh() # Do not re-run on databank update
 
     @ui.refreshable
     def display_messages():
