@@ -586,14 +586,18 @@ class Intelligent():
                 data['editdocs'][editdoc] = {'content': ''}
         UI.set(data)
 
-    def interface_send_message(self, chatroom, text):
+    def interface_send_message(self, chatroom, text, cc=None):
         avatar = 'ai.png' if self.kind == 'ai' else 'human.png'
         message = {'text': text,
                    'name': self.name,
                    'stamp': time.ctime(),
                    'avatar': avatar}
+        cc = [cc] if isinstance(cc, str) else cc
         data = UI.get()
         data['chatrooms'][chatroom]['log'].append(message)
+        if cc is not None:
+            for carboncopy in cc:
+                data['chatrooms'][carboncopy]['log'].append(message)
         UI.set(data)
 
     def interface_get_message(self, chatroom):
