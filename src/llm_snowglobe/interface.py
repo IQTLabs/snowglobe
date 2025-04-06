@@ -24,22 +24,25 @@ from nicegui import ui, app, events
 here = os.path.dirname(os.path.abspath(__file__))
 datapath = 'databank.json'
 databank = None
+app.storage.general['datastep'] = 0
 
-def load_databank():
-    if os.path.exists(datapath):
-        with open(datapath, 'r') as f:
-            globals()['databank'] = json.load(f)
-    else:
+async def load_databank():
+    if not os.path.exists(datapath):
         globals()['databank'] = {'players': {}, 'chatrooms': {},
                                  'infodocs': {}, 'editdocs': {}}
+        save_databank()
+    while True:
+        with open(datapath, 'r') as f:
+            globals()['databank'] = json.load(f)
+        app.storage.general['datastep'] += 1
+        async for changes in watchfiles.awatch(datapath):
+            break
 
 def save_databank():
     with open(datapath, 'w') as f:
         json.dump(globals()['databank'], f, indent=4)
 
 app.on_startup(load_databank)
-app.on_shutdown(save_databank)
-app.on_exception(save_databank)
 
 app.add_static_file(url_path='/ai.png', local_file=os.path.join(
     here, 'assets/ai.png'))
@@ -49,7 +52,7 @@ app.add_static_file(url_path='/human.png', local_file=os.path.join(
 @ui.page('/')
 async def interface_page():
 
-    async def load_id(idval):
+    async def set_id(idval):
         if len(idval) == 0:
             ui.notify('Enter your ID.')
         elif not idval in databank['players']:
@@ -59,9 +62,7 @@ async def interface_page():
             app.storage.tab['logged_in'] = True
             app.storage.tab['message_count'] = 0
             login_name.text = databank['players'][idval]['name']
-            display_messages.refresh()
-            display_infodoc.refresh()
-            display_editdoc.refresh()
+            display_all()
 
     async def send_message():
         if not 'id' in app.storage.tab:
@@ -106,14 +107,10 @@ async def interface_page():
         #print(update_editdoc_cursor.post_cursor)
         editobj.set_selection_range(3,5)
 
-    async def get_disk_updates():
-        while True:
-            async for changes in watchfiles.awatch(datapath):
-                break
-            load_databank()
-            display_messages.refresh()
-            display_infodoc.refresh()
-            display_editdoc.refresh()
+    def display_all():
+        display_messages.refresh()
+        display_infodoc.refresh()
+        display_editdoc.refresh()
 
     @ui.refreshable
     def display_messages():
@@ -151,9 +148,7 @@ async def interface_page():
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
-    ui.timer(0, get_disk_updates, once=True)
     ui.add_css('.q-editor__toolbar { display: none }')
-    editobj = None
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
@@ -162,11 +157,12 @@ async def interface_page():
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in', backward=lambda x: not x):
-                login_id = ui.input('ID', placeholder='Player ID #').props('size=8')
-                ui.button('Connect', on_click=lambda x: load_id(login_id.value))
+                login_id = ui.input('ID', placeholder='Player ID #').props('size=6')
+                ui.button('Connect', on_click=lambda x: set_id(login_id.value))
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
                 login_name = ui.label('Name')
+            ui.textarea().bind_value(app.storage.general, 'datastep').on_value_change(display_all)
     with ui.header().style('background-color: #B4C7E7'):
         with ui.tabs().classes('w-full') as tabs:
             chattab = ui.tab('Chat')
