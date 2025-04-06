@@ -24,7 +24,7 @@ from nicegui import ui, app, events
 here = os.path.dirname(os.path.abspath(__file__))
 datapath = 'databank.json'
 databank = None
-datastep = 0
+app.storage.general['datastep'] = 0
 
 async def load_databank():
     if not os.path.exists(datapath):
@@ -34,7 +34,7 @@ async def load_databank():
     while True:
         with open(datapath, 'r') as f:
             globals()['databank'] = json.load(f)
-        globals()['datastep'] += 1
+        app.storage.general['datastep'] += 1
         async for changes in watchfiles.awatch(datapath):
             break
 
@@ -105,7 +105,7 @@ async def interface_page():
         #update_editdoc_cursor.post_cursor = editobj.selectionStart
         print(event)
         #print(update_editdoc_cursor.post_cursor)
-        editobj.set_selection_range(3,5)
+        #editobj.set_selection_range(3,5)
 
     def display_all():
         display_messages.refresh()
@@ -162,7 +162,7 @@ async def interface_page():
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
                 login_name = ui.label('Name')
-            ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
+            ui.input().bind_value(app.storage.general, 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
         with ui.tabs().classes('w-full') as tabs:
             chattab = ui.tab('Chat')
