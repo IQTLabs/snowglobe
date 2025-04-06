@@ -162,7 +162,7 @@ async def interface_page():
             with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
                 login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
                 login_name = ui.label('Name')
-            ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False)
+            ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
         with ui.tabs().classes('w-full') as tabs:
             chattab = ui.tab('Chat')
