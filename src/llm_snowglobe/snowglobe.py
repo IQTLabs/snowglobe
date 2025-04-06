@@ -580,7 +580,7 @@ class Intelligent():
                 data['chatrooms'][chatroom] = {'log': []}
         for infodoc in pdict['infodocs']:
             if infodoc not in data['infodocs']:
-                data['infodocs'][infodoc] = {'content': '', 'format': 'plaintext'}
+                data['infodocs'][infodoc] = {'content': '', 'format': 'markdown'}
         for editdoc in pdict['editdocs']:
             if editdoc not in data['editdocs']:
                 data['editdocs'][editdoc] = {'content': ''}
