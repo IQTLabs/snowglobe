@@ -18,6 +18,7 @@ import os
 import json
 import time
 import asyncio
+import markdown2
 import watchfiles
 from nicegui import ui, app, events
 
@@ -143,7 +144,13 @@ async def interface_page():
             if not 'log' in chatroom:
                 chatroom['log'] = []
             for message in chatroom['log']:
-                ui.chat_message(sent=name == message['name'], **message).classes('w-full')
+                ui.chat_message(text=markdown2.markdown(message['text']),
+                                name=message['name'],
+                                stamp=message['stamp'],
+                                avatar=message['avatar'],
+                                sent=name == message['name'],
+                                text_html=True,
+                                ).classes('w-full')
             if len(chatroom['log']) > app.storage.tab['message_count']:
                 message_window.scroll_to(percent=100)
                 app.storage.tab['message_count'] = len(chatroom['log'])
