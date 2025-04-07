@@ -144,12 +144,20 @@ async def interface_page():
             if not 'log' in chatroom:
                 chatroom['log'] = []
             for message in chatroom['log']:
-                ui.chat_message(text=markdown2.markdown(message['text']),
+                if message['name'] == name:
+                    text = message['text']
+                    sent = True
+                    text_html = False
+                else:
+                    text = markdown2.markdown(message['text'])
+                    sent = False
+                    text_html = True
+                ui.chat_message(text=text,
                                 name=message['name'],
                                 stamp=message['stamp'],
                                 avatar=message['avatar'],
-                                sent=name == message['name'],
-                                text_html=True,
+                                sent=sent,
+                                text_html=text_html,
                                 ).classes('w-full')
             if len(chatroom['log']) > app.storage.tab['message_count']:
                 message_window.scroll_to(percent=100)
