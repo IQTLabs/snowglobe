@@ -112,21 +112,22 @@ async def interface_page():
         #     return
         # print(event)
         # print(editobj.id)
-        await ui.run_javascript('''
-            const element = getElement(%s).$refs.qRef.getNativeElement();
-            if (document.activeElement === element) {
-                const loc = element.selectionStart;
-                const text = element.value;
-                const newloc = loc - 1;
-                element.value = element.value + '()';
-                element.setSelectionRange(newloc, newloc);
-                window.loc = newloc;
-            }
-        ''' % editobj.id)
+        # await ui.run_javascript('''
+        #     const element = getElement(%s).$refs.qRef.getNativeElement();
+        #     if (document.activeElement === element) {
+        #         const loc = element.selectionStart;
+        #         const text = element.value;
+        #         const newloc = loc - 1;
+        #         element.value = element.value + '()';
+        #         element.setSelectionRange(newloc, newloc);
+        #         window.loc = newloc;
+        #     }
+        # ''' % editobj.id)
         #update_editdoc_cursor.post_cursor = editobj.selectionStart
         #print(event.sender.__name__)
         #print(update_editdoc_cursor.post_cursor)
         #editobj.set_selection_range(3,5)
+        pass
 
     def display_all():
         display_messages.refresh()
@@ -170,6 +171,18 @@ async def interface_page():
                 if databank['players'][idval]['name'] in databank['editdocs'][editdocname]['readonly']:
                     editobj.enabled = False
 
+            # ui.run_javascript('''
+            # const element = getElement(%s).$refs.qRef.getNativeElement();
+            # if (document.activeElement === element) {
+            #     const loc = element.selectionStart;
+            #     const text = element.value;
+            #     const newloc = loc - 1;
+            #     element.value = element.value + '()';
+            #     element.setSelectionRange(newloc, newloc);
+            #     window.loc = newloc;
+            # }
+            # ''' % editobj.id)
+
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
     ui.add_css('.q-editor__toolbar { display: none }')
@@ -206,7 +219,7 @@ async def interface_page():
         with ui.tab_panel(edittab).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
                 #editobj = ui.editor().classes('w-full h-full')
-                editobj = ui.textarea().classes('w-full').props('input-class=h-64')
+                editobj = ui.textarea().classes('w-full').props('input-class=h-80')
                 #editobj = ui.element('textarea').classes('w-full h-full').style('border: 1px solid #e5e7eb; padding: 5px')
                 #editobj = ui.input().classes('w-full h-full')
                 display_editdoc()
