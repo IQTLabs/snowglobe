@@ -166,6 +166,9 @@ async def interface_page():
             editdocname = databank['players'][idval]['editdocs'][0]
             editobj.bind_value(app.storage.general, editdocname)
             editobj.on_value_change(update_editdoc_cursor)
+            if 'readonly' in databank['editdocs'][editdocname]:
+                if databank['players'][idval]['name'] in databank['editdocs'][editdocname]['readonly']:
+                    editobj.enabled = False
 
     await ui.context.client.connected()
     app.storage.tab['logged_in'] = False
