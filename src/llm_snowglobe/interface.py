@@ -108,10 +108,23 @@ async def interface_page():
         ui.notify('Document submitted')
 
     async def update_editdoc_cursor(event: events.ValueChangeEventArguments):
-        if not 'id' in app.storage.tab:
-            return
+        # if not 'id' in app.storage.tab:
+        #     return
+        # print(event)
+        # print(editobj.id)
+        await ui.run_javascript('''
+            const element = getElement(%s).$refs.qRef.getNativeElement();
+            if (document.activeElement === element) {
+                const loc = element.selectionStart;
+                const text = element.value;
+                const newloc = loc - 1;
+                element.value = element.value + '()';
+                element.setSelectionRange(newloc, newloc);
+                window.loc = newloc;
+            }
+        ''' % editobj.id)
         #update_editdoc_cursor.post_cursor = editobj.selectionStart
-        print(event)
+        #print(event.sender.__name__)
         #print(update_editdoc_cursor.post_cursor)
         #editobj.set_selection_range(3,5)
 
