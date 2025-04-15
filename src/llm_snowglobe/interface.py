@@ -78,7 +78,8 @@ async def interface_page():
             return
         idval = app.storage.tab['id']
         message = {
-            'text': chattext.value,
+            'content': chattext.value,
+            'format': 'plaintext',
             'name': databank['players'][idval]['name'],
             'stamp': time.ctime(),
             'avatar': 'human.png',
@@ -142,16 +143,18 @@ async def interface_page():
             name = databank['players'][idval]['name']
             chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
             if not 'log' in chatroom:
-                chatroom['log'] = []
+                return
             for message in chatroom['log']:
-                if message['name'] == name:
-                    text = message['text']
-                    sent = True
+                if 'format' not in message or message['format'] == 'plaintext':
+                    text = message['content']
                     text_html = False
-                else:
-                    text = markdown2.markdown(message['text'])
-                    sent = False
+                elif message['format'] == 'markdown':
+                    text = markdown2.markdown(message['content'])
                     text_html = True
+                elif message['format'] == 'html':
+                    text = message['content']
+                    text_html = True
+                sent = message['name'] == name
                 ui.chat_message(text=text,
                                 name=message['name'],
                                 stamp=message['stamp'],

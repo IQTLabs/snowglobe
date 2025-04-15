@@ -586,9 +586,12 @@ class Intelligent():
                 data['editdocs'][editdoc] = {'content': ''}
         UI.set(data)
 
-    def interface_send_message(self, chatroom, text, cc=None):
+    def interface_send_message(self, chatroom, content, fmt=None, cc=None):
+        if fmt is None:
+            fmt = 'markdown'
         avatar = 'ai.png' if self.kind == 'ai' else 'human.png'
-        message = {'text': text,
+        message = {'content': content,
+                   'format': fmt,
                    'name': self.name,
                    'stamp': time.ctime(),
                    'avatar': avatar}
