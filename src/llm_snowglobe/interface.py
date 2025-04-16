@@ -67,9 +67,11 @@ async def interface_page():
             ui.notify('ID not found.')
         else:
             app.storage.tab['id'] = idval
-            app.storage.tab['logged_in'] = True
             app.storage.tab['message_count'] = 0
+            login_numb.text = app.storage.tab['id']
             login_name.text = databank['players'][idval]['name']
+            preloginrow.set_visibility(False)
+            postloginrow.set_visibility(True)
             await display_all()
             display_editdoc()
 
@@ -211,11 +213,12 @@ async def interface_page():
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
-            with ui.row().bind_visibility_from(app.storage.tab, 'logged_in', backward=lambda x: not x):
+            with ui.row() as preloginrow:
                 login_id = ui.input('ID', placeholder='Player ID #').props('size=6')
                 ui.button('Connect', on_click=lambda x: set_id(login_id.value))
-            with ui.row().bind_visibility_from(app.storage.tab, 'logged_in'):
-                login_numb = ui.label('ID').bind_text_from(app.storage.tab, 'id')
+            with ui.row() as postloginrow:
+                postloginrow.set_visibility(False)
+                login_numb = ui.label('ID')
                 login_name = ui.label('Name')
             ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
