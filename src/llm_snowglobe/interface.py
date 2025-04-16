@@ -112,8 +112,8 @@ async def interface_page():
         ui.notify('Document submitted')
 
     async def update_editdoc_cursor(event: events.ValueChangeEventArguments):
-        # if not 'id' in app.storage.tab:
-        #     return
+        if not 'id' in app.storage.tab:
+            return
         # print(event)
         # print(editobj.id)
         # await ui.run_javascript('''
@@ -131,7 +131,6 @@ async def interface_page():
         #print(event.sender.__name__)
         #print(update_editdoc_cursor.post_cursor)
         #editobj.set_selection_range(3,5)
-        pass
 
     async def display_all():
         display_messages.refresh()
@@ -188,7 +187,8 @@ async def interface_page():
             editobj.bind_value(app.storage.general, editdocname)
             editobj.on_value_change(update_editdoc_cursor)
             if 'readonly' in databank['editdocs'][editdocname]:
-                if databank['players'][idval]['name'] in databank['editdocs'][editdocname]['readonly']:
+                if databank['players'][idval]['name'] in \
+                   databank['editdocs'][editdocname]['readonly']:
                     editobj.enabled = False
 
             # ui.run_javascript('''
@@ -204,8 +204,6 @@ async def interface_page():
             # ''' % editobj.id)
 
     await ui.context.client.connected()
-    app.storage.tab['logged_in'] = False
-    ui.add_css('.q-editor__toolbar { display: none }')
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
         with ui.column(align_items='center'):
@@ -214,7 +212,7 @@ async def interface_page():
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
             with ui.row() as preloginrow:
-                login_id = ui.input('ID', placeholder='Player ID #').props('size=6')
+                login_id = ui.input('ID', placeholder='Player ID').props('size=6')
                 ui.button('Connect', on_click=lambda x: set_id(login_id.value))
             with ui.row() as postloginrow:
                 postloginrow.set_visibility(False)
