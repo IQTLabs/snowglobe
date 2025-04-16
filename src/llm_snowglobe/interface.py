@@ -70,7 +70,7 @@ async def interface_page():
             app.storage.tab['logged_in'] = True
             app.storage.tab['message_count'] = 0
             login_name.text = databank['players'][idval]['name']
-            display_all()
+            await display_all()
             display_editdoc()
 
     async def send_message():
@@ -102,7 +102,7 @@ async def interface_page():
         if not 'history' in editdoc:
             editdoc['history'] = []
         editdoc['history'].append({
-            'text': editdoc['content'],
+            'content': editdoc['content'],
             'name': databank['players'][idval]['name'],
             'stamp': time.ctime(),
         })
@@ -131,7 +131,7 @@ async def interface_page():
         #editobj.set_selection_range(3,5)
         pass
 
-    def display_all():
+    async def display_all():
         display_messages.refresh()
         display_infodoc.refresh()
         # display_editdoc.refresh() # Do not re-run on databank update
