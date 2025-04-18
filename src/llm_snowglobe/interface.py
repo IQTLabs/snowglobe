@@ -75,42 +75,6 @@ async def interface_page():
             await display_all()
             display_editdoc()
 
-    async def send_message():
-        if not 'id' in app.storage.tab:
-            return
-        idval = app.storage.tab['id']
-        message = {
-            'content': chattext.value,
-            'format': 'plaintext',
-            'name': databank['players'][idval]['name'],
-            'stamp': time.ctime(),
-            'avatar': 'human.png',
-        }
-        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
-        if not 'log' in chatroom:
-            chatroom['log'] = []
-        chatroom['log'].append(message)
-        display_messages.refresh()
-        chattext.set_value('')
-        save_databank()
-
-    async def submit_editdoc():
-        if not 'id' in app.storage.tab:
-            return
-        idval = app.storage.tab['id']
-        editdocname = databank['players'][idval]['editdocs'][0]
-        editdoc = databank['editdocs'][editdocname]
-        editdoc['content'] = app.storage.general[editdocname]
-        if not 'history' in editdoc:
-            editdoc['history'] = []
-        editdoc['history'].append({
-            'content': editdoc['content'],
-            'name': databank['players'][idval]['name'],
-            'stamp': time.ctime(),
-        })
-        save_databank()
-        ui.notify('Document submitted')
-
     async def display_all():
         display_messages.refresh()
         display_infodoc.refresh()
@@ -222,6 +186,42 @@ async def interface_page():
             editobj.on('selectionchange', js_handler=cursor_move_handler)
             #editobj.on('update:model-value', lambda: ui.notify('text_change'))
             #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
+
+    async def send_message():
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        message = {
+            'content': chattext.value,
+            'format': 'plaintext',
+            'name': databank['players'][idval]['name'],
+            'stamp': time.ctime(),
+            'avatar': 'human.png',
+        }
+        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+        if not 'log' in chatroom:
+            chatroom['log'] = []
+        chatroom['log'].append(message)
+        display_messages.refresh()
+        chattext.set_value('')
+        save_databank()
+
+    async def submit_editdoc():
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        editdocname = databank['players'][idval]['editdocs'][0]
+        editdoc = databank['editdocs'][editdocname]
+        editdoc['content'] = app.storage.general[editdocname]
+        if not 'history' in editdoc:
+            editdoc['history'] = []
+        editdoc['history'].append({
+            'content': editdoc['content'],
+            'name': databank['players'][idval]['name'],
+            'stamp': time.ctime(),
+        })
+        save_databank()
+        ui.notify('Document submitted')
 
     await ui.context.client.connected()
 
