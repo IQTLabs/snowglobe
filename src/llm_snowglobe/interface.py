@@ -191,6 +191,54 @@ async def interface_page():
                    databank['editdocs'][editdocname]['readonly']:
                     editobj.enabled = False
 
+            # Code to reposition cursor, which by default gets moved to
+            # the end of the textarea if someone else modifies the text.
+            handler_setup = '''
+            if (typeof window.editdoccursor == 'undefined') {
+                window.editdoccursor = {};
+            }
+            if (typeof window.editdoccursor.%s == 'undefined') {
+                window.editdoccursor.%s = {};
+            }
+            window.editdoccursor.%s.value = '';
+            window.editdoccursor.%s.selectionStart = 0;
+            window.editdoccursor.%s.selectionEnd = 0;
+            ''' % tuple([editdocname] * 5) # Hardwired number of occurrences
+            handler = '''(e) => {
+                const element = getElement(%s).$refs.qRef.getNativeElement();
+                const debug = getElement(%s).$refs.qRef.getNativeElement();
+                debug.value = element.value.length.toString() + ' ' + element.selectionStart.toString() + ' ' + element.selectionEnd.toString();
+                oldinfo = window.editdoccursor.%s;
+                if (oldinfo.selectionStart == oldinfo.selectionEnd && element.selectionStart == element.selectionEnd) {
+                    if (element.value.substring(oldinfo.selectionEnd + element.value.length - oldinfo.value.length) == oldinfo.value.substring(oldinfo.selectionEnd)) {
+                        element.setSelectionRange(oldinfo.selectionEnd + element.value.length - oldinfo.value.length, oldinfo.selectionEnd + element.value.length - oldinfo.value.length);
+                    } else if (element.value.substring(0, oldinfo.selectionStart) == oldinfo.value.substring(0, oldinfo.selectionStart)) {
+                        element.setSelectionRange(oldinfo.selectionEnd, oldinfo.selectionEnd);
+                    }
+                } else {
+                    // TODO: Handle case of highlighted text
+                }
+                oldinfo.value = element.value;
+                oldinfo.selectionStart = element.selectionStart;
+                oldinfo.selectionEnd = element.selectionEnd;
+                oldinfo.e = e;
+            }''' % (editobj.id, debugobj.id, editdocname)
+            ui.run_javascript(handler_setup)
+            editobj.on('update:model-value', js_handler=handler)
+            #editobj.on('selectionchange', lambda: ui.notify('change'))
+
+            #debugobj.on('input', lambda: ui.notify('modify'))
+            #debugobj.on('selectionchange', lambda: ui.notify('change'))
+            #editobj.on('update:model-value', lambda: ui.notify('modify'))
+
+            # ui.run_javascript('''
+            # const element = getElement(%s).$refs.qRef.getNativeElement();
+            # const debug = getElement(%s).$refs.qRef.getNativeElement();
+            # element.addEventListener('selectionchange', () => {
+            #     debug.value = 'abc'; //element.selectionStart;
+            # });
+            # ''' % (editobj.id, debugobj.id))
+
             # ui.run_javascript('''
             # const element = getElement(%s).$refs.qRef.getNativeElement();
             # if (document.activeElement === element) {
@@ -241,6 +289,7 @@ async def interface_page():
                 editobj = ui.textarea().classes('w-full').props('input-class=h-80')
                 #editobj = ui.element('textarea').classes('w-full h-full').style('border: 1px solid #e5e7eb; padding: 5px')
                 #editobj = ui.input().classes('w-full h-full')
+                debugobj = ui.textarea()
                 display_editdoc()
                 ui.button('Submit', on_click=submit_editdoc)
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
