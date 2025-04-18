@@ -204,32 +204,37 @@ async def interface_page():
             info.value = '';
             info.selectionStart = 0;
             info.selectionEnd = 0;
+            info.selfChange = false;
             ''' % tuple([editdocname] * 3)
+            text_change_handler = '''() => {
+                window.editdoccursor.%s.selfChange = true;
+            }''' % editdocname
             cursor_move_handler = '''() => {
                 const element = getElement(%s).$refs.qRef.getNativeElement();
-                const debug = getElement(%s).$refs.qRef.getNativeElement();
-                debug.value = element.value.length.toString() + ' ' + element.selectionStart.toString() + ' ' + element.selectionEnd.toString();
-                info = window.editdoccursor.%s;
+                const info = window.editdoccursor.%s;
+                // Relocate cursor if text was changed but not by this user
+                if (element.value !== info.value && !info.selfChange) {
+                    if (info.selectionStart == info.selectionEnd && element.selectionStart == element.selectionEnd) {
+                        if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
+                            // Relocate cursor based on subsequent text
+                            element.setSelectionRange(info.selectionEnd + element.value.length - info.value.length, info.selectionEnd + element.value.length - info.value.length);
+                        } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
+                            // Relocate cursor based on previous text
+                            element.setSelectionRange(info.selectionEnd, info.selectionEnd);
+                        }
+                    } else {
+                        // TODO: Handle case of highlighted text
+                    }
+                }
+                // Update record of previous cursor location
                 info.value = element.value;
                 info.selectionStart = element.selectionStart;
                 info.selectionEnd = element.selectionEnd;
-            }''' % (editobj.id, debugobj.id, editdocname)
-            text_change_handler = '''() => {
-                const element = getElement(%s).$refs.qRef.getNativeElement();
-                oldinfo = window.editdoccursor.%s;
-                if (oldinfo.selectionStart == oldinfo.selectionEnd && element.selectionStart == element.selectionEnd) {
-                    if (element.value.substring(oldinfo.selectionEnd + element.value.length - oldinfo.value.length) == oldinfo.value.substring(oldinfo.selectionEnd)) {
-                        element.setSelectionRange(oldinfo.selectionEnd + element.value.length - oldinfo.value.length, oldinfo.selectionEnd + element.value.length - oldinfo.value.length);
-                    } else if (element.value.substring(0, oldinfo.selectionStart) == oldinfo.value.substring(0, oldinfo.selectionStart)) {
-                        element.setSelectionRange(oldinfo.selectionEnd, oldinfo.selectionEnd);
-                    }
-                } else {
-                    // TODO: Handle case of highlighted text
-                }
+                info.selfChange = false;
             }''' % (editobj.id, editdocname)
             ui.run_javascript(handler_setup)
-            #editobj.on('update:model-value', js_handler=text_change_handler)
-            #editobj.on('selectionchange', js_handler=cursor_move_handler)
+            editobj.on('update:model-value', js_handler=text_change_handler)
+            editobj.on('selectionchange', js_handler=cursor_move_handler)
 
             editobj.on('update:model-value', lambda: ui.notify('text_change'))
             editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
