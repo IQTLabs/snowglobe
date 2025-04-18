@@ -192,16 +192,23 @@ async def interface_page():
                 const info = window.editdoccursor.%s;
                 // Relocate cursor if text was changed but not by this user
                 if (element.value !== info.value && !info.selfChange) {
-                    if (info.selectionStart == info.selectionEnd && element.selectionStart == element.selectionEnd) {
-                        if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
-                            // Relocate cursor using matching subsequent text
-                            element.setSelectionRange(info.selectionEnd + element.value.length - info.value.length, info.selectionEnd + element.value.length - info.value.length);
-                        } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
-                            // Relocate cursor using matching previous text
-                            element.setSelectionRange(info.selectionEnd, info.selectionEnd);
-                        }
-                    } else {
-                        // TODO: Handle case of highlighted text
+                    var newStart = element.selectionStart;
+                    var newEnd = element.selectionEnd;
+                    // Relocate selectionStart
+                    if (element.value.substring(info.selectionStart + element.value.length - info.value.length) == info.value.substring(info.selectionStart)) {
+                        newStart = info.selectionStart + element.value.length - info.value.length;
+                    } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
+                        newStart = info.selectionStart;
+                    }
+                    // Relocate selectionEnd
+                    if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
+                        newEnd = info.selectionEnd + element.value.length - info.value.length;
+                    } else if (element.value.substring(0, info.selectionEnd) == info.value.substring(0, info.selectionEnd)) {
+                        newEnd = info.selectionEnd;
+                    }
+                    // Implement any specified relocations
+                    if (newStart !== element.selectionStart || newEnd !== element.selectionEnd) {
+                        element.setSelectionRange(newStart, newEnd);
                     }
                 }
                 // Update record of previous cursor location
