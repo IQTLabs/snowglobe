@@ -82,110 +82,113 @@ async def interface_page():
 
     @ui.refreshable
     def display_messages():
-        if 'id' in app.storage.tab:
-            idval = app.storage.tab['id']
-            name = databank['players'][idval]['name']
-            chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
-            if not 'log' in chatroom:
-                return
-            for message in chatroom['log']:
-                if 'format' not in message or message['format'] == 'plaintext':
-                    text = message['content']
-                    text_html = False
-                elif message['format'] == 'markdown':
-                    text = markdown2.markdown(message['content'])
-                    text_html = True
-                elif message['format'] == 'html':
-                    text = message['content']
-                    text_html = True
-                sent = message['name'] == name
-                ui.chat_message(text=text,
-                                name=message['name'],
-                                stamp=message['stamp'],
-                                avatar=message['avatar'],
-                                sent=sent,
-                                text_html=text_html,
-                                ).classes('w-full')
-            if len(chatroom['log']) > app.storage.tab['message_count']:
-                message_window.scroll_to(percent=100)
-                app.storage.tab['message_count'] = len(chatroom['log'])
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        name = databank['players'][idval]['name']
+        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+        if not 'log' in chatroom:
+            return
+        for message in chatroom['log']:
+            if 'format' not in message or message['format'] == 'plaintext':
+                text = message['content']
+                text_html = False
+            elif message['format'] == 'markdown':
+                text = markdown2.markdown(message['content'])
+                text_html = True
+            elif message['format'] == 'html':
+                text = message['content']
+                text_html = True
+            sent = message['name'] == name
+            ui.chat_message(text=text,
+                            name=message['name'],
+                            stamp=message['stamp'],
+                            avatar=message['avatar'],
+                            sent=sent,
+                            text_html=text_html,
+                            ).classes('w-full')
+        if len(chatroom['log']) > app.storage.tab['message_count']:
+            message_window.scroll_to(percent=100)
+            app.storage.tab['message_count'] = len(chatroom['log'])
 
     @ui.refreshable
     def display_infodoc():
-        if 'id' in app.storage.tab:
-            idval = app.storage.tab['id']
-            infodoc = databank['infodocs'][databank['players'][idval]['infodocs'][0]]
-            if 'format' not in infodoc or infodoc['format'] == 'plaintext':
-                ui.label(infodoc['content']).classes('w-full h-full')
-            elif infodoc['format'] == 'markdown':
-                ui.markdown(infodoc['content'].replace('\\n', chr(10))).classes('w-full h-full')
-            elif infodoc['format'] == 'html':
-                ui.html(infodoc['content']).classes('w-full h-full')
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        infodoc = databank['infodocs'][databank['players'][idval]['infodocs'][0]]
+        if 'format' not in infodoc or infodoc['format'] == 'plaintext':
+            ui.label(infodoc['content']).classes('w-full h-full')
+        elif infodoc['format'] == 'markdown':
+            ui.markdown(infodoc['content'].replace('\\n', chr(10))).classes('w-full h-full')
+        elif infodoc['format'] == 'html':
+            ui.html(infodoc['content']).classes('w-full h-full')
 
     @ui.refreshable
     def display_editdoc():
-        if 'id' in app.storage.tab:
-            idval = app.storage.tab['id']
-            editdocname = databank['players'][idval]['editdocs'][0]
-            editobj.bind_value(app.storage.general, editdocname)
-            if 'readonly' in databank['editdocs'][editdocname]:
-                if databank['players'][idval]['name'] in \
-                   databank['editdocs'][editdocname]['readonly']:
-                    editobj.enabled = False
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        editdocname = databank['players'][idval]['editdocs'][0]
+        editobj.bind_value(app.storage.general, editdocname)
+        if 'readonly' in databank['editdocs'][editdocname]:
+            if databank['players'][idval]['name'] in \
+               databank['editdocs'][editdocname]['readonly']:
+                editobj.enabled = False
 
-            # Code to reposition cursor, which by default gets moved to
-            # the end of the textarea if someone else modifies the text.
-            handler_setup = '''
-            if (typeof window.editdoccursor == 'undefined') {
-                window.editdoccursor = {};
-            }
-            if (typeof window.editdoccursor.%s == 'undefined') {
-                window.editdoccursor.%s = {};
-            }
-            info = window.editdoccursor.%s;
-            info.value = '';
-            info.selectionStart = 0;
-            info.selectionEnd = 0;
-            info.selfChange = false;
-            ''' % tuple([editdocname] * 3)
-            text_change_handler = '''() => {
-                window.editdoccursor.%s.selfChange = true;
-            }''' % editdocname
-            cursor_move_handler = '''() => {
-                const element = getElement(%s).$refs.qRef.getNativeElement();
-                const info = window.editdoccursor.%s;
-                // Relocate cursor if text was changed but not by this user
-                if (element.value !== info.value && !info.selfChange) {
-                    var newStart = element.selectionStart;
-                    var newEnd = element.selectionEnd;
-                    // Relocate selectionStart
-                    if (element.value.substring(info.selectionStart + element.value.length - info.value.length) == info.value.substring(info.selectionStart)) {
-                        newStart = info.selectionStart + element.value.length - info.value.length;
-                    } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
-                        newStart = info.selectionStart;
-                    }
-                    // Relocate selectionEnd
-                    if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
-                        newEnd = info.selectionEnd + element.value.length - info.value.length;
-                    } else if (element.value.substring(0, info.selectionEnd) == info.value.substring(0, info.selectionEnd)) {
-                        newEnd = info.selectionEnd;
-                    }
-                    // Implement any specified relocations
-                    if (newStart !== element.selectionStart || newEnd !== element.selectionEnd) {
-                        element.setSelectionRange(newStart, newEnd);
-                    }
+        # Code to reposition cursor, which by default gets moved to
+        # the end of the textarea if someone else modifies the text.
+        handler_setup = '''
+        if (typeof window.editdoccursor == 'undefined') {
+            window.editdoccursor = {};
+        }
+        if (typeof window.editdoccursor.%s == 'undefined') {
+            window.editdoccursor.%s = {};
+        }
+        info = window.editdoccursor.%s;
+        info.value = '';
+        info.selectionStart = 0;
+        info.selectionEnd = 0;
+        info.selfChange = false;
+        ''' % tuple([editdocname] * 3)
+        text_change_handler = '''() => {
+            window.editdoccursor.%s.selfChange = true;
+        }''' % editdocname
+        cursor_move_handler = '''() => {
+            const element = getElement(%s).$refs.qRef.getNativeElement();
+            const info = window.editdoccursor.%s;
+            // Relocate cursor if text was changed but not by this user
+            if (element.value !== info.value && !info.selfChange) {
+                var newStart = element.selectionStart;
+                var newEnd = element.selectionEnd;
+                // Relocate selectionStart
+                if (element.value.substring(info.selectionStart + element.value.length - info.value.length) == info.value.substring(info.selectionStart)) {
+                    newStart = info.selectionStart + element.value.length - info.value.length;
+                } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
+                    newStart = info.selectionStart;
                 }
-                // Update record of previous cursor location
-                info.value = element.value;
-                info.selectionStart = element.selectionStart;
-                info.selectionEnd = element.selectionEnd;
-                info.selfChange = false;
-            }''' % (editobj.id, editdocname)
-            ui.run_javascript(handler_setup)
-            editobj.on('update:model-value', js_handler=text_change_handler)
-            editobj.on('selectionchange', js_handler=cursor_move_handler)
-            #editobj.on('update:model-value', lambda: ui.notify('text_change'))
-            #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
+                // Relocate selectionEnd
+                if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
+                    newEnd = info.selectionEnd + element.value.length - info.value.length;
+                } else if (element.value.substring(0, info.selectionEnd) == info.value.substring(0, info.selectionEnd)) {
+                    newEnd = info.selectionEnd;
+                }
+                // Implement any specified relocations
+                if (newStart !== element.selectionStart || newEnd !== element.selectionEnd) {
+                    element.setSelectionRange(newStart, newEnd);
+                }
+            }
+            // Update record of previous cursor location
+            info.value = element.value;
+            info.selectionStart = element.selectionStart;
+            info.selectionEnd = element.selectionEnd;
+            info.selfChange = false;
+        }''' % (editobj.id, editdocname)
+        ui.run_javascript(handler_setup)
+        editobj.on('update:model-value', js_handler=text_change_handler)
+        editobj.on('selectionchange', js_handler=cursor_move_handler)
+        #editobj.on('update:model-value', lambda: ui.notify('text_change'))
+        #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
 
     async def send_message():
         if not 'id' in app.storage.tab:
