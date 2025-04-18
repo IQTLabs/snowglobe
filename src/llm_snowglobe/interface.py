@@ -200,14 +200,22 @@ async def interface_page():
             if (typeof window.editdoccursor.%s == 'undefined') {
                 window.editdoccursor.%s = {};
             }
-            window.editdoccursor.%s.value = '';
-            window.editdoccursor.%s.selectionStart = 0;
-            window.editdoccursor.%s.selectionEnd = 0;
-            ''' % tuple([editdocname] * 5) # Hardwired number of occurrences
-            handler = '''(e) => {
+            info = window.editdoccursor.%s;
+            info.value = '';
+            info.selectionStart = 0;
+            info.selectionEnd = 0;
+            ''' % tuple([editdocname] * 3)
+            cursor_move_handler = '''() => {
                 const element = getElement(%s).$refs.qRef.getNativeElement();
                 const debug = getElement(%s).$refs.qRef.getNativeElement();
                 debug.value = element.value.length.toString() + ' ' + element.selectionStart.toString() + ' ' + element.selectionEnd.toString();
+                info = window.editdoccursor.%s;
+                info.value = element.value;
+                info.selectionStart = element.selectionStart;
+                info.selectionEnd = element.selectionEnd;
+            }''' % (editobj.id, debugobj.id, editdocname)
+            text_change_handler = '''() => {
+                const element = getElement(%s).$refs.qRef.getNativeElement();
                 oldinfo = window.editdoccursor.%s;
                 if (oldinfo.selectionStart == oldinfo.selectionEnd && element.selectionStart == element.selectionEnd) {
                     if (element.value.substring(oldinfo.selectionEnd + element.value.length - oldinfo.value.length) == oldinfo.value.substring(oldinfo.selectionEnd)) {
@@ -218,15 +226,13 @@ async def interface_page():
                 } else {
                     // TODO: Handle case of highlighted text
                 }
-                oldinfo.value = element.value;
-                oldinfo.selectionStart = element.selectionStart;
-                oldinfo.selectionEnd = element.selectionEnd;
-                oldinfo.e = e;
-            }''' % (editobj.id, debugobj.id, editdocname)
+            }''' % (editobj.id, editdocname)
             ui.run_javascript(handler_setup)
-            editobj.on('update:model-value', js_handler=handler)
-            #editobj.on('selectionchange', lambda: ui.notify('change'))
+            #editobj.on('update:model-value', js_handler=text_change_handler)
+            #editobj.on('selectionchange', js_handler=cursor_move_handler)
 
+            editobj.on('update:model-value', lambda: ui.notify('text_change'))
+            editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
             #debugobj.on('input', lambda: ui.notify('modify'))
             #debugobj.on('selectionchange', lambda: ui.notify('change'))
             #editobj.on('update:model-value', lambda: ui.notify('modify'))
