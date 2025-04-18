@@ -111,27 +111,6 @@ async def interface_page():
         save_databank()
         ui.notify('Document submitted')
 
-    async def update_editdoc_cursor(event: events.ValueChangeEventArguments):
-        if not 'id' in app.storage.tab:
-            return
-        # print(event)
-        # print(editobj.id)
-        # await ui.run_javascript('''
-        #     const element = getElement(%s).$refs.qRef.getNativeElement();
-        #     if (document.activeElement === element) {
-        #         const loc = element.selectionStart;
-        #         const text = element.value;
-        #         const newloc = loc - 1;
-        #         element.value = element.value + '()';
-        #         element.setSelectionRange(newloc, newloc);
-        #         window.loc = newloc;
-        #     }
-        # ''' % editobj.id)
-        #update_editdoc_cursor.post_cursor = editobj.selectionStart
-        #print(event.sender.__name__)
-        #print(update_editdoc_cursor.post_cursor)
-        #editobj.set_selection_range(3,5)
-
     async def display_all():
         display_messages.refresh()
         display_infodoc.refresh()
@@ -185,7 +164,6 @@ async def interface_page():
             idval = app.storage.tab['id']
             editdocname = databank['players'][idval]['editdocs'][0]
             editobj.bind_value(app.storage.general, editdocname)
-            editobj.on_value_change(update_editdoc_cursor)
             if 'readonly' in databank['editdocs'][editdocname]:
                 if databank['players'][idval]['name'] in \
                    databank['editdocs'][editdocname]['readonly']:
@@ -216,10 +194,10 @@ async def interface_page():
                 if (element.value !== info.value && !info.selfChange) {
                     if (info.selectionStart == info.selectionEnd && element.selectionStart == element.selectionEnd) {
                         if (element.value.substring(info.selectionEnd + element.value.length - info.value.length) == info.value.substring(info.selectionEnd)) {
-                            // Relocate cursor based on subsequent text
+                            // Relocate cursor using matching subsequent text
                             element.setSelectionRange(info.selectionEnd + element.value.length - info.value.length, info.selectionEnd + element.value.length - info.value.length);
                         } else if (element.value.substring(0, info.selectionStart) == info.value.substring(0, info.selectionStart)) {
-                            // Relocate cursor based on previous text
+                            // Relocate cursor using matching previous text
                             element.setSelectionRange(info.selectionEnd, info.selectionEnd);
                         }
                     } else {
@@ -235,32 +213,8 @@ async def interface_page():
             ui.run_javascript(handler_setup)
             editobj.on('update:model-value', js_handler=text_change_handler)
             editobj.on('selectionchange', js_handler=cursor_move_handler)
-
-            editobj.on('update:model-value', lambda: ui.notify('text_change'))
-            editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
-            #debugobj.on('input', lambda: ui.notify('modify'))
-            #debugobj.on('selectionchange', lambda: ui.notify('change'))
-            #editobj.on('update:model-value', lambda: ui.notify('modify'))
-
-            # ui.run_javascript('''
-            # const element = getElement(%s).$refs.qRef.getNativeElement();
-            # const debug = getElement(%s).$refs.qRef.getNativeElement();
-            # element.addEventListener('selectionchange', () => {
-            #     debug.value = 'abc'; //element.selectionStart;
-            # });
-            # ''' % (editobj.id, debugobj.id))
-
-            # ui.run_javascript('''
-            # const element = getElement(%s).$refs.qRef.getNativeElement();
-            # if (document.activeElement === element) {
-            #     const loc = element.selectionStart;
-            #     const text = element.value;
-            #     const newloc = loc - 1;
-            #     element.value = element.value + '()';
-            #     element.setSelectionRange(newloc, newloc);
-            #     window.loc = newloc;
-            # }
-            # ''' % editobj.id)
+            #editobj.on('update:model-value', lambda: ui.notify('text_change'))
+            #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
 
     await ui.context.client.connected()
 
@@ -296,11 +250,7 @@ async def interface_page():
                 display_infodoc()
         with ui.tab_panel(edittab).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
-                #editobj = ui.editor().classes('w-full h-full')
                 editobj = ui.textarea().classes('w-full').props('input-class=h-80')
-                #editobj = ui.element('textarea').classes('w-full h-full').style('border: 1px solid #e5e7eb; padding: 5px')
-                #editobj = ui.input().classes('w-full h-full')
-                debugobj = ui.textarea()
                 display_editdoc()
                 ui.button('Submit', on_click=submit_editdoc)
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
