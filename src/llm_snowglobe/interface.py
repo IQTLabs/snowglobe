@@ -73,7 +73,7 @@ async def interface_page():
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
             await display_all()
-            display_editdoc()
+            display_editdoc('testeditdoc')
 
     def setup_tabs():
         # if not 'id' in app.storage.tab:
@@ -87,45 +87,48 @@ async def interface_page():
         # chattab = ui.tab('Chat')
         # infotab = ui.tab('Info')
         # edittab = ui.tab('Edit')
-        tablist.append(ui.tab('Chat'))
-        tablist.append(ui.tab('Info'))
-        tablist.append(ui.tab('Edit'))
+        tabvars['testchat'] = {}
+        tabvars['testchat']['tab'] = ui.tab('Chat')
+        tabvars['testinfodoc'] = {}
+        tabvars['testinfodoc']['tab'] = ui.tab('Info')
+        tabvars['testeditdoc'] = {}
+        tabvars['testeditdoc']['tab'] = ui.tab('Edit')
 
     def setup_tab_panels():
-        setup_chat('testchat', tablist[0])
-        setup_infodoc('testinfodoc', tablist[1])
-        setup_editdoc('testeditdoc', tablist[2])
+        setup_chat('testchat')
+        setup_infodoc('testinfodoc')
+        setup_editdoc('testeditdoc')
 
-    def setup_chat(resource, tab):
-        with ui.tab_panel(tab).classes('h-full'):
+    def setup_chat(resource):
+        with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
             with ui.column().classes('w-full items-center h-full'):
-                with ui.scroll_area().classes('w-full h-full border') as message_window:
-                    display_messages()
-                chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=send_message)
+                with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
+                    display_messages(resource)
+                tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
+                ui.button('Send', on_click=lambda: send_message(resource)) ##
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
 
-    def setup_infodoc(resource, tab):
-        with ui.tab_panel(tab).classes('absolute-full'):
+    def setup_infodoc(resource):
+        with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.scroll_area().classes('w-full h-full absolute-full'):
-                display_infodoc()
+                display_infodoc(resource)
 
-    def setup_editdoc(resource, tab):
-        with ui.tab_panel(tab).classes('absolute-full'):
+    def setup_editdoc(resource):
+        with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
-                editobj = ui.textarea().classes('w-full').props('input-class=h-80')
-                display_editdoc()
-                ui.button('Submit', on_click=submit_editdoc)
+                tabvars[resource]['editobj'] = ui.textarea().classes('w-full').props('input-class=h-80')
+                display_editdoc(resource)
+                ui.button('Submit', on_click=lambda: submit_editdoc(resource)) ##
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
 
     async def display_all():
-        display_messages.refresh()
-        display_infodoc.refresh()
-        # display_editdoc.refresh() # Do not re-run on databank update
+        display_messages.refresh('testchat')
+        display_infodoc.refresh('testinfodoc')
+        # display_editdoc.refresh('testeditdoc') # Do not re-run on databank update
 
     @ui.refreshable
-    def display_messages():
+    def display_messages(resource):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
@@ -152,11 +155,11 @@ async def interface_page():
                             text_html=text_html,
                             ).classes('w-full')
         if len(chatroom['log']) > app.storage.tab['message_count']:
-            message_window.scroll_to(percent=100)
+            tabvars[resource]['message_window'].scroll_to(percent=100)
             app.storage.tab['message_count'] = len(chatroom['log'])
 
     @ui.refreshable
-    def display_infodoc():
+    def display_infodoc(resource):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
@@ -169,10 +172,11 @@ async def interface_page():
             ui.html(infodoc['content']).classes('w-full h-full')
 
     @ui.refreshable
-    def display_editdoc():
+    def display_editdoc(resource):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
+        editobj = tabvars[resource]['editobj']
         editdocname = databank['players'][idval]['editdocs'][0]
         editobj.bind_value(app.storage.general, editdocname)
         if 'readonly' in databank['editdocs'][editdocname]:
@@ -234,10 +238,11 @@ async def interface_page():
         #editobj.on('update:model-value', lambda: ui.notify('text_change'))
         #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
 
-    async def send_message():
+    async def send_message(resource):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
+        chattext = tabvars[resource]['chattext']
         message = {
             'content': chattext.value,
             'format': 'plaintext',
@@ -245,15 +250,15 @@ async def interface_page():
             'stamp': time.ctime(),
             'avatar': 'human.png',
         }
-        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+        chatroom = databank['chatrooms'][resource]
         if not 'log' in chatroom:
             chatroom['log'] = []
         chatroom['log'].append(message)
-        display_messages.refresh()
+        display_messages.refresh(resource)
         chattext.set_value('')
         save_databank()
 
-    async def submit_editdoc():
+    async def submit_editdoc(resource):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
@@ -270,7 +275,7 @@ async def interface_page():
         save_databank()
         ui.notify('Document submitted')
 
-    tablist = []
+    tabvars = {}
     await ui.context.client.connected()
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
@@ -290,7 +295,6 @@ async def interface_page():
     with ui.header().style('background-color: #B4C7E7'):
         with ui.tabs().classes('w-full') as tabs:
             setup_tabs()
-    print('tablist', tablist)
     with ui.tab_panels(tabs).classes('absolute-full'):
         setup_tab_panels()
 
