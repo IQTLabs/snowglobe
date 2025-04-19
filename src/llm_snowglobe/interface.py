@@ -75,6 +75,50 @@ async def interface_page():
             await display_all()
             display_editdoc()
 
+    def setup_tabs():
+        # if not 'id' in app.storage.tab:
+        #     return
+        # idval = app.storage.tab['id']
+        # app.storage.tab['tablist'] = []
+        # for resource_type in ['chatrooms', 'infodocs', 'editdocs']:
+        #     if resource_type in databank['players'][idval]:
+        #         for resource in databank['players'][idval][resource_type]:
+        #             app.storage.tab['tablist'].append(ui.tab(resource_type))
+        # chattab = ui.tab('Chat')
+        # infotab = ui.tab('Info')
+        # edittab = ui.tab('Edit')
+        tablist.append(ui.tab('Chat'))
+        tablist.append(ui.tab('Info'))
+        tablist.append(ui.tab('Edit'))
+
+    def setup_tab_panels():
+        setup_chat('testchat', tablist[0])
+        setup_infodoc('testinfodoc', tablist[1])
+        setup_editdoc('testeditdoc', tablist[2])
+
+    def setup_chat(resource, tab):
+        with ui.tab_panel(tab).classes('h-full'):
+            with ui.column().classes('w-full items-center h-full'):
+                with ui.scroll_area().classes('w-full h-full border') as message_window:
+                    display_messages()
+                chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
+                ui.button('Send', on_click=send_message)
+                ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
+
+    def setup_infodoc(resource, tab):
+        with ui.tab_panel(tab).classes('absolute-full'):
+            with ui.scroll_area().classes('w-full h-full absolute-full'):
+                display_infodoc()
+
+    def setup_editdoc(resource, tab):
+        with ui.tab_panel(tab).classes('absolute-full'):
+            with ui.column().classes('w-full items-center h-full'):
+                editobj = ui.textarea().classes('w-full').props('input-class=h-80')
+                display_editdoc()
+                ui.button('Submit', on_click=submit_editdoc)
+                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
+
+
     async def display_all():
         display_messages.refresh()
         display_infodoc.refresh()
@@ -226,6 +270,7 @@ async def interface_page():
         save_databank()
         ui.notify('Document submitted')
 
+    tablist = []
     await ui.context.client.connected()
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
@@ -244,26 +289,10 @@ async def interface_page():
             ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
         with ui.tabs().classes('w-full') as tabs:
-            chattab = ui.tab('Chat')
-            infotab = ui.tab('Info')
-            edittab = ui.tab('Edit')
-    with ui.tab_panels(tabs, value=chattab).classes('absolute-full'):
-        with ui.tab_panel(chattab).classes('h-full'):
-            with ui.column().classes('w-full items-center h-full'):
-                with ui.scroll_area().classes('w-full h-full border') as message_window:
-                    display_messages()
-                chattext = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=send_message)
-                ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
-        with ui.tab_panel(infotab).classes('absolute-full'):
-            with ui.scroll_area().classes('w-full h-full absolute-full'):
-                display_infodoc()
-        with ui.tab_panel(edittab).classes('absolute-full'):
-            with ui.column().classes('w-full items-center h-full'):
-                editobj = ui.textarea().classes('w-full').props('input-class=h-80')
-                display_editdoc()
-                ui.button('Submit', on_click=submit_editdoc)
-                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
+            setup_tabs()
+    print('tablist', tablist)
+    with ui.tab_panels(tabs).classes('absolute-full'):
+        setup_tab_panels()
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
