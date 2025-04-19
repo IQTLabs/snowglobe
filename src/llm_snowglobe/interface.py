@@ -111,6 +111,7 @@ async def interface_page():
     def setup_chatroom(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
             with ui.column().classes('w-full items-center h-full'):
+                tabvars[resource]['message_count'] = 0
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     display_messages(resource)
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
@@ -171,9 +172,9 @@ async def interface_page():
                             sent=sent,
                             text_html=text_html,
                             ).classes('w-full')
-        if len(chatroom['log']) > app.storage.tab['message_count']:
+        if len(chatroom['log']) > tabvars[resource]['message_count']:
             tabvars[resource]['message_window'].scroll_to(percent=100)
-            app.storage.tab['message_count'] = len(chatroom['log'])
+            tabvars[resource]['message_count'] = len(chatroom['log'])
 
     @ui.refreshable
     def display_infodoc(resource):
