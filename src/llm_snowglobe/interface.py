@@ -72,47 +72,59 @@ async def interface_page():
             login_name.text = databank['players'][idval]['name']
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
+            setup_tabs.refresh()
+            setup_tab_panels.refresh()
             await display_all()
-            display_editdoc('testeditdoc')
 
+    @ui.refreshable
     def setup_tabs():
-        # if not 'id' in app.storage.tab:
-        #     return
-        # idval = app.storage.tab['id']
-        # app.storage.tab['tablist'] = []
-        # for resource_type in ['chatrooms', 'infodocs', 'editdocs']:
-        #     if resource_type in databank['players'][idval]:
-        #         for resource in databank['players'][idval][resource_type]:
-        #             app.storage.tab['tablist'].append(ui.tab(resource_type))
-        # chattab = ui.tab('Chat')
-        # infotab = ui.tab('Info')
-        # edittab = ui.tab('Edit')
-        tabvars['testchat'] = {}
-        tabvars['testchat']['tab'] = ui.tab('Chat')
-        tabvars['testinfodoc'] = {}
-        tabvars['testinfodoc']['tab'] = ui.tab('Info')
-        tabvars['testeditdoc'] = {}
-        tabvars['testeditdoc']['tab'] = ui.tab('Edit')
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        default_title = {
+            'chatrooms': 'Chat',
+            'infodocs': 'Info',
+            'editdocs': 'Edit',
+        }
+        for resource_type in default_title:
+            if resource_type in databank['players'][idval]:
+                for resource in databank['players'][idval][resource_type]:
+                    tabvars[resource] = {}
+                    tabvars[resource]['tab'] = ui.tab(resource) #change to title
 
+    @ui.refreshable
     def setup_tab_panels():
-        setup_chat('testchat')
-        setup_infodoc('testinfodoc')
-        setup_editdoc('testeditdoc')
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        setup_func = {
+            'chatrooms': setup_chatroom,
+            'infodocs': setup_infodoc,
+            'editdocs': setup_editdoc,
+        }
+        for resource_type in setup_func:
+            if resource_type in databank['players'][idval]:
+                for resource in databank['players'][idval][resource_type]:
+                    setup_func[resource_type].refresh(resource)
 
-    def setup_chat(resource):
+    @ui.refreshable
+    def setup_chatroom(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
             with ui.column().classes('w-full items-center h-full'):
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     display_messages(resource)
+                    ui.notify('setup_chat')
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda: send_message(resource)) ##
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
 
+    @ui.refreshable
     def setup_infodoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.scroll_area().classes('w-full h-full absolute-full'):
                 display_infodoc(resource)
 
+    @ui.refreshable
     def setup_editdoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
@@ -123,9 +135,17 @@ async def interface_page():
 
 
     async def display_all():
-        display_messages.refresh('testchat')
-        display_infodoc.refresh('testinfodoc')
-        # display_editdoc.refresh('testeditdoc') # Do not re-run on databank update
+        if not 'id' in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        display_func = {
+            'chatrooms': display_messages,
+            'infodocs': display_infodoc,
+        }
+        for resource_type in display_func:
+            if resource_type in databank['players'][idval]:
+                for resource in databank['players'][idval][resource_type]:
+                    display_func[resource_type].refresh(resource)
 
     @ui.refreshable
     def display_messages(resource):
@@ -133,7 +153,7 @@ async def interface_page():
             return
         idval = app.storage.tab['id']
         name = databank['players'][idval]['name']
-        chatroom = databank['chatrooms'][databank['players'][idval]['chatrooms'][0]]
+        chatroom = databank['chatrooms'][resource]
         if not 'log' in chatroom:
             return
         for message in chatroom['log']:
@@ -163,7 +183,7 @@ async def interface_page():
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
-        infodoc = databank['infodocs'][databank['players'][idval]['infodocs'][0]]
+        infodoc = databank['infodocs'][resource]
         if 'format' not in infodoc or infodoc['format'] == 'plaintext':
             ui.label(infodoc['content']).classes('w-full h-full')
         elif infodoc['format'] == 'markdown':
