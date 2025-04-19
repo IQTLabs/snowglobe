@@ -67,14 +67,12 @@ async def interface_page():
             ui.notify('ID not found.')
         else:
             app.storage.tab['id'] = idval
-            app.storage.tab['message_count'] = 0
             login_numb.text = app.storage.tab['id']
             login_name.text = databank['players'][idval]['name']
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
-            tabs = setup_tabs.refresh()
+            setup_tabs.refresh()
             setup_tab_panels.refresh()
-            #await display_all()
 
     @ui.refreshable
     def setup_tabs():
@@ -280,9 +278,8 @@ async def interface_page():
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
-        editdocname = databank['players'][idval]['editdocs'][0]
-        editdoc = databank['editdocs'][editdocname]
-        editdoc['content'] = app.storage.general[editdocname]
+        editdoc = databank['editdocs'][resource]
+        editdoc['content'] = app.storage.general[resource]
         if not 'history' in editdoc:
             editdoc['history'] = []
         editdoc['history'].append({
@@ -304,7 +301,7 @@ async def interface_page():
             ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
             with ui.row() as preloginrow:
                 login_id = ui.input('ID', placeholder='Player ID').props('size=6')
-                ui.button('Connect', on_click=lambda x: set_id(login_id.value))
+                ui.button('Connect', on_click=lambda: set_id(login_id.value))
             with ui.row() as postloginrow:
                 postloginrow.set_visibility(False)
                 login_numb = ui.label('ID')
