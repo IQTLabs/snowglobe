@@ -73,7 +73,7 @@ async def interface_page():
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
             tabs = setup_tabs.refresh()
-            setup_tab_panels.refresh(tabs)
+            setup_tab_panels.refresh()
             #await display_all()
 
     @ui.refreshable
@@ -86,7 +86,6 @@ async def interface_page():
             'infodocs': 'Info',
             'editdocs': 'Edit',
         }
-        
         with ui.tabs().classes('w-full') as tabs:
             for resource_type in default_title:
                 if resource_type in databank['players'][idval]:
@@ -96,7 +95,7 @@ async def interface_page():
         tabvars['COLLECTION'] = tabs
 
     @ui.refreshable
-    def setup_tab_panels(tabs):
+    def setup_tab_panels():
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
@@ -109,11 +108,8 @@ async def interface_page():
             for resource_type in setup_func:
                 if resource_type in databank['players'][idval]:
                     for resource in databank['players'][idval][resource_type]:
-                        #setup_func[resource_type].refresh(resource)
-                        with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
-                            ui.label(resource)
+                        setup_func[resource_type](resource)
 
-    @ui.refreshable
     def setup_chatroom(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
             with ui.column().classes('w-full items-center h-full'):
@@ -124,13 +120,11 @@ async def interface_page():
                 ui.button('Send', on_click=lambda: send_message(resource)) ##
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
 
-    @ui.refreshable
     def setup_infodoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.scroll_area().classes('w-full h-full absolute-full'):
                 display_infodoc(resource)
 
-    @ui.refreshable
     def setup_editdoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
@@ -318,8 +312,8 @@ async def interface_page():
                 login_name = ui.label('Name')
             ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
-        tabs = setup_tabs()
-    setup_tab_panels(tabs)
+        setup_tabs()
+    setup_tab_panels()
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
