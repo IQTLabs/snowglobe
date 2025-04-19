@@ -72,8 +72,8 @@ async def interface_page():
             login_name.text = databank['players'][idval]['name']
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
-            setup_tabs.refresh()
-            setup_tab_panels.refresh()
+            tabs = setup_tabs.refresh()
+            setup_tab_panels.refresh(tabs)
             #await display_all()
 
     @ui.refreshable
@@ -86,14 +86,17 @@ async def interface_page():
             'infodocs': 'Info',
             'editdocs': 'Edit',
         }
-        for resource_type in default_title:
-            if resource_type in databank['players'][idval]:
-                for resource in databank['players'][idval][resource_type]:
-                    tabvars[resource] = {}
-                    tabvars[resource]['tab'] = ui.tab(resource) #change to title
+        
+        with ui.tabs().classes('w-full') as tabs:
+            for resource_type in default_title:
+                if resource_type in databank['players'][idval]:
+                    for resource in databank['players'][idval][resource_type]:
+                        tabvars[resource] = {}
+                        tabvars[resource]['tab'] = ui.tab(resource)
+        tabvars['COLLECTION'] = tabs
 
     @ui.refreshable
-    def setup_tab_panels():
+    def setup_tab_panels(tabs):
         if not 'id' in app.storage.tab:
             return
         idval = app.storage.tab['id']
@@ -102,10 +105,13 @@ async def interface_page():
             'infodocs': setup_infodoc,
             'editdocs': setup_editdoc,
         }
-        for resource_type in setup_func:
-            if resource_type in databank['players'][idval]:
-                for resource in databank['players'][idval][resource_type]:
-                    setup_func[resource_type].refresh(resource)
+        with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full'):
+            for resource_type in setup_func:
+                if resource_type in databank['players'][idval]:
+                    for resource in databank['players'][idval][resource_type]:
+                        #setup_func[resource_type].refresh(resource)
+                        with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
+                            ui.label(resource)
 
     @ui.refreshable
     def setup_chatroom(resource):
@@ -312,10 +318,8 @@ async def interface_page():
                 login_name = ui.label('Name')
             ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
-        with ui.tabs().classes('w-full') as tabs:
-            setup_tabs()
-    with ui.tab_panels(tabs).classes('absolute-full'):
-        setup_tab_panels()
+        tabs = setup_tabs()
+    setup_tab_panels(tabs)
 
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
