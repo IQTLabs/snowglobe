@@ -115,7 +115,6 @@ async def interface_page():
             with ui.column().classes('w-full items-center h-full'):
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     display_messages(resource)
-                    ui.notify('setup_chat')
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda: send_message(resource)) ##
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
@@ -217,10 +216,10 @@ async def interface_page():
         info.selectionStart = 0;
         info.selectionEnd = 0;
         info.selfChange = false;
-        ''' % tuple([editdocname] * 3)
+        ''' % tuple([resource] * 3)
         text_change_handler = '''() => {
             window.editdoccursor.%s.selfChange = true;
-        }''' % editdocname
+        }''' % resource
         cursor_move_handler = '''() => {
             const element = getElement(%s).$refs.qRef.getNativeElement();
             const info = window.editdoccursor.%s;
@@ -250,7 +249,7 @@ async def interface_page():
             info.selectionStart = element.selectionStart;
             info.selectionEnd = element.selectionEnd;
             info.selfChange = false;
-        }''' % (editobj.id, editdocname)
+        }''' % (editobj.id, resource)
         ui.run_javascript(handler_setup)
         editobj.on('update:model-value', js_handler=text_change_handler)
         editobj.on('selectionchange', js_handler=cursor_move_handler)
