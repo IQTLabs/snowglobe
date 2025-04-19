@@ -74,7 +74,7 @@ async def interface_page():
             postloginrow.set_visibility(True)
             setup_tabs.refresh()
             setup_tab_panels.refresh()
-            await display_all()
+            #await display_all()
 
     @ui.refreshable
     def setup_tabs():
@@ -197,11 +197,10 @@ async def interface_page():
             return
         idval = app.storage.tab['id']
         editobj = tabvars[resource]['editobj']
-        editdocname = databank['players'][idval]['editdocs'][0]
-        editobj.bind_value(app.storage.general, editdocname)
-        if 'readonly' in databank['editdocs'][editdocname]:
+        editobj.bind_value(app.storage.general, resource)
+        if 'readonly' in databank['editdocs'][resource]:
             if databank['players'][idval]['name'] in \
-               databank['editdocs'][editdocname]['readonly']:
+               databank['editdocs'][resource]['readonly']:
                 editobj.enabled = False
 
         # Code to reposition cursor, which by default gets moved to
