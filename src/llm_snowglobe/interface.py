@@ -115,7 +115,7 @@ async def interface_page():
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     display_messages(resource)
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=lambda: send_message(resource)) ##
+                ui.button('Send', on_click=lambda resource=resource: send_message(resource))
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
 
     def setup_infodoc(resource):
@@ -128,7 +128,7 @@ async def interface_page():
             with ui.column().classes('w-full items-center h-full'):
                 tabvars[resource]['editobj'] = ui.textarea().classes('w-full').props('input-class=h-80')
                 display_editdoc(resource)
-                ui.button('Submit', on_click=lambda: submit_editdoc(resource)) ##
+                ui.button('Submit', on_click=lambda resource=resource: submit_editdoc(resource))
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
 
