@@ -314,8 +314,7 @@ async def interface_page():
 
 def snowglobe_interface(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface',
-           favicon=os.path.join(here, 'terminal/favicon.ico'),
-           reload=True)
+           favicon=os.path.join(here, 'terminal/favicon.ico'), reload=False)
 
 
 if __name__ in {'__main__', '__mp_main__'}:
