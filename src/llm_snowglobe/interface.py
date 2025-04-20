@@ -183,7 +183,7 @@ async def interface_page():
         idval = app.storage.tab['id']
         infodoc = databank['infodocs'][resource]
         if 'format' not in infodoc or infodoc['format'] == 'plaintext':
-            ui.label(infodoc['content']).classes('w-full h-full')
+            ui.label(infodoc['content']).style('white-space: pre-wrap').classes('w-full h-full')
         elif infodoc['format'] == 'markdown':
             ui.markdown(infodoc['content']).classes('w-full h-full')
         elif infodoc['format'] == 'html':
