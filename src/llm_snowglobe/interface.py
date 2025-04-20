@@ -113,7 +113,8 @@ async def interface_page():
             with ui.column().classes('w-full items-center h-full'):
                 tabvars[resource]['message_count'] = 0
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
-                    display_messages(resource)
+                    tabvars[resource]['updater'] = ui.refreshable(display_messages)
+                    tabvars[resource]['updater'](resource)
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
@@ -121,7 +122,8 @@ async def interface_page():
     def setup_infodoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.scroll_area().classes('w-full h-full absolute-full'):
-                display_infodoc(resource)
+                tabvars[resource]['updater'] = ui.refreshable(display_infodoc)
+                tabvars[resource]['updater'](resource)
 
     def setup_editdoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -143,9 +145,8 @@ async def interface_page():
         for resource_type in display_func:
             if resource_type in databank['players'][idval]:
                 for resource in databank['players'][idval][resource_type]:
-                    display_func[resource_type].refresh(resource)
+                    tabvars[resource]['updater'].refresh(resource)
 
-    @ui.refreshable
     def display_messages(resource):
         if not 'id' in app.storage.tab:
             return
@@ -176,7 +177,6 @@ async def interface_page():
             tabvars[resource]['message_window'].scroll_to(percent=100)
             tabvars[resource]['message_count'] = len(chatroom['log'])
 
-    @ui.refreshable
     def display_infodoc(resource):
         if not 'id' in app.storage.tab:
             return
@@ -189,7 +189,6 @@ async def interface_page():
         elif infodoc['format'] == 'html':
             ui.html(infodoc['content']).classes('w-full h-full')
 
-    @ui.refreshable
     def display_editdoc(resource):
         if not 'id' in app.storage.tab:
             return
@@ -271,7 +270,7 @@ async def interface_page():
         if not 'log' in chatroom:
             chatroom['log'] = []
         chatroom['log'].append(message)
-        display_messages.refresh(resource)
+        tabvars[resource]['updater'].refresh(resource)
         chattext.set_value('')
         save_databank()
 
