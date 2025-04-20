@@ -185,7 +185,7 @@ async def interface_page():
         if 'format' not in infodoc or infodoc['format'] == 'plaintext':
             ui.label(infodoc['content']).classes('w-full h-full')
         elif infodoc['format'] == 'markdown':
-            ui.markdown(infodoc['content'].replace('\\n', chr(10))).classes('w-full h-full')
+            ui.markdown(infodoc['content']).classes('w-full h-full')
         elif infodoc['format'] == 'html':
             ui.html(infodoc['content']).classes('w-full h-full')
 
