@@ -118,10 +118,8 @@ class UI():
     def create(self, overwrite=False):
         path = self.path()
         if (not os.path.exists(path)) or overwrite:
-            data = {'players': {}, 'chatrooms': {},
-                    'infodocs': {}, 'editdocs': {}}
             with open(path, 'w') as f:
-                json.dump(data, f, indent=4)
+                json.dump({}, f, indent=4)
     @classmethod
     def get(self):
         with open(self.path(), 'r') as f:
@@ -568,22 +566,26 @@ class Intelligent():
             print('ID %s : %s' % (self.interface_label, self.name))
 
         # Create info for UI interface
-        pdict = self.iodict if self.iodict is not None else {
-            'name': self.name, 'chatrooms': [], 'infodocs': [], 'editdocs': []}
+        pdict = self.iodict if self.iodict is not None else {'name': self.name}
 
         # Export info for UI interface
         UI.create()
         data = UI.get()
+        if 'players' not in data:
+            data['players'] = {}
         data['players'][self.interface_label] = pdict
-        for chatroom in pdict['chatrooms']:
-            if chatroom not in data['chatrooms']:
-                data['chatrooms'][chatroom] = {'log': []}
-        for infodoc in pdict['infodocs']:
-            if infodoc not in data['infodocs']:
-                data['infodocs'][infodoc] = {'content': '', 'format': 'markdown'}
-        for editdoc in pdict['editdocs']:
-            if editdoc not in data['editdocs']:
-                data['editdocs'][editdoc] = {'content': ''}
+        for resource_type in ['chatrooms', 'infodocs', 'editdocs']:
+            if resource_type not in data:
+                data[resource_type] = {}
+            for resource in pdict[resource_type]:
+                if resource not in data[resource_type]:
+                    data[resource_type][resource] = {}
+                    if resource_type == 'chatrooms':
+                        data[resource_type][resource]['log'] = []
+                    if resource_type in ['infodocs', 'editdocs']:
+                        data[resource_type][resource]['content'] = ''
+                    if resource_type == 'infodocs':
+                        data[resource_type][resource]['format'] = 'markdown'
         UI.set(data)
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):

@@ -29,8 +29,7 @@ datastep = 0
 
 async def load_databank():
     if not os.path.exists(datapath):
-        globals()['databank'] = {'players': {}, 'chatrooms': {},
-                                 'infodocs': {}, 'editdocs': {}}
+        globals()['databank'] = {}
         save_databank()
     while True:
         while True:
@@ -63,7 +62,7 @@ async def interface_page():
     async def set_id(idval):
         if len(idval) == 0:
             ui.notify('Enter your ID.')
-        elif not idval in databank['players']:
+        elif 'players' not in databank or idval not in databank['players']:
             ui.notify('ID not found.')
         else:
             app.storage.tab['id'] = idval
@@ -76,7 +75,7 @@ async def interface_page():
 
     @ui.refreshable
     def setup_tabs():
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         default_title = {
@@ -94,7 +93,7 @@ async def interface_page():
 
     @ui.refreshable
     def setup_tab_panels():
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         setup_func = {
@@ -135,7 +134,7 @@ async def interface_page():
 
 
     async def display_all():
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         display_func = {
@@ -148,7 +147,7 @@ async def interface_page():
                     tabvars[resource]['updater'].refresh(resource)
 
     def display_messages(resource):
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         name = databank['players'][idval]['name']
@@ -178,7 +177,7 @@ async def interface_page():
             tabvars[resource]['message_count'] = len(chatroom['log'])
 
     def display_infodoc(resource):
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         infodoc = databank['infodocs'][resource]
@@ -190,7 +189,7 @@ async def interface_page():
             ui.html(infodoc['content']).classes('w-full h-full')
 
     def display_editdoc(resource):
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         editobj = tabvars[resource]['editobj']
@@ -255,7 +254,7 @@ async def interface_page():
         #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
 
     async def send_message(resource):
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         chattext = tabvars[resource]['chattext']
@@ -275,7 +274,7 @@ async def interface_page():
         save_databank()
 
     async def submit_editdoc(resource):
-        if not 'id' in app.storage.tab:
+        if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
         editdoc = databank['editdocs'][resource]
