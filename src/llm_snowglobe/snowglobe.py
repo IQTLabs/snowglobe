@@ -574,18 +574,19 @@ class Intelligent():
         if 'players' not in data:
             data['players'] = {}
         data['players'][self.interface_label] = pdict
-        for resource_type in ['chatrooms', 'infodocs', 'editdocs']:
-            if resource_type not in data:
-                data[resource_type] = {}
-            for resource in pdict[resource_type]:
-                if resource not in data[resource_type]:
-                    data[resource_type][resource] = {}
-                    if resource_type == 'chatrooms':
-                        data[resource_type][resource]['log'] = []
-                    if resource_type in ['infodocs', 'editdocs']:
-                        data[resource_type][resource]['content'] = ''
-                    if resource_type == 'infodocs':
-                        data[resource_type][resource]['format'] = 'markdown'
+        for resource_type in ['chatrooms', 'weblinks', 'infodocs', 'editdocs']:
+            if resource_type in pdict:
+                if resource_type not in data:
+                    data[resource_type] = {}
+                for resource in pdict[resource_type]:
+                    if resource not in data[resource_type]:
+                        data[resource_type][resource] = {}
+                        if resource_type == 'chatrooms':
+                            data[resource_type][resource]['log'] = []
+                        if resource_type in ['infodocs', 'editdocs']:
+                            data[resource_type][resource]['content'] = ''
+                        if resource_type == 'infodocs':
+                            data[resource_type][resource]['format'] = 'markdown'
         UI.set(data)
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):

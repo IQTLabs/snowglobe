@@ -80,6 +80,7 @@ async def interface_page():
         idval = app.storage.tab['id']
         default_title = {
             'chatrooms': 'Chat',
+            'weblinks': 'Data',
             'infodocs': 'Info',
             'editdocs': 'Edit',
         }
@@ -98,6 +99,7 @@ async def interface_page():
         idval = app.storage.tab['id']
         setup_func = {
             'chatrooms': setup_chatroom,
+            'weblinks': setup_weblink,
             'infodocs': setup_infodoc,
             'editdocs': setup_editdoc,
         }
@@ -117,6 +119,11 @@ async def interface_page():
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
                 ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
+
+    def setup_weblink(resource):
+        with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
+            tabvars[resource]['iframe'] = ui.element('iframe').classes('w-full h-full absolute-full')
+            display_weblink(resource)
 
     def setup_infodoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -175,6 +182,11 @@ async def interface_page():
         if len(chatroom['log']) > tabvars[resource]['message_count']:
             tabvars[resource]['message_window'].scroll_to(percent=100)
             tabvars[resource]['message_count'] = len(chatroom['log'])
+
+    def display_weblink(resource):
+        if 'id' not in app.storage.tab:
+            return
+        tabvars[resource]['iframe'].props('src=%s' % databank['weblinks'][resource]['url'])
 
     def display_infodoc(resource):
         if 'id' not in app.storage.tab:
