@@ -20,7 +20,7 @@ import time
 import asyncio
 import markdown2
 import watchfiles
-from nicegui import ui, app, events
+from nicegui import ui, app
 
 here = os.path.dirname(os.path.abspath(__file__))
 datapath = 'databank.json'
@@ -78,6 +78,13 @@ async def interface_page():
         if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
+        icon = {
+            'chatrooms': 'chat',
+            'weblinks': 'language',
+            'infodocs': 'description',
+            'notepads': 'edit_note',
+            'editdocs': 'edit',
+        }
         default_title = {
             'chatrooms': 'Chat',
             'weblinks': 'Data',
@@ -89,8 +96,15 @@ async def interface_page():
             for resource_type in default_title:
                 if resource_type in databank['players'][idval]:
                     for resource in databank['players'][idval][resource_type]:
+                        if resource_type in databank \
+                           and resource in databank[resource_type] \
+                           and 'title' in databank[resource_type][resource]:
+                            title = databank[resource_type][resource]['title']
+                        else:
+                            title = default_title[resource_type]
                         tabvars[resource] = {}
-                        tabvars[resource]['tab'] = ui.tab(resource)
+                        tabvars[resource]['tab'] = ui.tab(
+                            resource, label=title, icon=icon[resource_type])
         tabvars['COLLECTION'] = tabs
 
     @ui.refreshable
