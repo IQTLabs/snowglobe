@@ -82,6 +82,7 @@ async def interface_page():
             'chatrooms': 'Chat',
             'weblinks': 'Data',
             'infodocs': 'Info',
+            'notepads': 'Note',
             'editdocs': 'Edit',
         }
         with ui.tabs().classes('w-full') as tabs:
@@ -101,6 +102,7 @@ async def interface_page():
             'chatrooms': setup_chatroom,
             'weblinks': setup_weblink,
             'infodocs': setup_infodoc,
+            'notepads': setup_notepad,
             'editdocs': setup_editdoc,
         }
         with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full'):
@@ -130,6 +132,11 @@ async def interface_page():
             with ui.scroll_area().classes('w-full h-full absolute-full'):
                 tabvars[resource]['updater'] = ui.refreshable(display_infodoc)
                 tabvars[resource]['updater'](resource)
+
+    def setup_notepad(resource):
+        with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
+            tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
+            display_notepad(resource)
 
     def setup_editdoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -199,6 +206,13 @@ async def interface_page():
             ui.markdown(infodoc['content']).classes('w-full h-full')
         elif infodoc['format'] == 'html':
             ui.html(infodoc['content']).classes('w-full h-full')
+
+    def display_notepad(resource):
+        if 'id' not in app.storage.tab:
+            return
+        idval = app.storage.tab['id']
+        editor = tabvars[resource]['editor']
+        editor.bind_value(app.storage.general, resource)
 
     def display_editdoc(resource):
         if 'id' not in app.storage.tab:

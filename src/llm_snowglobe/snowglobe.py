@@ -574,7 +574,8 @@ class Intelligent():
         if 'players' not in data:
             data['players'] = {}
         data['players'][self.interface_label] = pdict
-        for resource_type in ['chatrooms', 'weblinks', 'infodocs', 'editdocs']:
+        for resource_type in [
+                'chatrooms', 'weblinks', 'infodocs', 'notepads', 'editdocs']:
             if resource_type in pdict:
                 if resource_type not in data:
                     data[resource_type] = {}
