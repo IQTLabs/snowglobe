@@ -36,8 +36,9 @@ async def load_databank():
             try:
                 with open(datapath, 'r') as f:
                     globals()['databank'] = json.load(f)
-            except json.decoder.JSONDecodeError:
-                print('! Databank load error')
+            except (FileNotFoundError, json.decoder.JSONDecodeError) as err:
+                print('! Databank load error, %s, %s' %
+                      (type(err), time.ctime()))
                 time.sleep(0.1)
             else:
                 break
@@ -159,7 +160,6 @@ async def interface_page():
                 display_editdoc(resource)
                 ui.button('Submit', on_click=lambda resource=resource: submit_editdoc(resource))
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
-
 
     async def display_all():
         if 'id' not in app.storage.tab:
