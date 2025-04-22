@@ -151,12 +151,34 @@ async def interface_page():
     def setup_notepad(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
+            tabvars[resource]['editor']._props.update(toolbar=[
+                [{
+                    'label': 'Font',
+                    'fixedLabel': True,
+                    'fixedIcon': True,
+                    'list': 'no-icons',
+                    'options': ['default_font', 'arial', 'times_new_roman'],
+                }, {
+                    'label': 'Size',
+                    'fixedLabel': True,
+                    'fixedIcon': True,
+                    'list': 'no-icons',
+                    'options': ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7'],
+                }],
+                ['bold', 'italic', 'underline', 'strike', 'removeFormat'],
+                ['left', 'center', 'right', 'justify'],
+                ['unordered', 'ordered', 'link', 'hr'],
+                ['undo', 'redo'],
+            ])
+            tabvars[resource]['editor']._props.update(fonts={
+                'arial': 'Arial', 'times_new_roman': 'Times New Roman',
+            })
             display_notepad(resource)
 
     def setup_editdoc(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
             with ui.column().classes('w-full items-center h-full'):
-                tabvars[resource]['editobj'] = ui.textarea().classes('w-full').props('input-class=h-80')
+                tabvars[resource]['editobj'] = ui.textarea().classes('w-full').props('input-class=h-96')
                 display_editdoc(resource)
                 ui.button('Submit', on_click=lambda resource=resource: submit_editdoc(resource))
                 ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
