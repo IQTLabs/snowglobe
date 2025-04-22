@@ -135,7 +135,6 @@ async def interface_page():
                     tabvars[resource]['updater'](resource)
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
-                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
     def setup_weblink(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -150,9 +149,7 @@ async def interface_page():
 
     def setup_notepad(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
-            with ui.column().classes('w-full items-center h-full'):
-                tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
-                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
+            tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
             tabvars[resource]['editor']._props.update(toolbar=[
                 [{
                     'label': 'Font',
@@ -183,7 +180,6 @@ async def interface_page():
                 tabvars[resource]['editobj'] = ui.textarea().classes('w-full').props('input-class=h-96')
                 display_editdoc(resource)
                 ui.button('Submit', on_click=lambda resource=resource: submit_editdoc(resource))
-                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
     async def display_all():
         if 'id' not in app.storage.tab:
@@ -357,7 +353,7 @@ async def interface_page():
     await ui.context.client.connected()
 
     with ui.left_drawer(top_corner=True, bordered=True).classes('items-center'):
-        with ui.column(align_items='center'):
+        with ui.column(align_items='center').classes('h-full'):
             ui.image(os.path.join(here, 'assets/snowglobe.png')).props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
             ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
@@ -369,6 +365,8 @@ async def interface_page():
                 postloginrow.set_visibility(False)
                 login_numb = ui.label('ID')
                 login_name = ui.label('Name')
+            ui.space().classes('h-100')
+            ui.label('Do not input sensitive or personal information.').style('font-size: 12px; font-style: italic')
             ui.input().bind_value(globals(), 'datastep').on_value_change(display_all).set_visibility(False) # Update display on file update
     with ui.header().style('background-color: #B4C7E7'):
         setup_tabs()
