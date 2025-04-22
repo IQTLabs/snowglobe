@@ -135,7 +135,7 @@ async def interface_page():
                     tabvars[resource]['updater'](resource)
                 tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
-                ui.label('Do not send sensitive or personal information.').style('font-size: 10px')
+                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
 
     def setup_weblink(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -150,7 +150,9 @@ async def interface_page():
 
     def setup_notepad(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
-            tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
+            with ui.column().classes('w-full items-center h-full'):
+                tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
+                ui.label('Do not input sensitive or personal information.').style('font-size: 10px')
             tabvars[resource]['editor']._props.update(toolbar=[
                 [{
                     'label': 'Font',
