@@ -195,8 +195,6 @@ async def interface_page():
                     tabvars[resource]['updater'].refresh(resource)
 
     def display_messages(resource):
-        if 'id' not in app.storage.tab:
-            return
         idval = app.storage.tab['id']
         name = databank['players'][idval]['name']
         chatroom = databank['chatrooms'][resource]
@@ -225,13 +223,9 @@ async def interface_page():
             tabvars[resource]['message_count'] = len(chatroom['log'])
 
     def display_weblink(resource):
-        if 'id' not in app.storage.tab:
-            return
         tabvars[resource]['iframe'].props('src=%s' % databank['weblinks'][resource]['url'])
 
     def display_infodoc(resource):
-        if 'id' not in app.storage.tab:
-            return
         idval = app.storage.tab['id']
         infodoc = databank['infodocs'][resource]
         if 'format' not in infodoc or infodoc['format'] == 'plaintext':
@@ -242,15 +236,9 @@ async def interface_page():
             ui.html(infodoc['content']).classes('w-full h-full')
 
     def display_notepad(resource):
-        if 'id' not in app.storage.tab:
-            return
-        idval = app.storage.tab['id']
-        editor = tabvars[resource]['editor']
-        editor.bind_value(app.storage.general, resource)
+        tabvars[resource]['editor'].bind_value(app.storage.general, resource)
 
     def display_editdoc(resource):
-        if 'id' not in app.storage.tab:
-            return
         idval = app.storage.tab['id']
         editobj = tabvars[resource]['editobj']
         editobj.bind_value(app.storage.general, resource)
@@ -314,8 +302,6 @@ async def interface_page():
         #editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
 
     async def send_message(resource):
-        if 'id' not in app.storage.tab:
-            return
         idval = app.storage.tab['id']
         chattext = tabvars[resource]['chattext']
         message = {
@@ -334,8 +320,6 @@ async def interface_page():
         save_databank()
 
     async def submit_editdoc(resource):
-        if 'id' not in app.storage.tab:
-            return
         idval = app.storage.tab['id']
         editdoc = databank['editdocs'][resource]
         editdoc['content'] = app.storage.general[resource]
