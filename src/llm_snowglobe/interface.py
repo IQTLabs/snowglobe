@@ -149,7 +149,7 @@ async def interface_page():
 
     def setup_notepad(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
-            tabvars[resource]['editor'] = ui.editor().classes('w-full h-full')
+            tabvars[resource]['editor'] = ui.editor().classes('w-full h-full').props('height=100%')
             tabvars[resource]['editor']._props.update(toolbar=[
                 [{
                     'label': 'Font',
