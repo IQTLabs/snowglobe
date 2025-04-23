@@ -360,11 +360,11 @@ async def interface_page():
         with ui.column(align_items='center').classes('h-full'):
             ui.image(os.path.join(here, 'assets/snowglobe.png')).props('width=150px').style('border-radius: 5%')
             ui.label('User Interface').style('font-size: 25px; font-weight: bold')
-            ui.button('Toggle Full Screen', on_click=ui.fullscreen().toggle)
-            ui.button('Toggle Dark Mode', on_click=ui.dark_mode().toggle)
+            ui.chip('Toggle Full Screen', color='#B4C7E7', on_click=ui.fullscreen().toggle)
+            ui.chip('Toggle Dark Mode', color='#B4C7E7', on_click=ui.dark_mode().toggle)
             with ui.row() as preloginrow:
                 login_id = ui.input('ID', placeholder='Player ID').props('size=6')
-                ui.button('Connect', on_click=lambda: set_id(login_id.value))
+                ui.chip('Connect', color='#B4C7E7', on_click=lambda: set_id(login_id.value))
             with ui.row() as postloginrow:
                 postloginrow.set_visibility(False)
                 login_numb = ui.label('ID')
