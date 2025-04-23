@@ -236,7 +236,16 @@ async def interface_page():
             ui.html(infodoc['content']).classes('w-full h-full')
 
     def display_notepad(resource):
-        tabvars[resource]['editor'].bind_value(app.storage.general, resource)
+        idval = app.storage.tab['id']
+        editor = tabvars[resource]['editor']
+        editor.bind_value(app.storage.general, resource)
+        editor.on_value_change(lambda resource=resource: stamp_notepad(resource))
+        if 'readonly' in databank['notepads'][resource] and \
+           databank['players'][idval]['name'] in \
+           databank['notepads'][resource]['readonly']:
+            editor.enabled = False
+        else:
+            ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
 
     def display_editdoc(resource):
         idval = app.storage.tab['id']
@@ -318,6 +327,17 @@ async def interface_page():
         tabvars[resource]['updater'].refresh(resource)
         chattext.set_value('')
         save_databank()
+
+    async def stamp_notepad(resource):
+        tabvars[resource]['last_modified'] = time.time()
+
+    async def save_notepad(resource):
+        now = time.time()
+        if 'last_modified' in tabvars[resource] and ('last_saved' not in tabvars[resource] or tabvars[resource]['last_saved'] < tabvars[resource]['last_modified']):
+            databank['notepads'][resource]['content'] = tabvars[resource]['editor'].value
+            databank['notepads'][resource]['stamp'] = time.ctime(tabvars[resource]['last_modified'])
+            save_databank()
+            tabvars[resource]['last_saved'] = now
 
     async def submit_editdoc(resource):
         idval = app.storage.tab['id']
