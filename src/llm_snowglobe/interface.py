@@ -363,8 +363,8 @@ async def interface_page():
             ui.chip('Toggle Full Screen', color='#B4C7E7', on_click=ui.fullscreen().toggle)
             ui.chip('Toggle Dark Mode', color='#B4C7E7', on_click=ui.dark_mode().toggle)
             with ui.row() as preloginrow:
-                login_id = ui.input('ID', placeholder='Player ID').props('size=6')
-                ui.chip('Connect', color='#B4C7E7', on_click=lambda: set_id(login_id.value))
+                login_id = ui.input('ID', placeholder='User ID').props('size=5')
+                ui.chip('Log In', color='#B4C7E7', on_click=lambda: set_id(login_id.value))
             with ui.row() as postloginrow:
                 postloginrow.set_visibility(False)
                 login_numb = ui.label('ID')
