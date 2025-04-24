@@ -71,8 +71,23 @@ async def interface_page():
             login_name.text = databank['players'][idval]['name']
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
+            new_resource_check()
             setup_tabs.refresh()
             setup_tab_panels.refresh()
+
+    def new_resource_check():
+        idval = app.storage.tab['id']
+        resource_string = ''
+        resource_types = [
+            'chatrooms', 'weblinks', 'infodocs', 'notepads', 'editdocs']
+        for resource_type in resource_types:
+            if resource_type in databank['players'][idval]:
+                for resource in databank['players'][idval][resource_type]:
+                    resource_string += '|' + resource_type + ':' + resource
+        key = 'TABSTRING'
+        new_resource = key not in tabvars or tabvars[key] != resource_string
+        tabvars[key] = resource_string
+        return new_resource
 
     @ui.refreshable
     def setup_tabs():
@@ -185,6 +200,10 @@ async def interface_page():
         if 'id' not in app.storage.tab:
             return
         idval = app.storage.tab['id']
+        if new_resource_check():
+            setup_tabs.refresh()
+            setup_tab_panels.refresh()
+            return
         display_func = {
             'chatrooms': display_messages,
             'infodocs': display_infodoc,
