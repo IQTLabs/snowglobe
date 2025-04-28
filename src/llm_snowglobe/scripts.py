@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Copyright 2024 IQT Labs LLC
+#   Copyright 2024-2025 IQT Labs LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,6 +18,13 @@ def config():
     import llm_snowglobe as snowglobe
     snowglobe.config()
 
-def server(host='0.0.0.0', port=8000, log_level='warning'):
+def ui(host='0.0.0.0', port=8000):
+    import llm_snowglobe as snowglobe
+    snowglobe.ui.run(host=host, port=port)
+
+def api(host='0.0.0.0', port=8000, log_level='warning'):
     import uvicorn
     uvicorn.run('llm_snowglobe.api:app', host=host, port=port, log_level=log_level)
+
+def server(*args, **kwargs):
+    ui(*args, **kwargs)
