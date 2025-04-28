@@ -58,7 +58,7 @@ app.add_static_file(url_path='/human.png', local_file=os.path.join(
     here, 'assets/human.png'))
 
 @ui.page('/')
-async def interface_page():
+async def ui_page():
 
     async def set_id(idval):
         if len(idval) == 0:
@@ -396,10 +396,10 @@ async def interface_page():
     setup_tab_panels()
 
 
-def snowglobe_interface(host='0.0.0.0', port=8000):
+def run(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface',
            favicon=os.path.join(here, 'terminal/favicon.ico'), reload=False)
 
 
 if __name__ in {'__main__', '__mp_main__'}:
-    snowglobe_interface()
+    run()
