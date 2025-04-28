@@ -498,8 +498,8 @@ class Intelligent():
         pass
 
     async def return_from_api(self, prompt, variables, delay=2):
-        prompt_path = self.get_iopath(False)
-        answer_path = self.get_iopath(True)
+        prompt_path = self.get_api_path(False)
+        answer_path = self.get_api_path(True)
         self.api_count += 1
 
         # Write prompt to disk
@@ -535,7 +535,7 @@ class Intelligent():
         self.api_count = 0
         if verbose >= 2:
             print('ID %i : %s' % (self.api_label, self.name))
-        intro_path = self.get_iopath(False)
+        intro_path = self.get_api_path(False)
         intro_json = {'name': self.name}
         if not os.path.exists(os.path.dirname(intro_path)):
             self.api_log = EphemeralDir(
@@ -544,7 +544,7 @@ class Intelligent():
             json.dump(intro_json, f)
         self.api_count += 1
 
-    def get_iopath(self, answer=False, base_path=None):
+    def get_api_path(self, answer=False, base_path=None):
         if base_path is None:
             base_path = settings()['data_dir']
         return os.path.join(base_path, str(self.api_label), '%i_%i_%s.json'
