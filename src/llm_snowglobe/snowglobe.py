@@ -110,28 +110,23 @@ def config(menu=None, source=None, model=None, url=None, path=None,
         print('Done', flush=True)
 
 
-class UI():
-    @classmethod
-    def path(self):
-        return 'databank.json'
-    @classmethod
+class UIClass():
+    def __init__(self, path=None):
+        self.path = path if path is not None else 'databank.json'
     def create(self, overwrite=False):
-        path = self.path()
-        if (not os.path.exists(path)) or overwrite:
-            with open(path, 'w') as f:
-                json.dump({}, f, indent=4)
-    @classmethod
+        if (not os.path.exists(self.path)) or overwrite:
+            self.set({})
     def get(self):
-        with open(self.path(), 'r') as f:
+        with open(self.path, 'r') as f:
             return json.load(f)
-    @classmethod
     def set(self, data):
-        with open(self.path(), 'w') as f:
+        with open(self.path, 'w') as f:
             json.dump(data, f, indent=4)
-    @classmethod
     def wait(self):
-        for changes in watchfiles.watch(self.path()):
+        for changes in watchfiles.watch(self.path):
             break
+
+UI = UIClass()
 
 
 class LLM():
