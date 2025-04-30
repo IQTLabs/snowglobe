@@ -494,8 +494,29 @@ class Intelligent():
             print()
         return output
 
-    async def return_from_human(self, prompt, variables, delay=2):
-        pass
+    async def return_from_human(self, prompt, variables):
+        # Determine chatroom to use.  If user has more than one, use the first.
+        # If user has none, create one.
+        data = UI.get()
+        if 'chatrooms' in data['players'][self.interface_label] and \
+           len(data['players'][self.interface_label]['chatrooms']) > 0:
+            chatroom = data['players'][self.interface_label]['chatrooms'][0]
+        else:
+            chatroom = '%s_%s_default' % (self.name, self.interface_label)
+            data['players'][self.interface_label]['chatrooms'] = [chatroom]
+            if 'chatrooms' not in data:
+                data['chatrooms'] = {}
+            data['chatrooms'][chatroom] = {'log': []}
+            UI.set(data)
+
+        # Send prompt.  Create a temporary control just to send the message.
+        sender = Control(llm=None)
+        content = prompt.format(**variables)
+        sender.interface_send_message(chatroom, content)
+
+        # Get response
+        answer = self.interface_get_message(chatroom)
+        return answer
 
     async def return_from_api(self, prompt, variables, delay=2):
         prompt_path = self.get_api_path(False)
@@ -603,8 +624,13 @@ class Intelligent():
         UI.set(data)
 
     def interface_get_message(self, chatroom):
-        # Await addition of message from recipient into their interface log
-        pass
+        while True:
+            data = UI.get()
+            log = data['chatrooms'][chatroom]['log']
+            if len(log) > 0 and log[-1]['name'] == self.name:
+                answer = log[-1]['content']
+                return answer
+            UI.wait()
 
     def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
