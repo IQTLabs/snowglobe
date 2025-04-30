@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 import os
+import sys
 import json
 import time
 import asyncio
@@ -36,10 +37,12 @@ async def load_databank():
             try:
                 with open(datapath, 'r') as f:
                     globals()['databank'] = json.load(f)
-            except (FileNotFoundError, json.decoder.JSONDecodeError) as err:
-                print('! Databank load error, %s, %s' %
-                      (type(err), time.ctime()))
-                time.sleep(0.1)
+            except json.decoder.JSONDecodeError:
+                print('! %s: File format error' % time.ctime())
+                await asyncio.sleep(0.1)
+            except FileNotFoundError:
+                print('! %s: Missing databank file' % time.ctime())
+                await asyncio.sleep(1.0)
             else:
                 break
         globals()['datastep'] += 1
