@@ -39,7 +39,7 @@ Or, simulate a political wargame about a geopolitical crisis.
 examples/ac.py
 ```
 
-In the latter case, you can use the chat interface to discuss the game afterwards, or just press `Enter` twice to exit.
+In the latter case, you can use a terminal-based chat interface to discuss the game afterwards, or just press `Enter` twice to exit.
 
 ## Human Players
 
@@ -56,7 +56,9 @@ Then, open a browser window and navigate to:
 http://localhost:8000
 ```
 
-The terminal output will include the ID number for the human player.  Type the number into the ID box then click `Connect`.  The top text box gives player prompts; the bottom text box is where the player enters responses.  Text boxes turn blue while waiting for the next prompt.
+The terminal output will include the ID number for the human player.  Type the number into the ID box, click `Log In`, then click `Chat` to enter the human player's responses using a graphical user interface.
+
+Make sure to run `snowglobe_server` from the same file system location where you run the game.  Files related to the graphical user interface will be stored in that location.
 
 ## License
 
