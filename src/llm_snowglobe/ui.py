@@ -151,7 +151,8 @@ async def ui_page():
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     tabvars[resource]['updater'] = ui.refreshable(display_messages)
                     tabvars[resource]['updater'](resource)
-                tabvars[resource]['chattext'] = ui.textarea(placeholder='Ask the AI assistant.').classes('w-full border').style('height: auto; padding: 0px 5px')
+                placeholder = databank['chatrooms'][resource]['instruction'] if 'instruction' in databank['chatrooms'][resource] else 'Ask the AI assistant.'
+                tabvars[resource]['chattext'] = ui.textarea(placeholder=placeholder).classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
 
     def setup_weblink(resource):
