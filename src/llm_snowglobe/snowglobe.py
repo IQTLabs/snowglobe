@@ -305,8 +305,10 @@ class ClassicRAG():
         splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = splitter.split_documents(docs)
+        collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
         vectorstore = langchain_chroma.Chroma.from_documents(
-            documents=splits, embedding=self.rag_llm.embeddings)
+            documents=splits, embedding=self.rag_llm.embeddings,
+            collection_name=collection_name)
         self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
 
     def rag_invoke(self, text):
@@ -329,9 +331,10 @@ class DescriptionRAG():
         splits = splitter.split_documents(docs)
 
         # Create retriever
+        collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
         vectorstore = langchain_chroma.Chroma(
-            collection_name='summaries',
-            embedding_function=self.rag_llm.embeddings)
+            embedding_function=self.rag_llm.embeddings,
+            collection_name=collection_name)
         bytestore = langchain.storage.InMemoryByteStore()
         id_key = 'split'
         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
