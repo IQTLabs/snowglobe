@@ -431,7 +431,7 @@ class Intelligent():
             variables['persona'] = persona
         if rag is not None and history is not None:
             if rag_intro is None:
-                rag_intro = 'Previously, you handled a similar situation like this'
+                rag_intro = 'Here is background information to inform your response'
             if rag_query is None:
                 rag_query = history.entries[-1]['text']
             docs = self.rag_invoke(rag_query)
