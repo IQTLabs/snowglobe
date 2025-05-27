@@ -180,7 +180,11 @@ class LLM():
                     streaming=True,
                 )
             if self.embed:
-                self.embeddings = langchain_openai.AzureOpenAIEmbeddings()
+                self.embeddings = langchain_openai.AzureOpenAIEmbeddings(
+                    azure_deployment=self.azure_deployment,
+                    azure_endpoint=self.azure_endpoint,
+                    api_version=self.azure_version,
+                )
 
         elif self.source == 'llamacpp':
 
