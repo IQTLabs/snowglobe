@@ -244,12 +244,10 @@ async def gather_plus(*args):
     flags = np.array([inspect.isawaitable(x) for x in items])
     if sum(flags) == 0:
         return items
-    awaitables  = items[flags]
+    awaitables = items[flags]
     outputs = await asyncio.gather(*awaitables)
     items[flags] = outputs
     return items
-def make_concrete(args):
-    return asyncio.run(gather_plus(*args))
 
 
 class History():
@@ -266,18 +264,18 @@ class History():
         return history_part
     def add(self, name, text):
         self.entries.append({'name': name, 'text': text})
-    def concrete(self):
+    async def concrete(self):
         texts = [entry['text'] for entry in self.entries]
-        texts = make_concrete(texts)
+        texts = await gather_plus(*texts)
         for i in range(len(texts)):
             self.entries[i]['text'] = texts[i]
-    def str(self, name=None):
-        self.concrete()
+    async def str(self, name=None):
+        await self.concrete()
         return '\n\n'.join([
             ('You' if entry['name'] == name else entry['name'])
             + ':\n\n' + entry['text'] for entry in self.entries])
-    def textonly(self):
-        self.concrete()
+    async def textonly(self):
+        await self.concrete()
         return '\n\n'.join([entry['text'] for entry in self.entries])
     def clear(self):
         self.entries = []
@@ -392,36 +390,37 @@ class Intelligent():
             if self.presets is not None:
                 self.preset_generator = self.set_preset_generator(self.presets)
 
-    def return_output(self, kind=None, bind=None,
-                      template=None, variables=None, **kwargs):
+    async def return_output(self, kind=None, bind=None,
+                            template=None, variables=None, **kwargs):
         # Set defaults
         if kind is None:
             kind = self.kind
 
         # Use intelligent entity (AI or human) to generate output
         if template is None and variables is None:
-            template, variables = self.return_template(**kwargs)
+            template, variables = await self.return_template(**kwargs)
         prompt = langchain.prompts.PromptTemplate(
             template=template,
             input_variables=list(variables.keys()),
         )
         if kind == 'ai':
-            output = self.return_from_ai(prompt, variables, bind=bind)
+            output = await self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
-            output = self.return_from_human(prompt, variables)
+            output = await self.return_from_human(prompt, variables)
         elif kind == 'api':
-            output = self.return_from_api(prompt, variables)
+            output = await self.return_from_api(prompt, variables)
         elif kind == 'preset':
-            output = self.return_from_preset()
+            output = await self.return_from_preset()
         return output
 
-    def return_template(self, name=None,
-                        persona=None, reminder=None,
-                        rag=None, rag_intro=None, rag_query=None,
-                        history=None, history_over=None, history_merged=None,
-                        responses=None, responses_intro=None,
-                        query=None, query_format=None, query_subtitle=None
-                        ):
+    async def return_template(
+            self, name=None,
+            persona=None, reminder=None,
+            rag=None, rag_intro=None, rag_query=None,
+            history=None, history_over=None, history_merged=None,
+            responses=None, responses_intro=None,
+            query=None, query_format=None, query_subtitle=None
+    ):
         # Punctuation edit
         if persona is not None:
             if persona[-1:] == '.':
@@ -451,12 +450,12 @@ class Intelligent():
             if isinstance(history, str):
                 variables['history'] = history
             elif not history_merged:
-                variables['history'] = history.str(name=name)
+                variables['history'] = await history.str(name=name)
             else:
-                variables['history'] = history.textonly()
+                variables['history'] = await history.textonly()
         if responses is not None:
             template += '### ' + responses_intro + ':\n\n{responses}\n\n'
-            variables['responses'] = responses.str(name=name)
+            variables['responses'] = await responses.str(name=name)
         if query_format is None or query_format == 'twoline':
             template += '### Question:\n\n{query}'
             if reminder == 2 and persona is not None:
@@ -477,7 +476,7 @@ class Intelligent():
             variables['subtitle'] = query_subtitle
         return template, variables
 
-    def return_from_ai(self, prompt, variables, max_tries=64, bind=None):
+    async def return_from_ai(self, prompt, variables, max_tries=64, bind=None):
         llm = self.llm.llm.bind(**self.llm.bound)
         if bind is not None:
             llm = llm.bind(**bind)
@@ -488,15 +487,17 @@ class Intelligent():
             print('^' * 80)
         for i in range(max_tries):
             if not verbose >= 1 or self.llm.source == 'huggingface':
-                output = chain.invoke(variables).strip()
+                output = chain.ainvoke(variables).strip()
             else:
                 def handle(chunk):
                     if self.llm.source in ['openai', 'azure']:
                         chunk = chunk.content
                     print(chunk, end='', flush=True)
                     return chunk
-                output = ''.join(handle(x) for x in chain.stream(variables)
-                                 ).strip()
+                output = ''
+                async for chunk in chain.astream(variables):
+                    output += handle(chunk)
+                output = output.strip()
             if len(output) > 0:
                 break
         if verbose >= 1:
@@ -551,7 +552,7 @@ class Intelligent():
         answer_content = answer_json['content']
         return answer_content
 
-    def return_from_preset(self):
+    async def return_from_preset(self):
         return next(self.preset_generator, '')
 
     def set_preset_generator(self, presets):
@@ -721,9 +722,6 @@ class Intelligent():
             responses=chatlog, responses_intro=chat_intro,
             query=name + ':\n\n', query_format='oneline_simple'
         )
-        # if verbose >= 1:
-        #     print()
-        # chatlog.add(name, output)
         return output
 
 
