@@ -667,8 +667,8 @@ class Intelligent():
                 output = ''
         return output
 
-    def chat_backend(self, name='Assistant', persona=None, rag=None,
-                     history=None):
+    async def chat_backend(self, name='Assistant', persona=None, rag=None,
+                           history=None):
         chatlog = History()
         nb = 2
         username = 'User'
@@ -694,7 +694,7 @@ class Intelligent():
 
             # Get response
             bind = {'stop': [username + ':', name + ':', 'Narrator:']}
-            output = self.return_output(
+            output = await self.return_output(
                 bind=bind,
                 persona=persona,
                 rag=rag,
@@ -826,7 +826,7 @@ class Control(Intelligent, Stateful, RAG):
     def chat(self, history=None):
         name = self.name
         persona = 'the Control (a.k.a. moderator) of a simulated scenario'
-        self.chat_backend(name=name, persona=persona, history=history)
+        return self.chat_backend(name=name, persona=persona, history=history)
 
     def create_scenario(self, query=None, clip=0):
         if query is None:
@@ -902,7 +902,7 @@ class Team(Stateful):
             history=history, responses=responses, query=query, mc=mc)
 
     def chat(self, history=None):
-        self.leader.chat(history=history)
+        return self.leader.chat(history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Team:', self.name)
@@ -974,7 +974,8 @@ class Player(Intelligent, Stateful, RAG):
         name = self.name
         persona = self.persona
         rag = self.rag
-        self.chat_backend(name=name, persona=persona, rag=rag, history=history)
+        return self.chat_backend(
+            name=name, persona=persona, rag=rag, history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Player:', self.name)
