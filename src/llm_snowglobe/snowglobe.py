@@ -487,7 +487,8 @@ class Intelligent():
             print('^' * 80)
         for i in range(max_tries):
             if not verbose >= 1 or self.llm.source == 'huggingface':
-                output = chain.ainvoke(variables).strip()
+                output = await chain.ainvoke(variables)
+                output = output.strip()
             else:
                 def handle(chunk):
                     if self.llm.source in ['openai', 'azure']:
