@@ -488,6 +488,8 @@ class Intelligent():
         for i in range(max_tries):
             if not verbose >= 1 or self.llm.source == 'huggingface':
                 output = await chain.ainvoke(variables)
+                if self.llm.source in ['openai', 'azure']:
+                    output = output.content
                 output = output.strip()
             else:
                 def handle(chunk):
