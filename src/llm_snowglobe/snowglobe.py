@@ -783,8 +783,8 @@ class Control(Intelligent, Stateful, RAG):
         else:
             print(title)
 
-    def adjudicate(self, history=None, responses=None, query=None,
-                   nature=True, timestep='week', mode=[]):
+    async def adjudicate(self, history=None, responses=None, query=None,
+                         nature=True, timestep='week', mode=[]):
         responses_intro = 'These are the plans for each person or group'
         if 'geopol' in mode:
             responses_intro = 'These are the plans ordered by each leader'
@@ -794,7 +794,7 @@ class Control(Intelligent, Stateful, RAG):
                 query = 'Describe these plans being carried out, assuming the leaders above issue no further orders.'
             if random.random() < nature:
                 query += ' Include unexpected consequences.'
-        output = self.return_output(
+        output = await self.return_output(
             history=history,
             responses=responses, responses_intro=responses_intro,
             query=query, query_format='oneline'
@@ -802,21 +802,21 @@ class Control(Intelligent, Stateful, RAG):
         if 'summarize' in mode:
             print('\n### Summary\n')
             template = 'Give a short summary of the News.\n\n### History:\n\n{history}\n\n### News:\n\n{news}\n\n### Summary of the News:\n\n'
-            variables = {'history': history.textonly(), 'news': output}
+            variables = {'history': await history.textonly(), 'news': output}
             output = self.return_output(
                 template=template, variables=variables
             )
         return output
 
-    def assess(self, history=None, responses=None, query=None,
-               mc=None, short=False):
+    async def assess(self, history=None, responses=None, query=None,
+                     mc=None, short=False):
         responses_intro = 'Questions about what happened'
         if responses is None:
             query_format = 'twoline'
         else:
             query_format = 'twoline_simple'
         bind = {'stop': ['\n\n']} if short else None
-        output = self.return_output(
+        output = await self.return_output(
             bind=bind,
             history=history, history_over=True,
             responses=responses, responses_intro=responses_intro,
@@ -938,12 +938,12 @@ class Player(Intelligent, Stateful, RAG):
         else:
             self.rag = None
 
-    def respond(self, history=None, query=None, reminder=2, mc=None,
-                short=False):
+    async def respond(self, history=None, query=None, reminder=2, mc=None,
+                      short=False):
         if query is None:
             query = 'What action or actions do you take in response?'
         bind = {'stop': ['\n\n']} if short else {'stop': ['Narrator:']}
-        output = self.return_output(
+        output = await self.return_output(
             bind=bind,
             name=self.name,
             persona=self.persona, reminder=reminder,
