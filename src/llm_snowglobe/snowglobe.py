@@ -708,8 +708,8 @@ class Intelligent():
             print()
             chatlog.add(name, output)
 
-    def chat_response(self, chatlog, name='Assistant', persona=None, rag=None,
-                      history=None, participants=None):
+    async def chat_response(self, chatlog, name='Assistant', persona=None,
+                            rag=None, history=None, participants=None):
         # Get single response, given prexisting chatlog
         chat_intro = 'This is a conversation about what happened'
         if participants is None:
@@ -717,7 +717,7 @@ class Intelligent():
             participants.add(name)
             participants.add('Narrator')
         bind = {'stop': [p + ':' for p in participants]}
-        output = self.return_output(
+        output = await self.return_output(
             bind=bind,
             persona=persona,
             rag=rag,
