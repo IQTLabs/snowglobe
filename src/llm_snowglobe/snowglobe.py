@@ -767,8 +767,11 @@ class Control(Intelligent, Stateful, RAG):
         else:
             self.rag = None
 
-    def __call__(self):
+    async def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
+
+    def run(self):
+        asyncio.run(self())
 
     def header(self, title, h=0, width=80):
         print()
