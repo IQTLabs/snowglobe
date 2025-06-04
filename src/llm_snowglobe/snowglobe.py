@@ -645,7 +645,7 @@ class Intelligent():
                 return answer
             UI.wait()
 
-    def multiple_choice(self, query, answer, mc):
+    async def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
         if len(mc_parts) == 2:
             mc_parts[0] = mc_parts[0][:-1]
@@ -654,7 +654,7 @@ class Intelligent():
         template = 'Question: {query}\n\nAnswer: {answer}\n\nQuestion: Which multiple choice response best summarizes the previous answer?: {mc_string}.\n\nAnswer: '
         variables = {'query': query, 'answer': answer, 'mc_string': mc_string}
         bind = {'stop': ['\n\n']}
-        output = self.return_output(
+        output = await self.return_output(
             bind=bind,
             template=template, variables=variables
         )
@@ -823,7 +823,7 @@ class Control(Intelligent, Stateful, RAG):
             query=query, query_format=query_format
         )
         if mc is not None:
-            output = self.multiple_choice(query, output, mc)
+            output = await self.multiple_choice(query, output, mc)
         return output
 
     def chat(self, history=None):
@@ -831,18 +831,19 @@ class Control(Intelligent, Stateful, RAG):
         persona = 'the Control (a.k.a. moderator) of a simulated scenario'
         return self.chat_backend(name=name, persona=persona, history=history)
 
-    def create_scenario(self, query=None, clip=0):
+    async def create_scenario(self, query=None, clip=0):
         if query is None:
             raise Exception('Query required to create scenario.')
-        output = self.return_output(
+        output = await self.return_output(
             query=query, query_format='twoline_simple'
         )
         if clip > 0:
             output = '\n\n'.join(output.split('\n\n')[:-clip])
         return output
 
-    def create_players(self, scenario, max_players=None, query=None,
-                       others=False, pattern_sep=None, pattern_left=None):
+    async def create_players(self, scenario, max_players=None, query=None,
+                             others=False, pattern_sep=None, pattern_left=None
+                             ):
         if query is None:
             query = 'List the key players in this scenario, separated by semicolons.'
         if pattern_sep is None:
@@ -851,7 +852,7 @@ class Control(Intelligent, Stateful, RAG):
             pattern_left = ' ()-'
         template = 'Scenario: {scenario}\n\nQuestion: {query}\n\nAnswer: '
         variables = {'scenario': scenario, 'query': query}
-        output = self.return_output(
+        output = await self.return_output(
             template=template, variables=variables
         )
         names = re.split(pattern_sep, output)
@@ -870,10 +871,10 @@ class Control(Intelligent, Stateful, RAG):
         else:
             return players, other_names
 
-    def create_inject(self, history=None, query=None):
+    async def create_inject(self, history=None, query=None):
         if query is None:
             raise Exception('Query required to create inject.')
-        output = self.return_output(
+        output = await self.return_output(
             history=history,
             query=query, query_format='oneline', query_subtitle='Narrator'
         )
@@ -887,21 +888,22 @@ class Team(Stateful):
         self.members = members
         self.history = History()
 
-    def respond(self, history=None, query=None, mc=None, short=False):
+    async def respond(self, history=None, query=None, mc=None, short=False):
         member_responses = History()
         for member in self.members:
             if verbose >= 2:
                 print('\n### ' + member.name)
-            member_responses.add(member.name, member.respond(
+            member_responses.add(member.name, await member.respond(
                 history=history, query=query, mc=mc, short=short))
         if verbose >= 2:
             print('\n### Leader: ' + self.leader.name)
-        leader_response = self.leader.synthesize(
+        leader_response = await self.leader.synthesize(
             history=history, responses=member_responses, query=query, mc=mc)
         return leader_response
 
-    def synthesize(self, history=None, responses=None, query=None, mc=None):
-        return self.leader.synthesize(
+    async def synthesize(self, history=None, responses=None, query=None,
+                         mc=None):
+        return await self.leader.synthesize(
             history=history, responses=responses, query=query, mc=mc)
 
     def chat(self, history=None):
@@ -952,17 +954,18 @@ class Player(Intelligent, Stateful, RAG):
             query=query
         )
         if mc is not None:
-            output = self.multiple_choice(query, output, mc)
+            output = await self.multiple_choice(query, output, mc)
         return output
 
-    def synthesize(self, history=None, responses=None, query=None, mc=None):
+    async def synthesize(self, history=None, responses=None, query=None,
+                         mc=None):
         if query is None:
             responses_intro = 'These are the actions your team members recommend you take in response'
             synthesize_query = 'Combine the recommended actions given above'
         else:
             responses_intro = 'These are the responses from your team members'
             synthesize_query = 'Combine the responses given above'
-        output = self.return_output(
+        output = await self.return_output(
             name=self.name,
             persona=self.persona,
             history=history,
@@ -970,7 +973,7 @@ class Player(Intelligent, Stateful, RAG):
             query=synthesize_query, query_format='oneline'
         )
         if mc is not None:
-            output = self.multiple_choice(query, output, mc)
+            output = await self.multiple_choice(query, output, mc)
         return output
 
     def chat(self, history=None):
