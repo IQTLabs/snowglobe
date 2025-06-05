@@ -727,6 +727,24 @@ class Intelligent():
         )
         return output
 
+    async def join_chatroom(self, chatroom, rag=None, history=None):
+        while True:
+            data = UI.get()
+            log = data['chatrooms'][chatroom]['log']
+            # Respond unless most recent message was from self
+            if len(log) > 0 and log[-1]['name'] != self.name:
+                # Construct message log
+                chatlog = History()
+                for logitem in log:
+                    chatlog.add(logitem['name'], logitem['content'])
+                # Respond
+                output = await self.chat_response(
+                    chatlog, name=self.name,
+                    persona=self.persona,
+                    rag=None, history=None)
+                self.interface_send_message(chatroom, output)
+            await UI.wait()
+
 
 class Stateful():
     def record_narration(self, narration, timestep=None, index=None):
