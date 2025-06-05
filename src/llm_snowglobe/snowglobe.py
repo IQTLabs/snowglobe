@@ -122,8 +122,8 @@ class UIClass():
     def set(self, data):
         with open(self.path, 'w') as f:
             json.dump(data, f, indent=4)
-    def wait(self):
-        for changes in watchfiles.watch(self.path):
+    async def wait(self):
+        async for changes in watchfiles.awatch(self.path):
             break
 
 UI = UIClass()
@@ -528,7 +528,7 @@ class Intelligent():
         sender.interface_send_message(chatroom, content)
 
         # Get response
-        answer = self.interface_get_message(chatroom)
+        answer = await self.interface_get_message(chatroom)
         return answer
 
     async def return_from_api(self, prompt, variables, delay=2):
@@ -636,14 +636,14 @@ class Intelligent():
                 data['chatrooms'][carboncopy]['log'].append(message)
         UI.set(data)
 
-    def interface_get_message(self, chatroom):
+    async def interface_get_message(self, chatroom):
         while True:
             data = UI.get()
             log = data['chatrooms'][chatroom]['log']
             if len(log) > 0 and log[-1]['name'] == self.name:
                 answer = log[-1]['content']
                 return answer
-            UI.wait()
+            await UI.wait()
 
     async def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
