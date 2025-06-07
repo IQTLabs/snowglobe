@@ -111,7 +111,7 @@ def config(menu=None, source=None, model=None, url=None, path=None,
         print('Done', flush=True)
 
 
-class UI():
+class Database():
     def __init__(self, path=None):
         self.path = path if path is not None else 'databank.db'
         self.con = sqlite3.connect(self.path)
@@ -142,7 +142,7 @@ class UI():
         async for changes in watchfiles.awatch(self.path):
             break
 
-ui = UI()
+db = Database()
 
 
 class LLM():
@@ -611,19 +611,19 @@ class Intelligent():
             print('ID %s : %s' % (self.interface_label, self.name))
 
         # Export info for UI interface
-        ui.add_player(self.interface_label, self.name)
+        db.add_player(self.interface_label, self.name)
         if self.iodict is not None:
             for resource_type in ['chatrooms', 'weblinks', 'infodocs',
                                   'notepads', 'editdocs']:
                 if resource_type in self.iodict:
                     for resource in self.iodict[resource_type]:
-                        ui.add_resource(resource, resource_type[:-1])
-                        ui.assign(self.interface_label, resource)
+                        db.add_resource(resource, resource_type[:-1])
+                        db.assign(self.interface_label, resource)
                         if resource_type in ['infodocs', 'editdocs']:
-                            ui.add_property(resource, 'content', '')
+                            db.add_property(resource, 'content', '')
                         if resource_type == 'infodocs':
-                            ui.add_property(resource, 'format', 'markdown')
-        ui.commit()
+                            db.add_property(resource, 'format', 'markdown')
+        db.commit()
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):
         if fmt is None:
