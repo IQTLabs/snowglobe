@@ -136,6 +136,9 @@ class Database():
     def add_property(self, resource, rproperty, value):
         self.cur.execute("replace into properties values(?, ?, ?)",
                          (resource, rproperty, value))
+    def get_name(self, pid):
+        res = self.cur.execute("select name from players where id == ?", (pid,)).fetchone()
+        return res[0] if res is not None else None
     def commit(self):
         self.con.commit()
     async def wait(self):

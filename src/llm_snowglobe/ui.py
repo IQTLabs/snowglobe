@@ -22,38 +22,18 @@ import asyncio
 import markdown2
 import watchfiles
 from nicegui import ui, app
+from llm_snowglobe import db
 
 here = os.path.dirname(os.path.abspath(__file__))
-datapath = 'databank.json'
-databank = None
 datastep = 0
 
-async def load_databank():
-    if not os.path.exists(datapath):
-        globals()['databank'] = {}
-        save_databank()
+async def detect_update():
     while True:
-        while True:
-            try:
-                with open(datapath, 'r') as f:
-                    globals()['databank'] = json.load(f)
-            except json.decoder.JSONDecodeError:
-                print('! %s: File format error' % time.ctime())
-                await asyncio.sleep(0.1)
-            except FileNotFoundError:
-                print('! %s: Missing databank file' % time.ctime())
-                await asyncio.sleep(1.0)
-            else:
-                break
         globals()['datastep'] += 1
-        async for changes in watchfiles.awatch(datapath):
+        async for changes in watchfiles.awatch(db.path):
             break
 
-def save_databank():
-    with open(datapath, 'w') as f:
-        json.dump(databank, f, indent=4)
-
-app.on_startup(load_databank)
+app.on_startup(detect_update)
 
 app.add_static_file(url_path='/ai.png', local_file=os.path.join(
     here, 'assets/ai.png'))
@@ -66,12 +46,12 @@ async def ui_page():
     async def set_id(idval):
         if len(idval) == 0:
             ui.notify('Enter your ID.')
-        elif 'players' not in databank or idval not in databank['players']:
+        elif db.get_name(idval) is None:
             ui.notify('ID not found.')
         else:
             app.storage.tab['id'] = idval
             login_numb.text = app.storage.tab['id']
-            login_name.text = databank['players'][idval]['name']
+            login_name.text = db.get_name(app.storage.tab['id'])
             preloginrow.set_visibility(False)
             postloginrow.set_visibility(True)
             new_resource_check()
