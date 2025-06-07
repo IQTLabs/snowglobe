@@ -25,6 +25,7 @@ import random
 import shutil
 import asyncio
 import inspect
+import sqlite3
 import readline
 import watchfiles
 import numpy as np
@@ -110,23 +111,38 @@ def config(menu=None, source=None, model=None, url=None, path=None,
         print('Done', flush=True)
 
 
-class UIClass():
+class UI():
     def __init__(self, path=None):
-        self.path = path if path is not None else 'databank.json'
-    def create(self, overwrite=False):
-        if (not os.path.exists(self.path)) or overwrite:
-            self.set({})
-    def get(self):
-        with open(self.path, 'r') as f:
-            return json.load(f)
-    def set(self, data):
-        with open(self.path, 'w') as f:
-            json.dump(data, f, indent=4)
+        self.path = path if path is not None else 'databank.db'
+        self.con = sqlite3.connect(self.path)
+        self.cur = self.con.cursor()
+        self.create()
+    def create(self):
+        self.cur.execute("create table if not exists players(id primary key, name)")
+        self.cur.execute("create table if not exists resources(resource primary key, type)")
+        self.cur.execute("create table if not exists assignments(id, resource, primary key (id, resource))")
+        self.cur.execute("create table if not exists properties(resource, property, value, primary key (resource, property))")
+        self.cur.execute("create table if not exists chatlog(resource, content, format, name, stamp, avatar)")
+        self.cur.execute("create table if not exists textlog(resource, content, name, stamp)")
+        self.cur.execute("create table if not exists histlog(resource, content, name)")
+    def add_player(self, pid, name):
+        self.cur.execute("replace into players values(?, ?)", (pid, name))
+    def add_resource(self, resource, rtype):
+        self.cur.execute("replace into resources values(?, ?)",
+                         (resource, rtype))
+    def assign(self, pid, resource):
+        self.cur.execute("replace into assignments values(?, ?)",
+                         (pid, resource))
+    def add_property(self, resource, rproperty, value):
+        self.cur.execute("replace into properties values(?, ?, ?)",
+                         (resource, rproperty, value))
+    def commit(self):
+        self.con.commit()
     async def wait(self):
         async for changes in watchfiles.awatch(self.path):
             break
 
-UI = UIClass()
+ui = UI()
 
 
 class LLM():
@@ -594,30 +610,20 @@ class Intelligent():
         if verbose >= 2:
             print('ID %s : %s' % (self.interface_label, self.name))
 
-        # Create info for UI interface
-        pdict = self.iodict if self.iodict is not None else {'name': self.name}
-
         # Export info for UI interface
-        UI.create()
-        data = UI.get()
-        if 'players' not in data:
-            data['players'] = {}
-        data['players'][self.interface_label] = pdict
-        for resource_type in [
-                'chatrooms', 'weblinks', 'infodocs', 'notepads', 'editdocs']:
-            if resource_type in pdict:
-                if resource_type not in data:
-                    data[resource_type] = {}
-                for resource in pdict[resource_type]:
-                    if resource not in data[resource_type]:
-                        data[resource_type][resource] = {}
-                        if resource_type == 'chatrooms':
-                            data[resource_type][resource]['log'] = []
+        ui.add_player(self.interface_label, self.name)
+        if self.iodict is not None:
+            for resource_type in ['chatrooms', 'weblinks', 'infodocs',
+                                  'notepads', 'editdocs']:
+                if resource_type in self.iodict:
+                    for resource in self.iodict[resource_type]:
+                        ui.add_resource(resource, resource_type[:-1])
+                        ui.assign(self.interface_label, resource)
                         if resource_type in ['infodocs', 'editdocs']:
-                            data[resource_type][resource]['content'] = ''
+                            ui.add_property(resource, 'content', '')
                         if resource_type == 'infodocs':
-                            data[resource_type][resource]['format'] = 'markdown'
-        UI.set(data)
+                            ui.add_property(resource, 'format', 'markdown')
+        ui.commit()
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):
         if fmt is None:
