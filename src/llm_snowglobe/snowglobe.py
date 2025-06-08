@@ -122,9 +122,9 @@ class Database():
         self.cur.execute("create table if not exists resources(resource primary key, type)")
         self.cur.execute("create table if not exists assignments(ord integer primary key, id, resource)")
         self.cur.execute("create table if not exists properties(resource, property, value, primary key (resource, property))")
-        self.cur.execute("create table if not exists chatlog(resource, content, format, name, stamp, avatar)")
-        self.cur.execute("create table if not exists textlog(resource, content, name, stamp)")
-        self.cur.execute("create table if not exists histlog(resource, content, name)")
+        self.cur.execute("create table if not exists chatlog(ord integer primary key, resource, content, format, name, stamp, avatar)")
+        self.cur.execute("create table if not exists textlog(ord integer primary key, resource, content, name, stamp)")
+        self.cur.execute("create table if not exists histlog(ord integer primary key, resource, content, name)")
     def add_player(self, pid, name):
         self.cur.execute("replace into players values(?, ?)", (pid, name))
     def add_resource(self, resource, rtype):
@@ -145,6 +145,14 @@ class Database():
     def get_properties(self, resource):
         res = self.cur.execute("select property, value from properties where resource == ?", (resource,)).fetchall()
         return dict(res)
+    def get_chatlog(self, chatroom=None):
+        if chatroom is not None:
+            res = self.cur.execute("select content, format, name, stamp, avatar from chatlog where resource == ? order by ord", (chatroom,)).fetchall()
+        else:
+            res = self.cur.execute("select content, format, name, stamp, avatar from chatlog order by ord").fetchall()
+        return [dict(zip(('content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
+    def send_message(self, chatroom, content, format, name, stamp, avatar):
+        self.cur.execute("insert into chatlog values(NULL, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
     def commit(self):
         self.con.commit()
     async def wait(self):
@@ -643,13 +651,15 @@ class Intelligent():
                    'name': self.name,
                    'stamp': time.ctime(),
                    'avatar': avatar}
-        cc = [cc] if isinstance(cc, str) else cc
-        data = UI.get()
-        data['chatrooms'][chatroom]['log'].append(message)
-        if cc is not None:
-            for carboncopy in cc:
-                data['chatrooms'][carboncopy]['log'].append(message)
-        UI.set(data)
+        if cc is None:
+            destinations = [chatroom]
+        elif isinstance(cc, str):
+            destinations = [chatroom, cc]
+        else:
+            destinations = [chatroom].append(cc)
+        for destination in destinations:
+            db.send_message(destination, **message)
+        db.commit()
 
     async def interface_get_message(self, chatroom):
         while True:
@@ -744,8 +754,7 @@ class Intelligent():
 
     async def join_chatroom(self, chatroom, rag=None, history=None):
         while True:
-            data = UI.get()
-            log = data['chatrooms'][chatroom]['log']
+            log = db.get_chatlog(chatroom)
             # Respond unless most recent message was from self
             if len(log) > 0 and log[-1]['name'] != self.name:
                 # Construct message log
@@ -758,7 +767,7 @@ class Intelligent():
                     persona=self.persona,
                     rag=None, history=None)
                 self.interface_send_message(chatroom, output)
-            await UI.wait()
+            await db.wait()
 
 
 class Stateful():
