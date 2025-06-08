@@ -122,7 +122,8 @@ async def ui_page():
                 with ui.scroll_area().classes('w-full h-full border') as tabvars[resource]['message_window']:
                     tabvars[resource]['updater'] = ui.refreshable(display_messages)
                     tabvars[resource]['updater'](resource)
-                placeholder = databank['chatrooms'][resource]['instruction'] if 'instruction' in databank['chatrooms'][resource] else 'Ask the AI assistant.'
+                properties = db.get_properties(resource)
+                placeholder = properties['instruction'] if 'instruction' in properties else 'Ask the AI assistant.'
                 tabvars[resource]['chattext'] = ui.textarea(placeholder=placeholder).classes('w-full border').style('height: auto; padding: 0px 5px')
                 ui.button('Send', on_click=lambda resource=resource: send_message(resource))
 
@@ -180,21 +181,18 @@ async def ui_page():
             setup_tab_panels.refresh()
             return
         display_func = {
-            'chatrooms': display_messages,
-            'infodocs': display_infodoc,
+            'chatroom': display_messages,
+            'infodoc': display_infodoc,
         }
-        for resource_type in display_func:
-            if resource_type in databank['players'][idval]:
-                for resource in databank['players'][idval][resource_type]:
-                    tabvars[resource]['updater'].refresh(resource)
+        for resource, resource_type in db.get_assignments(idval):
+            if resource_type in display_func:
+                tabvars[resource]['updater'].refresh(resource)
 
     def display_messages(resource):
         idval = app.storage.tab['id']
-        name = databank['players'][idval]['name']
-        chatroom = databank['chatrooms'][resource]
-        if not 'log' in chatroom:
-            return
-        for message in chatroom['log']:
+        name = db.get_name(idval)
+        chatlog = db.get_chatlog(resource)
+        for message in chatlog:
             if 'format' not in message or message['format'] == 'plaintext':
                 text = message['content']
                 text_html = False
@@ -212,31 +210,34 @@ async def ui_page():
                             sent=sent,
                             text_html=text_html,
                             ).classes('w-full')
-        if len(chatroom['log']) > tabvars[resource]['message_count']:
+        if len(chatlog) > tabvars[resource]['message_count']:
             tabvars[resource]['message_window'].scroll_to(percent=100)
-            tabvars[resource]['message_count'] = len(chatroom['log'])
+            tabvars[resource]['message_count'] = len(chatlog)
 
     def display_weblink(resource):
-        tabvars[resource]['iframe'].props('src=%s' % databank['weblinks'][resource]['url'])
+        properties = db.get_properties(resource)
+        if 'url' in properties:
+            tabvars[resource]['iframe'].props('src=%s' % properties['url'])
 
     def display_infodoc(resource):
         idval = app.storage.tab['id']
-        infodoc = databank['infodocs'][resource]
-        if 'format' not in infodoc or infodoc['format'] == 'plaintext':
-            ui.label(infodoc['content']).style('white-space: pre-wrap').classes('w-full h-full')
-        elif infodoc['format'] == 'markdown':
-            ui.markdown(infodoc['content']).classes('w-full h-full')
-        elif infodoc['format'] == 'html':
-            ui.html(infodoc['content']).classes('w-full h-full')
+        properties = db.get_properties(resource)
+        if 'content' not in properties:
+            return
+        if 'format' not in properties or properties['format'] == 'plaintext':
+            ui.label(properties['content']).style('white-space: pre-wrap').classes('w-full h-full')
+        elif properties['format'] == 'markdown':
+            ui.markdown(properties['content']).classes('w-full h-full')
+        elif properties['format'] == 'html':
+            ui.html(properties['content']).classes('w-full h-full')
 
     def display_notepad(resource):
         idval = app.storage.tab['id']
         editor = tabvars[resource]['editor']
         editor.bind_value(app.storage.general, resource)
         editor.on_value_change(lambda resource=resource: stamp_notepad(resource))
-        if 'readonly' in databank['notepads'][resource] and \
-           databank['players'][idval]['name'] in \
-           databank['notepads'][resource]['readonly']:
+        properties = db.get_properties(resource)
+        if 'readonly' in properties and '|' + db.get_name(idval) + '|' in properties['readonly']:
             editor.enabled = False
         else:
             ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
