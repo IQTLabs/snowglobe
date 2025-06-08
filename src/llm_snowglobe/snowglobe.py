@@ -132,7 +132,7 @@ class Database():
                          (resource, rtype))
     def assign(self, pid, resource):
         self.cur.execute("delete from assignments where id = ? and resource = ?", (pid, resource))
-        self.cur.execute("replace into assignments values(NULL, ?, ?)",
+        self.cur.execute("replace into assignments values(null, ?, ?)",
                          (pid, resource))
     def add_property(self, resource, rproperty, value):
         self.cur.execute("replace into properties values(?, ?, ?)",
@@ -154,9 +154,9 @@ class Database():
             res = self.cur.execute("select content, format, name, stamp, avatar from chatlog order by ord").fetchall()
         return [dict(zip(('content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
     def send_message(self, chatroom, content, format, name, stamp, avatar):
-        self.cur.execute("insert into chatlog values(NULL, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
+        self.cur.execute("insert into chatlog values(null, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
     def save_text(self, resource, content, name, stamp):
-        self.cur.execute("insert into textlog values(NULL, ?, ?, ?, ?)", (resource, content, name, stamp))
+        self.cur.execute("insert into textlog values(null, ?, ?, ?, ?)", (resource, content, name, stamp))
     def commit(self):
         self.con.commit()
     async def wait(self):
