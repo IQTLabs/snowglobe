@@ -327,23 +327,23 @@ async def ui_page():
     async def save_notepad(resource):
         now = time.time()
         if 'last_modified' in tabvars[resource] and ('last_saved' not in tabvars[resource] or tabvars[resource]['last_saved'] < tabvars[resource]['last_modified']):
-            databank['notepads'][resource]['content'] = tabvars[resource]['editor'].value
-            databank['notepads'][resource]['stamp'] = time.ctime(tabvars[resource]['last_modified'])
-            save_databank()
+            content = tabvars[resource]['editor'].value
+            stamp = time.ctime(tabvars[resource]['last_modified'])
+            db.add_property(resource, 'content', content)
+            db.add_property(resource, 'stamp', stamp)
+            db.save_text(resource, content, None, stamp)
+            db.commit()
             tabvars[resource]['last_saved'] = now
 
     async def submit_editdoc(resource):
         idval = app.storage.tab['id']
-        editdoc = databank['editdocs'][resource]
-        editdoc['content'] = app.storage.general[resource]
-        if not 'history' in editdoc:
-            editdoc['history'] = []
-        editdoc['history'].append({
-            'content': editdoc['content'],
-            'name': databank['players'][idval]['name'],
-            'stamp': time.ctime(),
-        })
-        save_databank()
+        content = app.storage.general[resource]
+        name = db.get_name(idval)
+        stamp = time.ctime()
+        db.add_property(resource, 'content', content)
+        db.add_property(resource, 'stamp', stamp)
+        db.save_text(resource, content, name, stamp)
+        db.commit()
         ui.notify('Document submitted')
 
     tabvars = {}

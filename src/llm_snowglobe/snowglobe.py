@@ -155,6 +155,8 @@ class Database():
         return [dict(zip(('content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
     def send_message(self, chatroom, content, format, name, stamp, avatar):
         self.cur.execute("insert into chatlog values(NULL, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
+    def save_text(self, resource, content, name, stamp):
+        self.cur.execute("insert into textlog values(NULL, ?, ?, ?, ?)", (resource, content, name, stamp))
     def commit(self):
         self.con.commit()
     async def wait(self):
