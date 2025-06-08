@@ -547,17 +547,16 @@ class Intelligent():
     async def return_from_human(self, prompt, variables):
         # Determine chatroom to use.  If user has more than one, use the first.
         # If user has none, create one.
-        data = UI.get()
-        if 'chatrooms' in data['players'][self.interface_label] and \
-           len(data['players'][self.interface_label]['chatrooms']) > 0:
-            chatroom = data['players'][self.interface_label]['chatrooms'][0]
-        else:
+        chatroom = None
+        for resource, resource_type in db.get_assignments(self.interface_label):
+            if resource_type == 'chatroom':
+                chatroom = resource
+                break
+        if chatroom is None:
             chatroom = '%s_%s_default' % (self.name, self.interface_label)
-            data['players'][self.interface_label]['chatrooms'] = [chatroom]
-            if 'chatrooms' not in data:
-                data['chatrooms'] = {}
-            data['chatrooms'][chatroom] = {'log': []}
-            UI.set(data)
+            db.add_resource(chatroom, 'chatroom')
+            db.assign(self.interface_label, chatroom)
+            db.commit()
 
         # Send prompt.  Create a temporary control just to send the message.
         sender = Control(llm=None)
@@ -667,12 +666,11 @@ class Intelligent():
 
     async def interface_get_message(self, chatroom):
         while True:
-            data = UI.get()
-            log = data['chatrooms'][chatroom]['log']
+            log = db.get_chatlog(chatroom)
             if len(log) > 0 and log[-1]['name'] == self.name:
                 answer = log[-1]['content']
                 return answer
-            await UI.wait()
+            await db.wait()
 
     async def multiple_choice(self, query, answer, mc):
         mc_parts = ["'" + x + "'," for x in mc]
