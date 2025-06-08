@@ -237,8 +237,9 @@ async def ui_page():
         editor.bind_value(app.storage.general, resource)
         editor.on_value_change(lambda resource=resource: stamp_notepad(resource))
         properties = db.get_properties(resource)
-        if 'readonly' in properties and '|' + db.get_name(idval) + '|' in properties['readonly']:
-            editor.enabled = False
+        if 'readonly' in properties:
+            if '|' + db.get_name(idval) + '|' in properties['readonly']:
+                editor.enabled = False
         else:
             ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
 
@@ -246,9 +247,9 @@ async def ui_page():
         idval = app.storage.tab['id']
         editobj = tabvars[resource]['editobj']
         editobj.bind_value(app.storage.general, resource)
-        if 'readonly' in databank['editdocs'][resource]:
-            if databank['players'][idval]['name'] in \
-               databank['editdocs'][resource]['readonly']:
+        properties = db.get_properties(resource)
+        if 'readonly' in properties:
+            if '|' + db.get_name(idval) + '|' in properties['readonly']:
                 editobj.enabled = False
 
         # Code to reposition cursor, which by default gets moved to
