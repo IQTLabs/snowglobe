@@ -27,13 +27,13 @@ from llm_snowglobe import db
 here = os.path.dirname(os.path.abspath(__file__))
 datastep = 0
 
-async def detect_update():
+async def detect_updates():
     while True:
         globals()['datastep'] += 1
         async for changes in watchfiles.awatch(db.path):
             break
 
-app.on_startup(detect_update)
+app.on_startup(detect_updates)
 
 app.add_static_file(url_path='/ai.png', local_file=os.path.join(
     here, 'assets/ai.png'))
@@ -61,12 +61,8 @@ async def ui_page():
     def new_resource_check():
         idval = app.storage.tab['id']
         resource_string = ''
-        resource_types = [
-            'chatrooms', 'weblinks', 'infodocs', 'notepads', 'editdocs']
-        for resource_type in resource_types:
-            if resource_type in databank['players'][idval]:
-                for resource in databank['players'][idval][resource_type]:
-                    resource_string += '|' + resource_type + ':' + resource
+        for resource, resource_type in db.get_assignments(idval):
+            resource_string += '|' + resource_type + ':' + resource
         key = 'TABSTRING'
         new_resource = key not in tabvars or tabvars[key] != resource_string
         tabvars[key] = resource_string
@@ -78,32 +74,29 @@ async def ui_page():
             return
         idval = app.storage.tab['id']
         icon = {
-            'chatrooms': 'chat',
-            'weblinks': 'language',
-            'infodocs': 'description',
-            'notepads': 'edit_note',
-            'editdocs': 'edit',
+            'chatroom': 'chat',
+            'weblink': 'language',
+            'infodoc': 'description',
+            'notepad': 'edit_note',
+            'editdoc': 'edit',
         }
         default_title = {
-            'chatrooms': 'Chat',
-            'weblinks': 'Data',
-            'infodocs': 'Info',
-            'notepads': 'Note',
-            'editdocs': 'Edit',
+            'chatroom': 'Chat',
+            'weblink': 'Data',
+            'infodoc': 'Info',
+            'notepad': 'Note',
+            'editdoc': 'Edit',
         }
         with ui.tabs().classes('w-full') as tabs:
-            for resource_type in default_title:
-                if resource_type in databank['players'][idval]:
-                    for resource in databank['players'][idval][resource_type]:
-                        if resource_type in databank \
-                           and resource in databank[resource_type] \
-                           and 'title' in databank[resource_type][resource]:
-                            title = databank[resource_type][resource]['title']
-                        else:
-                            title = default_title[resource_type]
-                        tabvars[resource] = {}
-                        tabvars[resource]['tab'] = ui.tab(
-                            resource, label=title, icon=icon[resource_type])
+            for resource, resource_type in db.get_assignments(idval):
+                properties = db.get_properties(resource)
+                if 'title' in properties:
+                    title = properties['title']
+                else:
+                    title = default_title[resource_type]
+                tabvars[resource] = {}
+                tabvars[resource]['tab'] = ui.tab(
+                    resource, label=title, icon=icon[resource_type])
         tabvars['COLLECTION'] = tabs
 
     @ui.refreshable
@@ -112,17 +105,15 @@ async def ui_page():
             return
         idval = app.storage.tab['id']
         setup_func = {
-            'chatrooms': setup_chatroom,
-            'weblinks': setup_weblink,
-            'infodocs': setup_infodoc,
-            'notepads': setup_notepad,
-            'editdocs': setup_editdoc,
+            'chatroom': setup_chatroom,
+            'weblink': setup_weblink,
+            'infodoc': setup_infodoc,
+            'notepad': setup_notepad,
+            'editdoc': setup_editdoc,
         }
         with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full'):
-            for resource_type in setup_func:
-                if resource_type in databank['players'][idval]:
-                    for resource in databank['players'][idval][resource_type]:
-                        setup_func[resource_type](resource)
+            for resource, resource_type in db.get_assignments(idval):
+                setup_func[resource_type](resource)
 
     def setup_chatroom(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):

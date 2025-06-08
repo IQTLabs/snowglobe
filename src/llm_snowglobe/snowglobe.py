@@ -120,7 +120,7 @@ class Database():
     def create(self):
         self.cur.execute("create table if not exists players(id primary key, name)")
         self.cur.execute("create table if not exists resources(resource primary key, type)")
-        self.cur.execute("create table if not exists assignments(id, resource, primary key (id, resource))")
+        self.cur.execute("create table if not exists assignments(ord integer primary key, id, resource)")
         self.cur.execute("create table if not exists properties(resource, property, value, primary key (resource, property))")
         self.cur.execute("create table if not exists chatlog(resource, content, format, name, stamp, avatar)")
         self.cur.execute("create table if not exists textlog(resource, content, name, stamp)")
@@ -131,7 +131,7 @@ class Database():
         self.cur.execute("replace into resources values(?, ?)",
                          (resource, rtype))
     def assign(self, pid, resource):
-        self.cur.execute("replace into assignments values(?, ?)",
+        self.cur.execute("replace into assignments values(NULL, ?, ?)",
                          (pid, resource))
     def add_property(self, resource, rproperty, value):
         self.cur.execute("replace into properties values(?, ?, ?)",
@@ -139,6 +139,12 @@ class Database():
     def get_name(self, pid):
         res = self.cur.execute("select name from players where id == ?", (pid,)).fetchone()
         return res[0] if res is not None else None
+    def get_assignments(self, pid):
+        res = self.cur.execute("select assignments.resource, type from resources join assignments on resources.resource = assignments.resource where id == ? order by ord", (pid,)).fetchall()
+        return res
+    def get_properties(self, resource):
+        res = self.cur.execute("select property, value from properties where resource == ?", (resource,)).fetchall()
+        return dict(res)
     def commit(self):
         self.con.commit()
     async def wait(self):
