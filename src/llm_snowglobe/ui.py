@@ -312,17 +312,14 @@ async def ui_page():
         message = {
             'content': chattext.value,
             'format': 'plaintext',
-            'name': databank['players'][idval]['name'],
+            'name': db.get_name(idval),
             'stamp': time.ctime(),
             'avatar': 'human.png',
         }
-        chatroom = databank['chatrooms'][resource]
-        if not 'log' in chatroom:
-            chatroom['log'] = []
-        chatroom['log'].append(message)
+        db.send_message(resource, **message)
+        db.commit()
         tabvars[resource]['updater'].refresh(resource)
         chattext.set_value('')
-        save_databank()
 
     async def stamp_notepad(resource):
         tabvars[resource]['last_modified'] = time.time()

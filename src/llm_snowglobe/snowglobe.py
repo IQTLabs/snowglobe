@@ -131,13 +131,15 @@ class Database():
         self.cur.execute("replace into resources values(?, ?)",
                          (resource, rtype))
     def assign(self, pid, resource):
+        self.cur.execute("delete from assignments where id = ? and resource = ?", (pid, resource))
         self.cur.execute("replace into assignments values(NULL, ?, ?)",
                          (pid, resource))
     def add_property(self, resource, rproperty, value):
         self.cur.execute("replace into properties values(?, ?, ?)",
                          (resource, rproperty, value))
     def get_name(self, pid):
-        res = self.cur.execute("select name from players where id == ?", (pid,)).fetchone()
+        res = self.cur.execute("select name from players where id == ?",
+                               (pid,)).fetchone()
         return res[0] if res is not None else None
     def get_assignments(self, pid):
         res = self.cur.execute("select assignments.resource, type from resources join assignments on resources.resource = assignments.resource where id == ? order by ord", (pid,)).fetchall()
