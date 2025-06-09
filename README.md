@@ -56,7 +56,7 @@ Then, open a browser window and navigate to:
 http://localhost:8000
 ```
 
-The terminal output will include the ID number for the human player.  Type the number into the ID box, click `Log In`, then click `Chat` to enter the human player's responses using a graphical user interface.
+The terminal output will include the ID number for the human player.  Type the number into the ID box and click `Log In` to enter the human player's responses using a graphical user interface.
 
 Make sure to run `snowglobe_server` from the same file system location where you run the game.  Files related to the graphical user interface will be stored in that location.
 
