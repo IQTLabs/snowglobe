@@ -641,10 +641,6 @@ class Intelligent():
                     for resource in self.iodict[resource_type]:
                         db.add_resource(resource, resource_type[:-1])
                         db.assign(self.interface_label, resource)
-                        if resource_type in ['infodocs', 'editdocs']:
-                            db.add_property(resource, 'content', '')
-                        if resource_type == 'infodocs':
-                            db.add_property(resource, 'format', 'markdown')
         db.commit()
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):
