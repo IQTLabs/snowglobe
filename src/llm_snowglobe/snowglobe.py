@@ -162,6 +162,8 @@ class Database():
     async def wait(self):
         async for changes in watchfiles.awatch(self.path):
             break
+    def __del__(self):
+        self.con.close()
 
 db = Database()
 
