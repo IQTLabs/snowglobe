@@ -111,9 +111,11 @@ async def ui_page():
             'notepad': setup_notepad,
             'editdoc': setup_editdoc,
         }
-        with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full'):
+        with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full') as panels:
             for resource, resource_type in db.get_assignments(idval):
                 setup_func[resource_type](resource)
+        if len(tabvars) - 2 == 1:
+            panels.set_value(resource)
 
     def setup_chatroom(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('h-full'):
