@@ -65,7 +65,7 @@ class HAIwire(snowglobe.Control):
             ]
         ]
 
-    def __call__(self):
+    async def __call__(self):
         self.header('HAIWIRE', h=0)
 
         incident = random.choice(self.incidents)
@@ -79,7 +79,7 @@ class HAIwire(snowglobe.Control):
             self.record_narration(card['Card Wording'].strip())
             if i > 0 and card['Card Wording'][-19:] == 'Draw next Incident!':
                 break
-            response = self.player.respond(
+            response = await self.player.respond(
                 history=self.history, query=self.query)
             self.record_response(self.player.name, response)
             if i > 0:
@@ -98,7 +98,7 @@ class HAIwire(snowglobe.Control):
             set_history = snowglobe.History()
             for assessment in assessment_set:
                 self.header(assessment, h=1)
-                response = self.assess(
+                response = await self.assess(
                     history=self.history,
                     responses=set_history,
                     query=assessment,
@@ -109,4 +109,4 @@ class HAIwire(snowglobe.Control):
 
 if __name__ == '__main__':
     sim = HAIwire()
-    sim()
+    sim.run()

@@ -54,7 +54,7 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
         self.timestep = 'month'
         self.nature = True
 
-    def __call__(self):
+    async def __call__(self):
         self.header('Azuristan and Crimsonia', h=0)
         self.header(self.background, h=2)
         self.record_narration(self.background, timestep=self.timestep)
@@ -64,12 +64,16 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
             responses = snowglobe.History()
             self.header('### Azuristan', h=2)
             a_response = self.azuristan.respond(history=self.history)
+            if self.azuristan.kind == 'ai':
+                a_response = await a_response
             responses.add(self.azuristan.name, a_response)
             self.header('### Crimsonia', h=2)
             c_response = self.crimsonia.respond(history=self.history)
+            if self.crimsonia.kind == 'ai':
+                c_response = await c_response
             responses.add(self.crimsonia.name, c_response)
             self.header('### Result', h=2)
-            r_response = self.adjudicate(
+            r_response = await self.adjudicate(
                 history=self.history, responses=responses, nature=self.nature,
                 timestep=self.timestep, mode=['geopol'])
             self.record_narration(r_response, timestep=self.timestep)
@@ -77,8 +81,8 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
         self.header('Assessment', h=0)
         for question in self.questions:
             self.header(question, h=1)
-            self.assess(history=self.history, query=question)
-        self.chat(history=self.history)
+            await self.assess(history=self.history, query=question)
+        await self.chat(history=self.history)
 
 
 if __name__ == '__main__':
@@ -88,4 +92,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     sim = AzuristanCrimsonia(human=args.human)
-    sim()
+    sim.run()
