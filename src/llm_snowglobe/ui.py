@@ -97,7 +97,7 @@ async def ui_page():
                 tabvars[resource] = {}
                 tabvars[resource]['tab'] = ui.tab(
                     resource, label=title, icon=icon[resource_type])
-        tabvars['COLLECTION'] = tabs
+        tabvars['TABCONTAINER'] = tabs
 
     @ui.refreshable
     def setup_tab_panels():
@@ -111,7 +111,7 @@ async def ui_page():
             'notepad': setup_notepad,
             'editdoc': setup_editdoc,
         }
-        with ui.tab_panels(tabvars['COLLECTION']).classes('absolute-full') as panels:
+        with ui.tab_panels(tabvars['TABCONTAINER']).classes('absolute-full') as panels:
             for resource, resource_type in db.get_assignments(idval):
                 setup_func[resource_type](resource)
         if len(tabvars) - 2 == 1:
