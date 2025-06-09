@@ -244,6 +244,7 @@ class LLM():
                     langchain_community.embeddings.LlamaCppEmbeddings(
                         model_path=self.model_path, n_gpu_layers=-1,
                         n_batch=512, n_ctx=8192, f16_kv=True, verbose=False)
+            self.serial = True
 
         elif self.source == 'huggingface':
 
@@ -526,7 +527,10 @@ class Intelligent():
             print('^' * 80)
         for i in range(max_tries):
             if not verbose >= 1 or self.llm.source == 'huggingface':
-                output = await chain.ainvoke(variables)
+                if hasattr(self.llm, 'serial') and self.llm.serial == True:
+                    output = chain.invoke(variables)
+                else:
+                    output = await chain.ainvoke(variables)
                 if self.llm.source in ['openai', 'azure']:
                     output = output.content
                 output = output.strip()
@@ -537,8 +541,12 @@ class Intelligent():
                     print(chunk, end='', flush=True)
                     return chunk
                 output = ''
-                async for chunk in chain.astream(variables):
-                    output += handle(chunk)
+                if hasattr(self.llm, 'serial') and self.llm.serial == True:
+                    for chunk in chain.stream(variables):
+                        output += handle(chunk)
+                else:
+                    async for chunk in chain.astream(variables):
+                        output += handle(chunk)
                 output = output.strip()
             if len(output) > 0:
                 break
