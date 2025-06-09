@@ -113,7 +113,7 @@ def config(menu=None, source=None, model=None, url=None, path=None,
 
 class Database():
     def __init__(self, path=None):
-        self.path = path if path is not None else 'databank.db'
+        self.path = path if path is not None else 'snowglobe.db'
         self.con = sqlite3.connect(self.path)
         self.cur = self.con.cursor()
         self.create()
