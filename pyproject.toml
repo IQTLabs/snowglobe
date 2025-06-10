@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llm-snowglobe"
-version = "0.5.0"
+version = "0.6.0"
 description = "Snow Globe multi-agent system for open-ended wargames with large language models"
 license = "Apache-2.0"
 authors = ["Daniel Hogan <6313241+dphogan@users.noreply.github.com>"]
