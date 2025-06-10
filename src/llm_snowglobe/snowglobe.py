@@ -150,9 +150,10 @@ class Database():
     def get_chatlog(self, chatroom=None):
         if chatroom is not None:
             res = self.cur.execute("select content, format, name, stamp, avatar from chatlog where resource == ? order by ord", (chatroom,)).fetchall()
+            return [dict(zip(('content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
         else:
-            res = self.cur.execute("select content, format, name, stamp, avatar from chatlog order by ord").fetchall()
-        return [dict(zip(('content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
+            res = self.cur.execute("select resource as chatroom, content, format, name, stamp, avatar from chatlog order by ord").fetchall()
+            return [dict(zip(('chatroom', 'content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
     def send_message(self, chatroom, content, format, name, stamp, avatar):
         self.cur.execute("insert into chatlog values(null, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
     def save_text(self, resource, content, name, stamp):
