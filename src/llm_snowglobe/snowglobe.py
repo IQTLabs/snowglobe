@@ -774,7 +774,7 @@ class Intelligent():
                 output = await self.chat_response(
                     chatlog, name=self.name,
                     persona=self.persona,
-                    rag=None, history=None)
+                    rag=rag, history=history)
                 self.interface_send_message(chatroom, output)
             await db.wait()
 
