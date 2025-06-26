@@ -44,6 +44,8 @@ import langchain_core.documents
 import langchain_community.llms
 import langchain_community.embeddings
 
+import langgraph.prebuilt
+
 verbose = 2
 
 
@@ -444,7 +446,9 @@ class Intelligent():
             template=template,
             input_variables=list(variables.keys()),
         )
-        if kind == 'ai':
+        if kind == 'ai' and self.reasoning == True:
+            output = await self.return_from_ai_reasoning(prompt, variables)
+        elif kind == 'ai':
             output = await self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
             output = await self.return_from_human(prompt, variables)
@@ -516,6 +520,18 @@ class Intelligent():
             template += '{subtitle}:\n\n'
             variables['subtitle'] = query_subtitle
         return template, variables
+
+    async def return_from_ai_reasoning(self, prompt, variables):
+        llm = self.llm.llm.bind(**self.llm.bound)
+        tools = self.tools if self.tools is not None else []
+        llm = llm.bind_tools(tools)
+        mind = langgraph.prebuilt.create_react_agent(llm, tools)
+        context = {'role': 'user', 'content': prompt.format(**variables)}
+        response = mind.invoke({'messages': context})
+        for message in response['messages']:
+            message.pretty_print()
+        output = response['messages'][-1].text()
+        return output
 
     async def return_from_ai(self, prompt, variables, max_tries=64, bind=None):
         llm = self.llm.llm.bind(**self.llm.bound)
@@ -975,12 +991,16 @@ class Team(Stateful):
 
 class Player(Intelligent, Stateful, RAG):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
+                 reasoning=None, tools=None,
                  loader=None, chunk_size=None, chunk_overlap=None, count=None,
-                 rag_llm=None, ioid=None, iodict=None, presets=None):
+                 rag_llm=None,
+                 ioid=None, iodict=None, presets=None):
         self.llm = llm
         self.name = name
         self.kind = kind
         self.persona = persona
+        self.reasoning = reasoning
+        self.tools = tools
         self.ioid = ioid
         self.iodict = iodict
         self.presets = presets
