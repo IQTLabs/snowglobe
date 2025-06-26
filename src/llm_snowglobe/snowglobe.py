@@ -45,6 +45,11 @@ import langchain_community.llms
 import langchain_community.embeddings
 
 import langgraph.prebuilt
+import langchain_community.document_loaders
+import langchain_community.document_loaders.text
+import langchain_community.document_loaders.html
+import langchain_core.vectorstores
+import langchain.tools.retriever
 
 verbose = 2
 
@@ -336,6 +341,21 @@ class EphemeralDir():
         shutil.rmtree(self.path) # Note: Parent dirs of path not deleted
 
 
+def RAGTool(ragllm, paths, doctype, name, desc):
+    loader_choices = {
+        'text': langchain_community.document_loaders.text.TextLoader,
+        'html': langchain_community.document_loaders.html.UnstructuredHTMLLoader,
+        'pdf': langchain_community.document_loaders.PyPDFLoader,
+    }
+    loader = loader_choices[doctype]
+    docs = [loader(path).load() for path in paths]
+    vectorstore = langchain_core.vectorstores.InMemoryVectorStore.from_documents(documents=docs, embedding=ragllm.embeddings)
+    retriever = vectorstore.as_retriever()
+    tool = langchain.tools.retriever.create_retriever_tool(retriever,
+                                                           name, desc)
+    return tool
+
+
 class ClassicRAG():
     def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
                  count=None):
@@ -527,7 +547,9 @@ class Intelligent():
         llm = llm.bind_tools(tools)
         mind = langgraph.prebuilt.create_react_agent(llm, tools)
         context = {'role': 'user', 'content': prompt.format(**variables)}
+        langchain.debug = True
         response = mind.invoke({'messages': context})
+        langchain.debug = False
         for message in response['messages']:
             message.pretty_print()
         output = response['messages'][-1].text()
