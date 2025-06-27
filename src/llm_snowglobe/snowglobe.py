@@ -349,7 +349,9 @@ def RAGTool(ragllm, paths, doctype, name, desc):
     }
     loader = loader_choices[doctype]
     docs = [loader(path).load() for path in paths]
-    vectorstore = langchain_core.vectorstores.InMemoryVectorStore.from_documents(documents=docs, embedding=ragllm.embeddings)
+    docs = [doc for docsub in docs for doc in docsub]
+    vectorstore = langchain_core.vectorstores.InMemoryVectorStore. \
+        from_documents(documents=docs, embedding=ragllm.embeddings)
     retriever = vectorstore.as_retriever()
     tool = langchain.tools.retriever.create_retriever_tool(retriever,
                                                            name, desc)
