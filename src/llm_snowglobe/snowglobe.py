@@ -341,20 +341,33 @@ class EphemeralDir():
         shutil.rmtree(self.path) # Note: Parent dirs of path not deleted
 
 
-def RAGTool(ragllm, paths, doctype, name, desc):
+def RAGTool(ragllm, paths, doctype, name, desc,
+            chunk_size=None, chunk_overlap=None, count=None):
+    # Loader
     loader_choices = {
         'text': langchain_community.document_loaders.text.TextLoader,
         'html': langchain_community.document_loaders.html.UnstructuredHTMLLoader,
         'pdf': langchain_community.document_loaders.PyPDFLoader,
     }
     loader = loader_choices[doctype]
+    # Docs & splits
     docs = [loader(path).load() for path in paths]
     docs = [doc for docsub in docs for doc in docsub]
-    vectorstore = langchain_core.vectorstores.InMemoryVectorStore. \
-        from_documents(documents=docs, embedding=ragllm.embeddings)
-    retriever = vectorstore.as_retriever()
-    tool = langchain.tools.retriever.create_retriever_tool(retriever,
-                                                           name, desc)
+    if chunk_size is not None:
+        if chunk_overlap is None:
+            chunk_overlap = 0
+        splitter = langchain_text_splitters \
+            .RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+                chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        docs = splitter.split_documents(docs)
+    # Vectors
+    vectorstore = langchain_core \
+        .vectorstores.InMemoryVectorStore.from_documents(
+            documents=docs, embedding=ragllm.embeddings)
+    kwargs = {'search_kwargs': {'k': count}} if count is not None else {}
+    retriever = vectorstore.as_retriever(**kwargs)
+    tool = langchain.tools.retriever.create_retriever_tool(
+        retriever, name, desc)
     return tool
 
 
@@ -861,8 +874,8 @@ class Control(Intelligent, Stateful, RAG):
     async def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
 
-    def run(self):
-        asyncio.run(self())
+    def run(self, *args, **kwargs):
+        asyncio.run(self(*args, **kwargs))
 
     def header(self, title, h=0, width=80):
         print()
