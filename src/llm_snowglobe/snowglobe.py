@@ -849,6 +849,7 @@ class Stateful():
 class Control(Intelligent, Stateful, RAG):
     def __init__(
             self, source=None, model=None, menu=None, gen=None, embed=None,
+            reasoning=None, tools=None,
             loader=None, chunk_size=None, chunk_overlap=None, count=None,
             llm=None, rag_llm=None, ioid=None, iodict=None, presets=None,
     ):
@@ -858,6 +859,8 @@ class Control(Intelligent, Stateful, RAG):
         self.name = 'Control'
         self.kind = 'ai'
         self.persona = None
+        self.reasoning = reasoning
+        self.tools = tools
         self.ioid = ioid
         self.iodict = iodict
         self.presets = presets
