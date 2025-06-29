@@ -562,12 +562,18 @@ class Intelligent():
         llm = llm.bind_tools(tools)
         mind = langgraph.prebuilt.create_react_agent(llm, tools)
         context = {'role': 'user', 'content': prompt.format(**variables)}
-        langchain.debug = True
+        if verbose >= 5:
+            langchain_debug = langchain.globals.get_debug()
+            langchain.globals.set_debug(True)
         response = mind.invoke({'messages': context})
-        langchain.debug = False
-        for message in response['messages']:
-            message.pretty_print()
         output = response['messages'][-1].text()
+        if verbose >= 5:
+            langchain.globals.set_debug(langchain_debug)
+        elif verbose >= 3:
+            for message in response['messages']:
+                message.pretty_print()
+        elif verbose >= 1:
+            print(output)
         return output
 
     async def return_from_ai(self, prompt, variables, max_tries=64, bind=None):
