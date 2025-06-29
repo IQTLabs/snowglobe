@@ -575,7 +575,7 @@ class Intelligent():
         if bind is not None:
             llm = llm.bind(**bind)
         chain = prompt | llm
-        if verbose >= 3:
+        if verbose >= 4:
             print('v' * 80)
             print(prompt.format(**variables))
             print('^' * 80)
