@@ -359,7 +359,11 @@ def RAGTool(ragllm, paths, doctype, name, desc,
         splitter = langchain_text_splitters \
             .RecursiveCharacterTextSplitter.from_tiktoken_encoder(
                 chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        if verbose >= 5:
+            print('Doc count for %s before splitting: %i' % (name, len(docs)))
         docs = splitter.split_documents(docs)
+        if verbose >= 5:
+            print('Doc count for %s after splitting: %i' % (name, len(docs)))
     # Vectors
     vectorstore = langchain_core \
         .vectorstores.InMemoryVectorStore.from_documents(
