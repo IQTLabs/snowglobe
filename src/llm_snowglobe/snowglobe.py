@@ -284,7 +284,7 @@ class LLM():
                     langchain_huggingface.embeddings.HuggingFaceEmbeddings(
                         model_name=self.model_path, show_progress=True)
 
-        self.bound = {'stop': '##'}
+        self.bound = {}
 
 
 async def gather_plus(*args):
