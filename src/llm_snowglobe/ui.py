@@ -312,7 +312,7 @@ async def ui_page():
         idval = app.storage.tab['id']
         chattext = tabvars[resource]['chattext']
         message = {
-            'content': chattext.value,
+            'content': chattext.value.strip(),
             'format': 'plaintext',
             'name': db.get_name(idval),
             'stamp': time.ctime(),
