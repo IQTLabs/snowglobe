@@ -767,8 +767,8 @@ class Intelligent():
                 output = ''
         return output
 
-    async def chat_backend(self, name='Assistant', persona=None, rag=None,
-                           history=None):
+    async def chat_terminal(self, name='Assistant', persona=None, rag=None,
+                            history=None):
         chatlog = History()
         nb = 2
         username = 'User'
@@ -824,7 +824,7 @@ class Intelligent():
         )
         return output
 
-    async def join_chatroom(self, chatroom, rag=None, history=None):
+    async def chat_session(self, chatroom, rag=None, history=None):
         while True:
             log = db.get_chatlog(chatroom)
             # Respond unless most recent message was from self
@@ -949,7 +949,7 @@ class Control(Intelligent, Stateful, RAG):
     def chat(self, history=None):
         name = self.name
         persona = 'the Control (a.k.a. moderator) of a simulated scenario'
-        return self.chat_backend(name=name, persona=persona, history=history)
+        return self.chat_terminal(name=name, persona=persona, history=history)
 
     async def create_scenario(self, query=None, clip=0):
         if query is None:
@@ -1104,7 +1104,7 @@ class Player(Intelligent, Stateful, RAG):
         name = self.name
         persona = self.persona
         rag = self.rag
-        return self.chat_backend(
+        return self.chat_terminal(
             name=name, persona=persona, rag=rag, history=history)
 
     def info(self, offset=0):
