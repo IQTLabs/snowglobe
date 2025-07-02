@@ -772,7 +772,6 @@ class Intelligent():
         chatlog = History()
         nb = 2
         username = 'User'
-        chat_intro = 'This is a conversation about what happened'
         if verbose >= 2:
             instructions = 'Chat | Press Enter twice after each message or to exit.'
             print()
@@ -793,15 +792,9 @@ class Intelligent():
             chatlog.add(username, usertext)
 
             # Get response
-            bind = {'stop': [username + ':', name + ':', 'Narrator:']}
-            output = await self.return_output(
-                bind=bind,
-                persona=persona,
-                rag=rag,
-                history=history, history_over=True,
-                responses=chatlog, responses_intro=chat_intro,
-                query=name + ':\n\n', query_format='oneline_simple'
-            )
+            output = await self.chat_response(
+                chatlog, name=name, persona=persona, rag=rag, history=history,
+                participants=[username, name, 'Narrator'])
             print()
             chatlog.add(name, output)
 
@@ -835,8 +828,7 @@ class Intelligent():
                     chatlog.add(logitem['name'], logitem['content'])
                 # Respond
                 output = await self.chat_response(
-                    chatlog, name=self.name,
-                    persona=self.persona,
+                    chatlog, name=self.name, persona=self.persona,
                     rag=rag, history=history)
                 self.interface_send_message(chatroom, output)
             await db.wait()
