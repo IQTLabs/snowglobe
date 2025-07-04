@@ -176,6 +176,18 @@ class Database():
 db = Database()
 
 
+def default_chatroom(ioid):
+    # Return player's default chatroom; create one if needed
+    for resource, resource_type in db.get_assignments(ioid):
+        if resource_type == 'chatroom':
+            return resource
+    chatroom = 'default_%s' % ioid
+    db.add_resource(chatroom, 'chatroom')
+    db.assign(ioid, chatroom)
+    db.commit()
+    return chatroom
+
+
 class LLM():
     def __init__(
             self, source=None, model=None, menu=None, gen=None, embed=None):
@@ -619,18 +631,7 @@ class Intelligent():
         return output
 
     async def return_from_human(self, prompt, variables):
-        # Determine chatroom to use.  If user has more than one, use the first.
-        # If user has none, create one.
-        chatroom = None
-        for resource, resource_type in db.get_assignments(self.ioid):
-            if resource_type == 'chatroom':
-                chatroom = resource
-                break
-        if chatroom is None:
-            chatroom = '%s_%s_default' % (self.name, self.ioid)
-            db.add_resource(chatroom, 'chatroom')
-            db.assign(self.ioid, chatroom)
-            db.commit()
+        chatroom = default_chatroom(self.ioid)
 
         # Send prompt.  Create a temporary control just to send the message.
         sender = Control(llm=None)
