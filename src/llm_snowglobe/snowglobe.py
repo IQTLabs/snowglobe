@@ -622,14 +622,14 @@ class Intelligent():
         # Determine chatroom to use.  If user has more than one, use the first.
         # If user has none, create one.
         chatroom = None
-        for resource, resource_type in db.get_assignments(self.interface_label):
+        for resource, resource_type in db.get_assignments(self.ioid):
             if resource_type == 'chatroom':
                 chatroom = resource
                 break
         if chatroom is None:
-            chatroom = '%s_%s_default' % (self.name, self.interface_label)
+            chatroom = '%s_%s_default' % (self.name, self.ioid)
             db.add_resource(chatroom, 'chatroom')
-            db.assign(self.interface_label, chatroom)
+            db.assign(self.ioid, chatroom)
             db.commit()
 
         # Send prompt.  Create a temporary control just to send the message.
@@ -698,21 +698,21 @@ class Intelligent():
     def interface_setup(self):
         # Assign ID
         if self.ioid is not None:
-            self.interface_label = str(self.ioid)
+            self.ioid = str(self.ioid)
         else:
-            self.interface_label = str(random.randint(100000, 999999))
+            self.ioid = str(random.randint(100000, 999999))
         if verbose >= 2:
-            print('ID %s : %s' % (self.interface_label, self.name))
+            print('ID %s : %s' % (self.ioid, self.name))
 
         # Export info for UI interface
-        db.add_player(self.interface_label, self.name)
+        db.add_player(self.ioid, self.name)
         if self.iodict is not None:
             for resource_type in ['chatrooms', 'weblinks', 'infodocs',
                                   'notepads', 'editdocs']:
                 if resource_type in self.iodict:
                     for resource in self.iodict[resource_type]:
                         db.add_resource(resource, resource_type[:-1])
-                        db.assign(self.interface_label, resource)
+                        db.assign(self.ioid, resource)
         db.commit()
 
     def interface_send_message(self, chatroom, content, fmt=None, cc=None):
