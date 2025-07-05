@@ -59,7 +59,6 @@ def settings():
     # Standard paths
     s['config_dir'] = platformdirs.user_config_dir('snowglobe')
     s['cache_dir'] = platformdirs.user_cache_dir('snowglobe')
-    s['data_dir'] = platformdirs.user_data_dir('snowglobe')
     s['menu_file'] = 'llms.yaml'
     s['menu_path'] = os.path.join(s['config_dir'], s['menu_file'])
 
@@ -345,14 +344,6 @@ class History():
         return history_copy
 
 
-class EphemeralDir():
-    def __init__(self, path, mode=0o777, exist_ok=False):
-        self.path = path
-        os.makedirs(path, mode=mode, exist_ok=exist_ok)
-    def __del__(self):
-        shutil.rmtree(self.path) # Note: Parent dirs of path not deleted
-
-
 def RAGTool(ragllm, paths, doctype, name, desc,
             chunk_size=None, chunk_overlap=None, count=None):
     # Loader
@@ -362,6 +353,7 @@ def RAGTool(ragllm, paths, doctype, name, desc,
         'pdf': langchain_community.document_loaders.PyPDFLoader,
     }
     loader = loader_choices[doctype]
+
     # Docs & splits
     docs = [loader(path).load() for path in paths]
     docs = [doc for docsub in docs for doc in docsub]
@@ -376,6 +368,7 @@ def RAGTool(ragllm, paths, doctype, name, desc,
         docs = splitter.split_documents(docs)
         if verbose >= 5:
             print('Doc count for %s after splitting: %i' % (name, len(docs)))
+
     # Vectors
     vectorstore = langchain_core \
         .vectorstores.InMemoryVectorStore.from_documents(
@@ -478,8 +471,6 @@ class Intelligent():
             pass
         elif kind == 'human':
             self.interface_setup()
-        elif kind == 'api':
-            self.set_api_id()
         elif kind == 'preset':
             if self.presets is not None:
                 self.preset_generator = self.set_preset_generator(self.presets)
@@ -503,8 +494,6 @@ class Intelligent():
             output = await self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
             output = await self.return_from_human(prompt, variables)
-        elif kind == 'api':
-            output = await self.return_from_api(prompt, variables)
         elif kind == 'preset':
             output = await self.return_from_preset()
         return output
@@ -642,30 +631,6 @@ class Intelligent():
         answer = await self.interface_get_message(chatroom)
         return answer
 
-    async def return_from_api(self, prompt, variables, delay=2):
-        prompt_path = self.get_api_path(False)
-        answer_path = self.get_api_path(True)
-        self.api_count += 1
-
-        # Write prompt to disk
-        prompt_content = prompt.format(**variables)
-        prompt_json = {'content': prompt_content}
-        if not os.path.exists(os.path.dirname(prompt_path)):
-            os.makedirs(os.path.dirname(prompt_path), exist_ok=True)
-        with open(prompt_path, 'w') as f:
-            json.dump(prompt_json, f)
-
-        # Read answer from disk
-        while not os.path.exists(answer_path):
-            await asyncio.sleep(delay)
-            if verbose >= 2:
-                print('Awaiting %s [ID %i # %i]'
-                      % (self.name, self.api_label, self.api_count - 1))
-        with open(answer_path, 'r') as f:
-            answer_json = json.load(f)
-        answer_content = answer_json['content']
-        return answer_content
-
     async def return_from_preset(self):
         return next(self.preset_generator, '')
 
@@ -674,27 +639,6 @@ class Intelligent():
             if verbose >= 2:
                 print(preset)
             yield preset
-
-    def set_api_id(self):
-        self.api_label = random.randint(100000, 999999)
-        self.api_count = 0
-        if verbose >= 2:
-            print('ID %i : %s' % (self.api_label, self.name))
-        intro_path = self.get_api_path(False)
-        intro_json = {'name': self.name}
-        if not os.path.exists(os.path.dirname(intro_path)):
-            self.api_log = EphemeralDir(
-                os.path.dirname(intro_path), exist_ok=True)
-        with open(intro_path, 'w') as f:
-            json.dump(intro_json, f)
-        self.api_count += 1
-
-    def get_api_path(self, answer=False, base_path=None):
-        if base_path is None:
-            base_path = settings()['data_dir']
-        return os.path.join(base_path, str(self.api_label), '%i_%i_%s.json'
-                            % (self.api_label, self.api_count,
-                               'answer' if answer else 'prompt'))
 
     def interface_setup(self):
         # Assign ID
