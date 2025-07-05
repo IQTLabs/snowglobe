@@ -466,7 +466,7 @@ class RAG(ClassicRAG):
 
 
 class Intelligent():
-    def setup_kind(self, kind):
+    def setup(self, kind):
         if kind == 'ai':
             pass
         elif kind == 'human':
@@ -809,7 +809,7 @@ class Control(Intelligent, Stateful, RAG):
         self.iodict = iodict
         self.presets = presets
         self.history = History()
-        self.setup_kind(self.kind)
+        self.setup(self.kind)
 
         if loader is not None:
             self.rag_llm = rag_llm if rag_llm is not None else self.llm
@@ -989,7 +989,7 @@ class Player(Intelligent, Stateful, RAG):
         self.iodict = iodict
         self.presets = presets
         self.history = History()
-        self.setup_kind(self.kind)
+        self.setup(self.kind)
 
         if loader is not None:
             self.rag_llm = rag_llm if rag_llm is not None else self.llm
