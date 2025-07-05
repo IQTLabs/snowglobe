@@ -712,6 +712,25 @@ class Intelligent():
                 output = ''
         return output
 
+    async def chat_response(self, chatlog, name='Assistant', persona=None,
+                            rag=None, history=None, participants=None):
+        # Get single response, given prexisting chatlog
+        chat_intro = 'This is a conversation about what happened'
+        if participants is None:
+            participants = set([entry['name'] for entry in chatlog.entries])
+            participants.add(name)
+            participants.add('Narrator')
+        bind = {'stop': [p + ':' for p in participants]}
+        output = await self.return_output(
+            bind=bind,
+            persona=persona,
+            rag=rag,
+            history=history, history_over=True,
+            responses=chatlog, responses_intro=chat_intro,
+            query=name + ':\n\n', query_format='oneline_simple'
+        )
+        return output
+
     async def chat_terminal(self, name='Assistant', persona=None, rag=None,
                             history=None):
         chatlog = History()
@@ -742,25 +761,6 @@ class Intelligent():
                 participants=[username, name, 'Narrator'])
             print()
             chatlog.add(name, output)
-
-    async def chat_response(self, chatlog, name='Assistant', persona=None,
-                            rag=None, history=None, participants=None):
-        # Get single response, given prexisting chatlog
-        chat_intro = 'This is a conversation about what happened'
-        if participants is None:
-            participants = set([entry['name'] for entry in chatlog.entries])
-            participants.add(name)
-            participants.add('Narrator')
-        bind = {'stop': [p + ':' for p in participants]}
-        output = await self.return_output(
-            bind=bind,
-            persona=persona,
-            rag=rag,
-            history=history, history_over=True,
-            responses=chatlog, responses_intro=chat_intro,
-            query=name + ':\n\n', query_format='oneline_simple'
-        )
-        return output
 
     async def chat_session(self, chatroom, rag=None, history=None):
         while True:
