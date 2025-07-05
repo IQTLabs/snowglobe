@@ -18,34 +18,41 @@ import os
 import json
 import fastapi
 import fastapi.staticfiles
-from pydantic import BaseModel
-import platformdirs
+import pydantic
+from llm_snowglobe import db, default_chatroom
 
 app = fastapi.FastAPI()
 here = os.path.dirname(os.path.abspath(__file__))
-base_path = platformdirs.user_data_dir('snowglobe')
 term_path = os.path.join(here, 'terminal')
 
-class Answer(BaseModel):
+class Message(pydantic.BaseModel):
     content: str
+    format: str
+    name: str
+    stamp: str
+    avatar: str
 
-@app.get('/prompt/{label}/{count}')
-async def prompt(label: int, count: int):
-    path = os.path.join(
-        base_path, str(label), '%i_%i_prompt.json' % (label, count))
-    if not os.path.exists(path):
-        return {}
-    with open(path, 'r') as f:
-        return json.load(f)
-
-@app.post('/answer/{label}/{count}')
-async def answer(label: int, count: int, answer: Answer):
-    path = os.path.join(
-        base_path, str(label), '%i_%i_answer.json' % (label, count))
-    if os.path.exists(os.path.dirname(path)):
-        with open(path, 'w') as f:
-            json.dump(answer.dict(), f)
+@app.get('/read/{ioid}/{count}')
+async def prompt(ioid: str, count: int):
+    if count == 0:
+        name = db.get_name(ioid)
+        if name is None:
+            return {}
+        else:
+            return {'name': name}
     else:
-        print('Unexpected API response [ID %i # %i]' % (label, count))
+        chatroom = default_chatroom(ioid)
+        chatlog = db.get_chatlog(chatroom)
+        if len(chatlog) >= count:
+            return  chatlog[count - 1]
+        else:
+            return {}
+
+@app.post('/post/{ioid}')
+async def answer(ioid: str, answer: Message):
+    chatroom = default_chatroom(ioid)
+    message = answer.dict()
+    db.send_message(chatroom, **message)
+    db.commit()
 
 app.mount('/', fastapi.staticfiles.StaticFiles(directory=term_path, html=True), name='terminal')

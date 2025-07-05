@@ -10,8 +10,11 @@ $(document).ready(function(){
     function api_path(answer=false) {
 	path = window.location.pathname;
 	dir = path.substr(0, path.lastIndexOf("/"));
-	return dir + "/" + (answer ? "answer" : "prompt")
-	    + "/" + globals.label + "/" + globals.count;
+	if (!answer) {
+	    return dir + "/read/" + globals.label + "/" + globals.count;
+	} else {
+	    return dir + "/post/" + globals.label;
+	}
     };
 
     // Set up
@@ -32,13 +35,16 @@ $(document).ready(function(){
 		    $("#id").attr("readonly", "readonly");
 		    $("#connect").attr("disabled", "disabled");
 		    $("#prompt, #answer").addClass("waiting");
-		    // $("#answer").focus();
 		    globals.count += 1;
 		} else {
-		    $("#prompt").val(json["content"]);
-		    $("#submit").removeAttr("disabled");
-		    $("#prompt, #answer").removeClass("waiting");
-		    break;
+		    if (json["name"] == $("#name").val()) {
+			globals.count += 1;
+		    } else {
+			$("#prompt").val(json["content"]);
+			$("#submit").removeAttr("disabled");
+			$("#prompt, #answer").removeClass("waiting");
+			break;
+		    }
 		}
 	    }
 	    await new Promise(r => setTimeout(r, 2000));
@@ -49,11 +55,17 @@ $(document).ready(function(){
     async function send_answer() {
 	$("#submit").attr("disabled", "disabled");
 	$("#prompt, #answer").addClass("waiting");
-	data = {"content": $("#answer").val()};
+	message = {
+	    "content": $("#answer").val(),
+	    "format": "plaintext",
+	    "name": $("#name").val(),
+	    "stamp": Date(),
+	    "avatar": "human.png"
+	};
 	await fetch(api_path(true), {
 	    method: "POST",
 	    headers: {"Content-Type": "application/json"},
-	    body: JSON.stringify(data)
+	    body: JSON.stringify(message)
 	});
 	get_prompt();
     }
