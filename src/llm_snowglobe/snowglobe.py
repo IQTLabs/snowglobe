@@ -472,8 +472,7 @@ class Intelligent():
         elif kind == 'human':
             self.interface_setup()
         elif kind == 'preset':
-            if self.presets is not None:
-                self.preset_generator = self.set_preset_generator(self.presets)
+            self.preset_setup()
 
     async def return_output(self, kind=None, bind=None,
                             template=None, variables=None, **kwargs):
@@ -632,13 +631,11 @@ class Intelligent():
         return answer
 
     async def return_from_preset(self):
-        return next(self.preset_generator, '')
+        self.preset_idx += 1
+        return self.presets[self.preset_idx - 1]
 
-    def set_preset_generator(self, presets):
-        for preset in presets:
-            if verbose >= 2:
-                print(preset)
-            yield preset
+    def preset_setup(self):
+        self.preset_idx = 0
 
     def interface_setup(self):
         # Assign ID
