@@ -160,10 +160,27 @@ class Database():
         else:
             res = self.cur.execute("select resource as chatroom, content, format, name, stamp, avatar from chatlog order by ord").fetchall()
             return [dict(zip(('chatroom', 'content', 'format', 'name', 'stamp', 'avatar'), x)) for x in res]
+    def get_history(self, resource, target=None):
+        if target is not None:
+            history = target
+            history.clear()
+        else:
+            history = History()
+        res = self.cur.execute("select content, name from histlog where resource == ? order by ord", (resource,)).fetchall()
+        for x in res:
+            history.add(x[1], x[0])
+        if target is not None:
+            return
+        else:
+            return history
     def send_message(self, chatroom, content, format, name, stamp, avatar):
         self.cur.execute("insert into chatlog values(null, ?, ?, ?, ?, ?, ?)", (chatroom, content, format, name, stamp, avatar))
     def save_text(self, resource, content, name, stamp):
         self.cur.execute("insert into textlog values(null, ?, ?, ?, ?)", (resource, content, name, stamp))
+    def set_history(self, resource, history):
+        self.cur.execute("delete from histlog where resource = ?", (resource,))
+        for entry in history.entries:
+            self.cur.execute("insert into histlog values(null, ?, ?, ?)", (resource, entry['text'], entry['name']))
     def commit(self):
         self.con.commit()
     async def wait(self):
