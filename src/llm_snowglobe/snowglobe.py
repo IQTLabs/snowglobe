@@ -50,6 +50,7 @@ import langchain_community.document_loaders.text
 import langchain_community.document_loaders.html
 import langchain_core.vectorstores
 import langchain.tools.retriever
+import langchain_core.tools
 
 verbose = 2
 
@@ -361,7 +362,19 @@ class History():
         return history_copy
 
 
-def RAGTool(ragllm, paths, doctype, name, desc,
+def PlayerTool(name, desc, player, history=None):
+    async def ask(query: str) -> str:
+        return player.respond(history, query)
+    tool = langchain_core.tools.StructuredTool.from_function(
+        coroutine=ask,
+        name=name,
+        description=desc,
+        return_direct=False,
+    )
+    return tool
+
+
+def RAGTool(name, desc, ragllm, paths, doctype,
             chunk_size=None, chunk_overlap=None, count=None):
     # Loader
     loader_choices = {
