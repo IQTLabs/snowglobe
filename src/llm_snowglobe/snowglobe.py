@@ -363,10 +363,13 @@ class History():
 
 
 def PlayerTool(name, desc, player, history=None):
-    async def ask(query: str) -> str:
+    def ask(query: str) -> str:
+        return asyncio.run(player.respond(history, query))
+    async def aask(query: str) -> str:
         return player.respond(history, query)
     tool = langchain_core.tools.StructuredTool.from_function(
-        coroutine=ask,
+        func=ask,
+        coroutine=aask,
         name=name,
         description=desc,
         return_direct=False,
@@ -599,7 +602,7 @@ class Intelligent():
         if verbose >= 5:
             langchain_debug = langchain.globals.get_debug()
             langchain.globals.set_debug(True)
-        response = mind.invoke({'messages': context})
+        response = await mind.ainvoke({'messages': context})
         output = response['messages'][-1].text()
         if verbose >= 5:
             langchain.globals.set_debug(langchain_debug)
