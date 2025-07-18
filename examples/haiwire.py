@@ -37,9 +37,6 @@ class HAIwire(snowglobe.Control):
                                           'haiwire_files', 'injects.csv')):
         super().__init__()
 
-        # Optionally truncate answers
-        # self.llm.llm = self.llm.llm.bind(max_tokens=250)
-
         self.player = snowglobe.Player(
             llm=self.llm,
             name='Incident Response Team',
