@@ -25,7 +25,7 @@ For GPU support:
 CMAKE_ARGS="-DGGML_CUDA=on" pip install llm-snowglobe
 ```
 
-## Demos
+## AI Simulations
 
 After installation, you can simulate a tabletop exercise about an AI incident response.
 
@@ -36,18 +36,16 @@ examples/haiwire.py
 Or, simulate a political wargame about a geopolitical crisis.
 
 ```
-examples/ac.py
+examples/ac_sim.py
 ```
 
-In the latter case, you can use a terminal-based chat interface to discuss the game afterwards, or just press `Enter` twice to exit.
-
-## Human Players
+## Human+AI Wargames
 
 To play a game between a human and an AI player, launch the server and start a game:
 
 ```
 snowglobe_server &
-examples/ac.py --human 1
+examples/ac_game.py
 ```
 
 Then, open a browser window and navigate to:
@@ -56,9 +54,9 @@ Then, open a browser window and navigate to:
 http://localhost:8000
 ```
 
-The terminal output will include the ID number for the human player.  Type the number into the ID box and click `Log In` to enter the human player's responses using a graphical user interface.
+The terminal output will begin with the ID number for the human player.  Type that number into the ID box in the browser window and click `Log In`.
 
-Make sure to run `snowglobe_server` from the same file system location where you run the game.  Files related to the graphical user interface will be stored in that location.
+Make sure to run `snowglobe_server` from the same file system location where you run the game.  Game-related files will be stored in that location.
 
 ## License
 
