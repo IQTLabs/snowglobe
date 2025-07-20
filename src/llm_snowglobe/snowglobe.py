@@ -366,7 +366,7 @@ def PlayerTool(name, desc, player, history=None):
     def ask(query: str) -> str:
         return asyncio.run(player.respond(history, query))
     async def aask(query: str) -> str:
-        return player.respond(history, query)
+        return await player.respond(history, query)
     tool = langchain_core.tools.StructuredTool.from_function(
         func=ask,
         coroutine=aask,
