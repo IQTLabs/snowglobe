@@ -712,7 +712,7 @@ class Intelligent():
     async def interface_get_message(self, chatroom):
         while True:
             log = db.get_chatlog(chatroom)
-            if len(log) > 0 and log[-1]['name'] != self.name:
+            if len(log) > 0 and log[-1]['name'] == self.name:
                 answer = log[-1]['content']
                 return answer
             await db.wait()

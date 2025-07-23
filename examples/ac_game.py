@@ -109,7 +109,7 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
                         + '\n\n**How do you respond?**'
                     self.interface_send_message(
                         player.gameroom, content, 'markdown')
-                    response = self.interface_get_message(player.gameroom)
+                    response = player.interface_get_message(player.gameroom)
                 else:
                     response = await player.respond(history=self.history)
                 responses.add(player.name, response)
