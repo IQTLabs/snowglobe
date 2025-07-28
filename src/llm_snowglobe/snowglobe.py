@@ -362,11 +362,15 @@ class History():
         return history_copy
 
 
-def PlayerTool(name, desc, player, history=None):
+def AskTool(name, desc, player, history=None, mode=None):
     def ask(query: str) -> str:
-        return asyncio.run(player.respond(history, query))
+        return asyncio.run(player.return_output(
+            name=player.name, persona=player.persona,
+            history=history, query=query, mode=mode))
     async def aask(query: str) -> str:
-        return await player.respond(history, query)
+        return await player.return_output(
+            name=player.name, persona=player.persona,
+            history=history, query=query, mode=mode)
     tool = langchain_core.tools.StructuredTool.from_function(
         func=ask,
         coroutine=aask,
@@ -375,6 +379,12 @@ def PlayerTool(name, desc, player, history=None):
         return_direct=False,
     )
     return tool
+
+def SelfTool(name, desc, player, history=None):
+    return AskTool(name, desc, player, history, mode='notools')
+
+def PlayerTool(name, desc, player, history=None):
+    return AskTool(name, desc, player, history, mode='noask')
 
 
 def RAGTool(name, desc, ragllm, paths, doctype,
@@ -507,7 +517,7 @@ class Intelligent():
         elif kind == 'preset':
             self.preset_setup()
 
-    async def return_output(self, kind=None, bind=None,
+    async def return_output(self, kind=None, bind=None, mode=None,
                             template=None, variables=None, **kwargs):
         # Set defaults
         if kind is None:
@@ -521,7 +531,8 @@ class Intelligent():
             input_variables=list(variables.keys()),
         )
         if kind == 'ai' and self.reasoning == True:
-            output = await self.return_from_ai_reasoning(prompt, variables)
+            output = await self.return_from_ai_reasoning(prompt, variables,
+                                                         mode=mode)
         elif kind == 'ai':
             output = await self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
@@ -593,9 +604,15 @@ class Intelligent():
             variables['subtitle'] = query_subtitle
         return template, variables
 
-    async def return_from_ai_reasoning(self, prompt, variables):
+    async def return_from_ai_reasoning(self, prompt, variables, mode=None):
         llm = self.llm.llm.bind(**self.llm.bound)
-        tools = self.tools if self.tools is not None else []
+        if self.tools is None or mode == 'notools':
+            tools = []
+        elif mode == 'noask':
+            tools = [x for x in self.tools if not isinstance(x, PlayerTool)]
+        else:
+            tools = self.tools
+        # tools = self.tools if self.tools is not None else []
         llm = llm.bind_tools(tools)
         mind = langgraph.prebuilt.create_react_agent(llm, tools)
         context = {'role': 'user', 'content': prompt.format(**variables)}
