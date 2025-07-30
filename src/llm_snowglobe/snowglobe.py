@@ -362,29 +362,30 @@ class History():
         return history_copy
 
 
-def AskTool(name, desc, player, history=None, mode=None):
+def AskTool(name, desc, player, history=None, mode=0):
     def ask(query: str) -> str:
         return asyncio.run(player.return_output(
             name=player.name, persona=player.persona,
-            history=history, query=query, mode=mode))
+            history=history, query=query, mode=mode + 1))
     async def aask(query: str) -> str:
         return await player.return_output(
             name=player.name, persona=player.persona,
-            history=history, query=query, mode=mode)
+            history=history, query=query, mode=mode + 1)
     tool = langchain_core.tools.StructuredTool.from_function(
         func=ask,
         coroutine=aask,
         name=name,
         description=desc,
         return_direct=False,
+        metadata={'mode': mode},
     )
     return tool
 
 def SelfTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, mode='notools')
+    return AskTool(name, desc, player, history, mode=1)
 
 def PlayerTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, mode='noask')
+    return AskTool(name, desc, player, history, mode=0)
 
 
 def RAGTool(name, desc, ragllm, paths, doctype,
@@ -412,14 +413,17 @@ def RAGTool(name, desc, ragllm, paths, doctype,
         if verbose >= 5:
             print('Doc count for %s after splitting: %i' % (name, len(docs)))
 
-    # Vectors
+    # Vectors & retriever
     vectorstore = langchain_core \
         .vectorstores.InMemoryVectorStore.from_documents(
             documents=docs, embedding=ragllm.embeddings)
     kwargs = {'search_kwargs': {'k': count}} if count is not None else {}
     retriever = vectorstore.as_retriever(**kwargs)
+
+    # Tool
     tool = langchain.tools.retriever.create_retriever_tool(
         retriever, name, desc)
+    tool.metadata = {'mode': 1}
     return tool
 
 
