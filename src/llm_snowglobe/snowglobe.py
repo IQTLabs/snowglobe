@@ -362,30 +362,30 @@ class History():
         return history_copy
 
 
-def AskTool(name, desc, player, history=None, mode=0):
+def AskTool(name, desc, player, history=None, level=0):
     def ask(query: str) -> str:
         return asyncio.run(player.return_output(
             name=player.name, persona=player.persona,
-            history=history, query=query, mode=mode + 1))
+            history=history, query=query, level=level + 1))
     async def aask(query: str) -> str:
         return await player.return_output(
             name=player.name, persona=player.persona,
-            history=history, query=query, mode=mode + 1)
+            history=history, query=query, level=level + 1)
     tool = langchain_core.tools.StructuredTool.from_function(
         func=ask,
         coroutine=aask,
         name=name,
         description=desc,
         return_direct=False,
-        metadata={'mode': mode},
+        metadata={'level': level},
     )
     return tool
 
 def SelfTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, mode=1)
+    return AskTool(name, desc, player, history, level=1)
 
 def PlayerTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, mode=0)
+    return AskTool(name, desc, player, history, level=0)
 
 
 def RAGTool(name, desc, ragllm, paths, doctype,
@@ -423,7 +423,7 @@ def RAGTool(name, desc, ragllm, paths, doctype,
     # Tool
     tool = langchain.tools.retriever.create_retriever_tool(
         retriever, name, desc)
-    tool.metadata = {'mode': 1}
+    tool.metadata = {'level': 1}
     return tool
 
 
@@ -521,7 +521,7 @@ class Intelligent():
         elif kind == 'preset':
             self.preset_setup()
 
-    async def return_output(self, kind=None, bind=None, mode=None,
+    async def return_output(self, kind=None, bind=None, level=None,
                             template=None, variables=None, **kwargs):
         # Set defaults
         if kind is None:
@@ -536,7 +536,7 @@ class Intelligent():
         )
         if kind == 'ai' and self.reasoning == True:
             output = await self.return_from_ai_reasoning(prompt, variables,
-                                                         mode=mode)
+                                                         level=level)
         elif kind == 'ai':
             output = await self.return_from_ai(prompt, variables, bind=bind)
         elif kind == 'human':
@@ -608,15 +608,14 @@ class Intelligent():
             variables['subtitle'] = query_subtitle
         return template, variables
 
-    async def return_from_ai_reasoning(self, prompt, variables, mode=None):
+    async def return_from_ai_reasoning(self, prompt, variables, level=None):
         llm = self.llm.llm.bind(**self.llm.bound)
-        if self.tools is None or mode == 'notools':
+        if self.tools is None:
             tools = []
-        elif mode == 'noask':
-            tools = [x for x in self.tools if not isinstance(x, PlayerTool)]
         else:
-            tools = self.tools
-        # tools = self.tools if self.tools is not None else []
+            if level is None:
+                level = 0
+            tools = [x for x in self.tools if tool.metadata['level'] >= level]
         llm = llm.bind_tools(tools)
         mind = langgraph.prebuilt.create_react_agent(llm, tools)
         context = {'role': 'user', 'content': prompt.format(**variables)}
