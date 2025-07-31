@@ -381,15 +381,10 @@ def AskTool(name, desc, player, history=None, level=0):
     )
     return tool
 
-def SelfTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, level=1)
-
-def PlayerTool(name, desc, player, history=None):
-    return AskTool(name, desc, player, history, level=0)
-
 
 def RAGTool(name, desc, ragllm, paths, doctype,
-            chunk_size=None, chunk_overlap=None, count=None):
+            chunk_size=None, chunk_overlap=None, count=None,
+            level=1):
     # Loader
     loader_choices = {
         'text': langchain_community.document_loaders.text.TextLoader,
@@ -423,7 +418,7 @@ def RAGTool(name, desc, ragllm, paths, doctype,
     # Tool
     tool = langchain.tools.retriever.create_retriever_tool(
         retriever, name, desc)
-    tool.metadata = {'level': 1}
+    tool.metadata = {'level': level}
     return tool
 
 
@@ -615,7 +610,8 @@ class Intelligent():
         else:
             if level is None:
                 level = 0
-            tools = [x for x in self.tools if tool.metadata['level'] >= level]
+            tools = [tool for tool in self.tools
+                     if tool.metadata['level'] >= level]
         llm = llm.bind_tools(tools)
         mind = langgraph.prebuilt.create_react_agent(llm, tools)
         context = {'role': 'user', 'content': prompt.format(**variables)}
