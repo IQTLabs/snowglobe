@@ -374,7 +374,7 @@ async def ui_page():
 
 def run(host='0.0.0.0', port=8000):
     ui.run(host=host, port=port, title='Snow Globe User Interface',
-           favicon=os.path.join(here, 'terminal/favicon.ico'), reload=False)
+           favicon=os.path.join(here, 'assets/favicon.ico'), reload=False)
 
 
 if __name__ in {'__main__', '__mp_main__'}:
