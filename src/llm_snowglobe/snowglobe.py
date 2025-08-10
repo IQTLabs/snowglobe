@@ -389,6 +389,7 @@ def RAGTool(name, desc, ragllm, paths, doctype,
     loader_choices = {
         'text': langchain_community.document_loaders.text.TextLoader,
         'html': langchain_community.document_loaders.html.UnstructuredHTMLLoader,
+        'xml': langchain_community.document_loaders.UnstructuredXMLLoader,
         'pdf': langchain_community.document_loaders.PyPDFLoader,
     }
     loader = loader_choices[doctype]
