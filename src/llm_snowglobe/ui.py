@@ -128,8 +128,8 @@ async def ui_page():
                 placeholder = properties['instruction'] if 'instruction' in properties else 'Ask the AI assistant.'
                 tabvars[resource]['chattext'] = ui.textarea(placeholder=placeholder).classes('w-full border').style('height: auto; padding: 0px 5px')
                 button = ui.button('Send', on_click=lambda resource=resource: send_message(resource))
-                if 'readonly' in properties and '|%s|' % db.get_name(idval) \
-                   in properties['readonly']:
+                if 'readonly' in properties and '|%s|' % db.get_name(
+                        app.storage.tab['id']) in properties['readonly']:
                     button.enabled = False
 
     def setup_weblink(resource):
