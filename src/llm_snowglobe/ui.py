@@ -127,7 +127,10 @@ async def ui_page():
                 properties = db.get_properties(resource)
                 placeholder = properties['instruction'] if 'instruction' in properties else 'Ask the AI assistant.'
                 tabvars[resource]['chattext'] = ui.textarea(placeholder=placeholder).classes('w-full border').style('height: auto; padding: 0px 5px')
-                ui.button('Send', on_click=lambda resource=resource: send_message(resource))
+                button = ui.button('Send', on_click=lambda resource=resource: send_message(resource))
+                if 'readonly' in properties and '|%s|' % db.get_name(idval) \
+                   in properties['readonly']:
+                    button.enabled = False
 
     def setup_weblink(resource):
         with ui.tab_panel(tabvars[resource]['tab']).classes('absolute-full'):
@@ -239,18 +242,18 @@ async def ui_page():
         editor.bind_value(app.storage.general, resource)
         editor.on_value_change(lambda resource=resource: stamp_notepad(resource))
         properties = db.get_properties(resource)
-        if 'readonly' in properties and '|' + db.get_name(idval) + '|' \
+        if 'readonly' in properties and '|%s|' % db.get_name(idval) \
            in properties['readonly']:
                 editor.enabled = False
         else:
-            ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
+            pass#ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
 
     def display_editdoc(resource):
         idval = app.storage.tab['id']
         editobj = tabvars[resource]['editobj']
         editobj.bind_value(app.storage.general, resource)
         properties = db.get_properties(resource)
-        if 'readonly' in properties and '|' + db.get_name(idval) + '|' \
+        if 'readonly' in properties and '|%s|' % db.get_name(idval) \
            in properties['readonly']:
                 editobj.enabled = False
 
