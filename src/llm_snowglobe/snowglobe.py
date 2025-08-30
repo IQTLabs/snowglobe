@@ -423,89 +423,89 @@ def RAGTool(name, desc, llm, paths, doctype,
     return tool
 
 
-class ClassicRAG():
-    def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
-                 count=None):
-        if chunk_size is None:
-            chunk_size = 1000
-        if chunk_overlap is None:
-            chunk_overlap = 200
-        if count is None:
-            count = 1
+# class ClassicRAG():
+#     def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
+#                  count=None):
+#         if chunk_size is None:
+#             chunk_size = 1000
+#         if chunk_overlap is None:
+#             chunk_overlap = 200
+#         if count is None:
+#             count = 1
 
-        docs = loader.load()
-        splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        splits = splitter.split_documents(docs)
-        collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
-        vectorstore = langchain_chroma.Chroma.from_documents(
-            documents=splits, embedding=self.rag_llm.embeddings,
-            collection_name=collection_name)
-        self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
+#         docs = loader.load()
+#         splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+#         splits = splitter.split_documents(docs)
+#         collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
+#         vectorstore = langchain_chroma.Chroma.from_documents(
+#             documents=splits, embedding=self.rag_llm.embeddings,
+#             collection_name=collection_name)
+#         self.retriever = vectorstore.as_retriever(search_kwargs={'k': count})
 
-    def rag_invoke(self, text):
-        return self.retriever.invoke(text)
+#     def rag_invoke(self, text):
+#         return self.retriever.invoke(text)
 
-class DescriptionRAG():
-    def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
-                 count=None):
-        if chunk_size is None:
-            chunk_size = 1000
-        if chunk_overlap is None:
-            chunk_overlap = 200
-        if count is None:
-            count = 1
+# class DescriptionRAG():
+#     def rag_init(self, loader, chunk_size=None, chunk_overlap=None,
+#                  count=None):
+#         if chunk_size is None:
+#             chunk_size = 1000
+#         if chunk_overlap is None:
+#             chunk_overlap = 200
+#         if count is None:
+#             count = 1
 
-        # Create splits
-        docs = loader.load()
-        splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        splits = splitter.split_documents(docs)
+#         # Create splits
+#         docs = loader.load()
+#         splitter = langchain_text_splitters.RecursiveCharacterTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+#         splits = splitter.split_documents(docs)
 
-        # Create retriever
-        collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
-        vectorstore = langchain_chroma.Chroma(
-            embedding_function=self.rag_llm.embeddings,
-            collection_name=collection_name)
-        bytestore = langchain.storage.InMemoryByteStore()
-        id_key = 'split'
-        retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
-            vectorstore=vectorstore, byte_store=bytestore, id_key=id_key,
-            search_kwargs={'k': count})
+#         # Create retriever
+#         collection_name = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)[:63]
+#         vectorstore = langchain_chroma.Chroma(
+#             embedding_function=self.rag_llm.embeddings,
+#             collection_name=collection_name)
+#         bytestore = langchain.storage.InMemoryByteStore()
+#         id_key = 'split'
+#         retriever = langchain.retrievers.multi_vector.MultiVectorRetriever(
+#             vectorstore=vectorstore, byte_store=bytestore, id_key=id_key,
+#             search_kwargs={'k': count})
 
-        # Create descriptions
-        split_ids = [str(uuid.uuid4()) for _ in splits]
-        description_strings = []
-        for split in splits:
-            output = self.rag_description(split.page_content)
-            description_strings.append(output)
-        description_docs = [langchain_core.documents.Document(
-            page_content=description_string, metadata={id_key: split_ids[i]})
-            for i, description_string in enumerate(description_strings)]
+#         # Create descriptions
+#         split_ids = [str(uuid.uuid4()) for _ in splits]
+#         description_strings = []
+#         for split in splits:
+#             output = self.rag_description(split.page_content)
+#             description_strings.append(output)
+#         description_docs = [langchain_core.documents.Document(
+#             page_content=description_string, metadata={id_key: split_ids[i]})
+#             for i, description_string in enumerate(description_strings)]
 
-        # Store splits and descriptions to retriever
-        retriever.vectorstore.add_documents(description_docs)
-        retriever.docstore.mset(list(zip(split_ids, splits)))
-        self.rag_retriever = retriever
+#         # Store splits and descriptions to retriever
+#         retriever.vectorstore.add_documents(description_docs)
+#         retriever.docstore.mset(list(zip(split_ids, splits)))
+#         self.rag_retriever = retriever
 
-    def rag_description(self, text):
-        #template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
-        template = 'Question:\n\nIn one sentence, describe the problem {name} is facing in the following text.\n\n{text}\n\nAnswer:\n\n'
-        variables = {'name': self.name, 'text': text}
-        bind = {'stop': ['\n\n']}
-        output = self.return_output(
-            bind=bind,
-            template=template, variables=variables
-        )
-        return output
+#     def rag_description(self, text):
+#         #template = 'Question:\n\nGive some keywords to describe the situation or problem faced by {name} in the following text.  The keywords should be in an unnumbered, comma-separated list.\n\n{text}\n\nAnswer:\n\nKeywords:'
+#         template = 'Question:\n\nIn one sentence, describe the problem {name} is facing in the following text.\n\n{text}\n\nAnswer:\n\n'
+#         variables = {'name': self.name, 'text': text}
+#         bind = {'stop': ['\n\n']}
+#         output = self.return_output(
+#             bind=bind,
+#             template=template, variables=variables
+#         )
+#         return output
         
-    def rag_invoke(self, text):
-        description = self.rag_description(text)
-        splits = self.rag_retriever.invoke(description)
-        return splits
+#     def rag_invoke(self, text):
+#         description = self.rag_description(text)
+#         splits = self.rag_retriever.invoke(description)
+#         return splits
 
-class RAG(ClassicRAG):
-    pass
+# class RAG(ClassicRAG):
+#     pass
 
 
 class Intelligent():
