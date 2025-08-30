@@ -382,7 +382,7 @@ def AskTool(name, desc, player, history=None, level=0):
     return tool
 
 
-def RAGTool(name, desc, ragllm, paths, doctype,
+def RAGTool(name, desc, llm, paths, doctype,
             chunk_size=None, chunk_overlap=None, count=None,
             level=1):
     # Loader
@@ -412,7 +412,7 @@ def RAGTool(name, desc, ragllm, paths, doctype,
     # Vectors & retriever
     vectorstore = langchain_core \
         .vectorstores.InMemoryVectorStore.from_documents(
-            documents=docs, embedding=ragllm.embeddings)
+            documents=docs, embedding=llm.embeddings)
     kwargs = {'search_kwargs': {'k': count}} if count is not None else {}
     retriever = vectorstore.as_retriever(**kwargs)
 
@@ -544,7 +544,6 @@ class Intelligent():
     async def return_template(
             self, name=None,
             persona=None, reminder=None,
-            rag=None, rag_intro=None, rag_query=None,
             history=None, history_over=None, history_merged=None,
             responses=None, responses_intro=None,
             query=None, query_format=None, query_subtitle=None
@@ -560,15 +559,6 @@ class Intelligent():
         if persona is not None:
             template += '### You are {persona}.\n\n'
             variables['persona'] = persona
-        if rag is not None and history is not None:
-            if rag_intro is None:
-                rag_intro = 'Here is background information to inform your response'
-            if rag_query is None:
-                rag_query = history.entries[-1]['text']
-            docs = self.rag_invoke(rag_query)
-            ragstring = '\n'.join(doc.page_content for doc in docs)
-            template += '### ' + rag_intro + ':\n\n{rag}\n\n'
-            variables['rag'] = ragstring
         if history is not None:
             if not history_over:
                 history_intro = 'This is what has happened so far'
@@ -760,7 +750,7 @@ class Intelligent():
         return output
 
     async def chat_response(self, chatlog, name='Assistant', persona=None,
-                            rag=None, history=None, participants=None):
+                            history=None, participants=None):
         # Get single response, given prexisting chatlog
         chat_intro = 'This is a conversation about what happened'
         if participants is None:
@@ -771,15 +761,14 @@ class Intelligent():
         output = await self.return_output(
             bind=bind,
             persona=persona,
-            rag=rag,
             history=history, history_over=True,
             responses=chatlog, responses_intro=chat_intro,
             query=name + ':\n\n', query_format='oneline_simple'
         )
         return output
 
-    async def chat_terminal(self, name='Assistant', persona=None, rag=None,
-                            history=None):
+    async def chat_terminal(self, name='Assistant', persona=None, history=None
+                            ):
         chatlog = History()
         nb = 2
         username = 'User'
@@ -804,12 +793,12 @@ class Intelligent():
 
             # Get response
             output = await self.chat_response(
-                chatlog, name=name, persona=persona, rag=rag, history=history,
+                chatlog, name=name, persona=persona, history=history,
                 participants=[username, name, 'Narrator'])
             print()
             chatlog.add(name, output)
 
-    async def chat_session(self, chatroom, rag=None, history=None):
+    async def chat_session(self, chatroom, history=None):
         while True:
             log = db.get_chatlog(chatroom)
             # Respond unless most recent message was from self
@@ -821,7 +810,7 @@ class Intelligent():
                 # Respond
                 output = await self.chat_response(
                     chatlog, name=self.name, persona=self.persona,
-                    rag=rag, history=history)
+                    history=history)
                 self.interface_send_message(chatroom, output)
             await db.wait()
 
@@ -840,12 +829,11 @@ class Stateful():
         self.history.add(player_name, player_response)
 
 
-class Control(Intelligent, Stateful, RAG):
+class Control(Intelligent, Stateful):
     def __init__(
             self, source=None, model=None, menu=None, gen=None, embed=None,
-            reasoning=None, tools=None,
-            loader=None, chunk_size=None, chunk_overlap=None, count=None,
-            llm=None, rag_llm=None, ioid=None, iodict=None, presets=None,
+            llm=None, reasoning=None, tools=None,
+            ioid=None, iodict=None, presets=None,
     ):
         self.llm = LLM(
             source=source, model=model, menu=menu, gen=gen, embed=embed
@@ -860,13 +848,6 @@ class Control(Intelligent, Stateful, RAG):
         self.presets = presets
         self.history = History()
         self.setup(self.kind)
-
-        if loader is not None:
-            self.rag_llm = rag_llm if rag_llm is not None else self.llm
-            self.rag_init(loader, chunk_size, chunk_overlap, count)
-            self.rag = True
-        else:
-            self.rag = None
 
     async def __call__(self):
         raise Exception('! Override this method in the subclass for your specific scenario.')
@@ -1023,11 +1004,9 @@ class Team(Stateful):
                 member.info(offset=offset+2)
 
 
-class Player(Intelligent, Stateful, RAG):
+class Player(Intelligent, Stateful):
     def __init__(self, llm=None, name='Anonymous', kind='ai', persona=None,
                  reasoning=None, tools=None,
-                 loader=None, chunk_size=None, chunk_overlap=None, count=None,
-                 rag_llm=None,
                  ioid=None, iodict=None, presets=None):
         self.llm = llm
         self.name = name
@@ -1041,13 +1020,6 @@ class Player(Intelligent, Stateful, RAG):
         self.history = History()
         self.setup(self.kind)
 
-        if loader is not None:
-            self.rag_llm = rag_llm if rag_llm is not None else self.llm
-            self.rag_init(loader, chunk_size, chunk_overlap, count)
-            self.rag = True
-        else:
-            self.rag = None
-
     async def respond(self, history=None, query=None, reminder=2, mc=None,
                       short=False):
         if query is None:
@@ -1057,7 +1029,6 @@ class Player(Intelligent, Stateful, RAG):
             bind=bind,
             name=self.name,
             persona=self.persona, reminder=reminder,
-            rag=self.rag,
             history=history,
             query=query
         )
@@ -1087,9 +1058,7 @@ class Player(Intelligent, Stateful, RAG):
     def chat(self, history=None):
         name = self.name
         persona = self.persona
-        rag = self.rag
-        return self.chat_terminal(
-            name=name, persona=persona, rag=rag, history=history)
+        return self.chat_terminal(name=name, persona=persona, history=history)
 
     def info(self, offset=0):
         print(' ' * offset + 'Player:', self.name)
