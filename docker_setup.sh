@@ -11,7 +11,11 @@ if [ -z "$(docker images -q $image_name)" ]; then
 	   ./
 fi
 
-docker run --name $container_name \
-       --runtime=nvidia \
-       -it --shm-size=64g -p 8000:8000 \
-       $image_name
+if [ -n "$(docker ps -aq -f name=$container_name)" ]; then
+    docker start -i $container_name
+else
+    docker run --name $container_name \
+   --runtime=nvidia \
+   -it --shm-size=64g -p 8000:8000 \
+   $image_name
+fi

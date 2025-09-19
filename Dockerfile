@@ -6,6 +6,7 @@ RUN apt update && apt install -y \
     python3-pip \
     python3-venv \
     emacs \
+    vim \
     less \
     tree \
     wget \
@@ -21,6 +22,8 @@ ARG gid=$uid
 RUN deluser --remove-home ubuntu
 RUN addgroup --gid $gid $groupname
 RUN adduser --uid $uid --gid $gid --disabled-password $username
+RUN mkdir /home/$username/logs && \
+    chown $uid:$gid /home/$username/logs
 WORKDIR /home/$username
 USER $username
 

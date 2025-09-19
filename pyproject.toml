@@ -35,6 +35,8 @@ langchain-chroma = "*"
 langchain-community = "*"
 langchain-text-splitters = "*"
 llama-cpp-python = ">=0.3.8"
+pdbpp = "*"
+ruamel-yaml = "*"
 
 [tool.poetry.scripts]
 snowglobe_config = "llm_snowglobe.scripts:config"

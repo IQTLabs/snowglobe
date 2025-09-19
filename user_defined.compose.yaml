@@ -1,0 +1,23 @@
+services:
+  snowglobe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: "examples/startup.sh"
+    image: snowglobe:latest
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    container_name: snowglobe
+    hostname: snowglobe
+    volumes:
+      - '${PWD}/config:/config'
+      - '${PWD}/logs:/home/snowglobe/logs'
+    ports:
+      - 8080:8000
