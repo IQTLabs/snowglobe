@@ -13,17 +13,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import llm_snowglobe as snowglobe
 
 def config():
-    import llm_snowglobe as snowglobe
-
-    snowglobe.config()
+    snowglobe.core.llm.config()
 
 
 def ui(host="0.0.0.0", port=8000):
-    import llm_snowglobe as snowglobe
-
     snowglobe.ui.run(host=host, port=port)
 
 

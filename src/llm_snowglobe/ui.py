@@ -14,22 +14,38 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import logging
+import markdown2
 import os
 import time
-import markdown2
+import uuid
 import watchfiles
+
 from nicegui import ui, app
-from llm_snowglobe import db
+from llm_snowglobe.core import Configuration, Database
 
 here = os.path.dirname(os.path.abspath(__file__))
 datastep = 0
+cfg_file = "/config/game.yaml"
+log_file = 'logs/snowglobe-ui.log'
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger.info('Logging started')
 
 
 async def detect_updates():
     while True:
-        globals()["datastep"] += 1
-        async for changes in watchfiles.awatch(db.path):
-            break
+        config = Configuration()
+        with open(config.game_id_file,'r') as gif:
+            ioid = uuid.UUID(gif.read())
+
+        db = Database(ioid=ioid, path=config.data_dir)
+        logger.debug(f'detecting updates to {db.path}')
+        if db.path:
+            globals()["datastep"] += 1
+            async for changes in watchfiles.awatch(db.path):
+                break
 
 
 app.on_startup(detect_updates)
@@ -39,11 +55,20 @@ app.add_static_file(
     url_path="/human.png", local_file=os.path.join(here, "assets/human.png")
 )
 
+def get_database():
+    config = Configuration(cfg_file)
+    with open(config.game_id_file,'r') as gif:
+        ioid = uuid.UUID(gif.read())
+
+    db = Database(ioid=ioid, path=config.data_dir)
+    return db
 
 @ui.page("/")
 async def ui_page():
+    db = get_database()
 
     async def set_id(idval):
+        logger.debug('method set_id entered')
         if len(idval) == 0:
             ui.notify("Enter your ID.")
         elif db.get_name(idval) is None:
@@ -57,8 +82,10 @@ async def ui_page():
             new_resource_check()
             setup_tabs.refresh()
             setup_tab_panels.refresh()
+        logger.debug('method set_id exiting')
 
     def new_resource_check():
+        logger.debug('method new_resource_check entered')
         idval = app.storage.tab["id"]
         resource_string = ""
         for resource, resource_type in db.get_assignments(idval):
@@ -66,10 +93,12 @@ async def ui_page():
         key = "TABSTRING"
         new_resource = key not in tabvars or tabvars[key] != resource_string
         tabvars[key] = resource_string
+        logger.debug(f'method new_resource_check returning value {new_resource}')
         return new_resource
 
     @ui.refreshable
     def setup_tabs():
+        logger.debug('method setup_tabs entered')
         if "id" not in app.storage.tab:
             return
         idval = app.storage.tab["id"]
@@ -99,9 +128,11 @@ async def ui_page():
                     resource, label=title, icon=icon[resource_type]
                 )
         tabvars["TABCONTAINER"] = tabs
+        logger.debug('method setup_tabs exiting')
 
     @ui.refreshable
     def setup_tab_panels():
+        logger.debug('method setup_tab_panels entered')
         if "id" not in app.storage.tab:
             return
         idval = app.storage.tab["id"]
@@ -118,7 +149,10 @@ async def ui_page():
         if len(tabvars) - 2 == 1:
             panels.set_value(resource)
 
+        logger.debug('method setup_tab_panels exiting')
+
     def setup_chatroom(resource):
+        logger.debug('method setup_chatroom entered')
         with ui.tab_panel(tabvars[resource]["tab"]).classes("h-full"):
             with ui.column().classes("w-full items-center h-full"):
                 tabvars[resource]["message_count"] = 0
@@ -148,20 +182,27 @@ async def ui_page():
                 ):
                     button.enabled = False
 
+        logger.debug('method setup_chatroom exiting')
+
     def setup_weblink(resource):
+        logger.debug('method setup_weblink entered')
         with ui.tab_panel(tabvars[resource]["tab"]).classes("absolute-full"):
             tabvars[resource]["iframe"] = ui.element("iframe").classes(
                 "w-full h-full absolute-full"
             )
             display_weblink(resource)
+        logger.debug('method setup_weblink exiting')
 
     def setup_infodoc(resource):
+        logger.debug('method setup_infodoc entered')
         with ui.tab_panel(tabvars[resource]["tab"]).classes("absolute-full"):
             with ui.scroll_area().classes("w-full h-full absolute-full"):
                 tabvars[resource]["updater"] = ui.refreshable(display_infodoc)
                 tabvars[resource]["updater"](resource)
+        logger.debug('method setup_infodoc exiting')
 
     def setup_notepad(resource):
+        logger.debug('method setup_notepad entered')
         with ui.tab_panel(tabvars[resource]["tab"]).classes("absolute-full"):
             tabvars[resource]["editor"] = (
                 ui.editor().classes("w-full h-full").props("height=100%")
@@ -205,8 +246,10 @@ async def ui_page():
                 }
             )
             display_notepad(resource)
+        logger.debug('method setup_notepad exiting')
 
     def setup_editdoc(resource):
+        logger.debug('method setup_editdoc entered')
         with ui.tab_panel(tabvars[resource]["tab"]).classes("absolute-full"):
             with ui.column().classes("w-full items-center h-full"):
                 tabvars[resource]["editobj"] = (
@@ -217,8 +260,10 @@ async def ui_page():
                     "Submit",
                     on_click=lambda resource=resource: submit_editdoc(resource),
                 )
+        logger.debug('method setup_editdoc exiting')
 
     async def display_all():
+        logger.debug('method display_all entered')
         if "id" not in app.storage.tab:
             return
         idval = app.storage.tab["id"]
@@ -233,8 +278,10 @@ async def ui_page():
         for resource, resource_type in db.get_assignments(idval):
             if resource_type in display_func:
                 tabvars[resource]["updater"].refresh(resource)
+        logger.debug('method display_all exiting')
 
     def display_messages(resource):
+        logger.debug('method display_messages entered')
         idval = app.storage.tab["id"]
         name = db.get_name(idval)
         chatlog = db.get_chatlog(resource)
@@ -261,12 +308,18 @@ async def ui_page():
             tabvars[resource]["message_window"].scroll_to(percent=100)
             tabvars[resource]["message_count"] = len(chatlog)
 
+        logger.debug('method display_messages exiting')
+
     def display_weblink(resource):
+        logger.debug('method display_weblink entered')
         properties = db.get_properties(resource)
         if "url" in properties:
             tabvars[resource]["iframe"].props("src=%s" % properties["url"])
 
+        logger.debug('method display_weblink exiting')
+
     def display_infodoc(resource):
+        logger.debug('method display_infodoc entered')
         # idval = app.storage.tab["id"]
         properties = db.get_properties(resource)
         if "content" not in properties:
@@ -279,8 +332,10 @@ async def ui_page():
             ui.markdown(properties["content"]).classes("w-full h-full")
         elif properties["format"] == "html":
             ui.html(properties["content"]).classes("w-full h-full")
+        logger.debug('method display_infodoc exiting')
 
     def display_notepad(resource):
+        logger.debug('method display_notepad entered')
         idval = app.storage.tab["id"]
         editor = tabvars[resource]["editor"]
         editor.bind_value(app.storage.general, resource)
@@ -293,8 +348,10 @@ async def ui_page():
             editor.enabled = False
         else:
             pass  # ui.timer(300, lambda resource=resource: save_notepad(resource), immediate=False)
+        logger.debug('method display_notepad exiting')
 
     def display_editdoc(resource):
+        logger.debug('method display_editdoc entered')
         idval = app.storage.tab["id"]
         editobj = tabvars[resource]["editobj"]
         editobj.bind_value(app.storage.general, resource)
@@ -366,8 +423,10 @@ async def ui_page():
         editobj.on("selectionchange", js_handler=cursor_move_handler)
         # editobj.on('update:model-value', lambda: ui.notify('text_change'))
         # editobj.on('selectionchange', lambda: ui.notify('cursor_move'))
+        logger.debug('method display_editdoc exiting')
 
     async def send_message(resource):
+        logger.debug('method send_message entered')
         idval = app.storage.tab["id"]
         chattext = tabvars[resource]["chattext"]
         message = {
@@ -381,11 +440,13 @@ async def ui_page():
         db.commit()
         tabvars[resource]["updater"].refresh(resource)
         chattext.set_value("")
+        logger.debug('method send_message exiting')
 
     async def stamp_notepad(resource):
         tabvars[resource]["last_modified"] = time.time()
 
     async def save_notepad(resource):
+        logger.debug('method save_notepad entered')
         now = time.time()
         if "last_modified" in tabvars[resource] and (
             "last_saved" not in tabvars[resource]
@@ -398,8 +459,10 @@ async def ui_page():
             db.save_text(resource, content, None, stamp)
             db.commit()
             tabvars[resource]["last_saved"] = now
+        logger.debug('method save_notepad exiting')
 
     async def submit_editdoc(resource):
+        logger.debug('method submit_editdoc entered')
         idval = app.storage.tab["id"]
         content = app.storage.general[resource]
         name = db.get_name(idval)
@@ -409,6 +472,7 @@ async def ui_page():
         db.save_text(resource, content, name, stamp)
         db.commit()
         ui.notify("Document submitted")
+        logger.debug('method submit_editdoc exiting')
 
     tabvars = {}
     await ui.context.client.connected()

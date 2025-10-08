@@ -1,3 +1,4 @@
+from .configuration import Configuration as Configuration
 from .control import Control as Control
 from .database import Database as Database
 from .history import History as History

@@ -29,6 +29,8 @@ class Control(Intelligent, Stateful):
         self,
         database,
         verbosity,
+        name,
+        kind='ai',
         logger=None,
         source=None,
         model=None,
@@ -43,7 +45,21 @@ class Control(Intelligent, Stateful):
         presets=None,
         **kwargs
     ):
-        super().__init__(database=database, verbosity=verbosity, logger=logger, kind='ai', **kwargs)
+        # super().__init__(database=database, verbosity=verbosity, logger=logger, kind='ai', **kwargs)
+        Intelligent.__init__(
+            self,
+            database=database,
+            verbosity=verbosity, 
+            kind=kind,
+            name=name,
+            iodict=iodict,
+            logger=logger,
+            **kwargs
+        )
+        Stateful.__init__(
+            self,
+            **kwargs
+        )
         self.llm = (
             LLM(source=source, model=model, menu=menu, gen=gen, embed=embed)
             if llm is None

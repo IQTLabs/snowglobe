@@ -14,17 +14,35 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
 import sqlite3
 import watchfiles
 
 from .history import History
 
 class Database:
-    def __init__(self, path=None):
-        self.path = path if path is not None else "snowglobe.db"
-        self.con = sqlite3.connect(self.path)
+
+    @staticmethod
+    def get_db_by_ioid(ioid, path=None):
+        db = None
+        db_file_path = os.path.join(path, f"snowglobe_{ioid}.db")
+        if os.path.exists(db_file_path) and os.path.isfile(db_file_path):
+            db = Database(ioid, path)
+
+        return db
+
+    def __init__(self, ioid, path=None, initialize=False):
+        # breakpoint()
+        db_file_path = os.path.join(path, f"snowglobe_{ioid}.db")
+        if (os.path.exists(db_file_path) and os.path.isfile(db_file_path)) or initialize:
+            self.path = db_file_path
+        self.con = sqlite3.connect(self.path, check_same_thread=False)
+        # if not self.con:
+        #     breakpoint()
         self.cur = self.con.cursor()
-        self.create()
+
+        if initialize:
+            self.create()
 
     def create(self):
         self.cur.execute("create table if not exists players(id primary key, name)")
@@ -160,4 +178,5 @@ class Database:
             break
 
     def __del__(self):
-        self.con.close()
+        if hasattr(self, 'con'):
+            self.con.close()

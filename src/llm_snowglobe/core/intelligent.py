@@ -19,15 +19,21 @@ import langgraph.prebuilt
 import random
 import time
 
-from .control import Control
 from .history import History
 
 class Intelligent:
-    def __init__(self, database, verbosity, kind, logger=None, **kwargs):
+    def __init__(self, database, verbosity, kind, ioid=None, name='', iodict=None, logger=None, **kwargs):
         self.db = database
         self.verbosity = verbosity
         self.logger = logger
         self.kind = kind
+        # Assign ID
+        if ioid is not None:
+            self.ioid = str(ioid)
+        else:
+            self.ioid = str(random.randint(100000, 999999))
+        self.name = name
+        self.iodict=iodict
         self.setup(self.kind)
 
     def setup(self, kind):
@@ -52,6 +58,7 @@ class Intelligent:
             template=template,
             input_variables=list(variables.keys()),
         )
+        
         if kind == "ai" and self.reasoning:
             output = await self.return_from_ai_reasoning(prompt, variables, level=level)
         elif kind == "ai":
@@ -191,9 +198,9 @@ class Intelligent:
         chatroom = self.db.default_chatroom(self.ioid)
 
         # Send prompt.  Create a temporary control just to send the message.
-        sender = Control(llm=None)
+        # sender = Control(llm=None)
         content = prompt.format(**variables)
-        sender.interface_send_message(chatroom, content)
+        self.interface_send_message(chatroom, content)
 
         # Get response
         answer = await self.interface_get_message(chatroom)
@@ -207,11 +214,6 @@ class Intelligent:
         self.preset_idx = 0
 
     def interface_setup(self):
-        # Assign ID
-        if self.ioid is not None:
-            self.ioid = str(self.ioid)
-        else:
-            self.ioid = str(random.randint(100000, 999999))
         if self.verbosity >= 2:
             print("ID %s : %s" % (self.ioid, self.name))
 

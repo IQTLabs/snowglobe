@@ -15,11 +15,11 @@
 #   limitations under the License.
 
 
-verbose = 2
+# verbose = 2
 
 
 
 
 
-db = Database()
+# db = Database()
 

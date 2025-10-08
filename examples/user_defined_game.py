@@ -15,32 +15,41 @@
 #   limitations under the License.
 
 import uuid
+import threading
 import logging
 import asyncio
-import llm_snowglobe as snowglobe
 
-from ruamel.yaml import YAML
+from llm_snowglobe.core import Configuration, Control, Database, History, Player
+from llm_snowglobe import ui as ui
 
 
-class UserDefinedGame(snowglobe.Control):
+class UserDefinedGame(Control):
     def __init__(self, config, logger):
-        super().__init__()
-
         self.logger = logger
-        goals = dict() 
-        for goal_name in config['goals']:
-            goals[goal_name] = config['goals'][goal_name]
+        self.verbosity = 2
 
-        ioid = config['ioid'] if 'ioid' in config else uuid.uuid4()
-        gameroom = f"game{ioid}"
-        chatroom = f"chat{ioid}"
+        self.goals = dict() 
+        for goal_name in config.goals:
+            self.goals[goal_name] = config.goals[goal_name]
 
-        self.title = config['title']
+        self.ioid = uuid.uuid4()
+        gameroom = f"game{self.ioid}"
+        chatroom = f"chat{self.ioid}"
+        with open(config.game_id_file,'w') as gif:
+            gif.write(self.ioid.hex)
+
+        self.game_id_file = config.game_id_file
+        self.data_dir = config.data_dir
+        self.db = Database(self.ioid, path=config.data_dir, initialize=True)
+        name = 'Game Control'
+        super().__init__(database=self.db, verbosity=self.verbosity, logger=logger, name=name)
+
+        self.title = config.title
         self.players = list()
         self.advisors = list()
 
-        for name in config['players']:
-            cfg_player = config['players'][name]
+        for name in config.players:
+            cfg_player = config.players[name]
             sg_player = None
 
             if cfg_player['kind'] == 'human': #player is human
@@ -51,14 +60,16 @@ class UserDefinedGame(snowglobe.Control):
                 infodocs = []
                 if 'infodocs' in cfg_player:
                     infodocs = cfg_player['infodocs']
-                sg_player = snowglobe.Player(
+                sg_player = Player(
+                    database=self.db,
+                    verbosity = self.verbosity,
                     llm=self.llm,
                     name=name,
                     kind=cfg_player['kind'],
                     ioid=ioid,
                     iodict={
                         'chatrooms': [gameroom, chatroom],
-                        'infodocs': ['ac_game_help'],
+                        'infodocs': infodocs,
                 })
                 sg_player.gameroom = gameroom
                 sg_player.chatroom = chatroom
@@ -66,8 +77,10 @@ class UserDefinedGame(snowglobe.Control):
                 persona = cfg_player['persona']
                 persona_goals = list()
                 for g in cfg_player['goals']:
-                    persona_goals.append(goals[g])
-                sg_player = snowglobe.Player(
+                    persona_goals.append(self.goals[g])
+                sg_player = Player(
+                    database=self.db,
+                    verbosity = self.verbosity,
                     llm=self.llm,
                     name=name,
                     persona=f"{persona}.  {persona_goals}"
@@ -76,32 +89,34 @@ class UserDefinedGame(snowglobe.Control):
                 self.logger.warning(f"Skipping player {name} with invalid type {cfg_player['kind']}")
 
             if sg_player:
-                self.logger.info(f"Adding {cfg_player['kind']} player {name} to game {ioid}")
+                self.logger.info(f"Adding {cfg_player['kind']} player {name} to game {self.ioid}")
                 self.players.append(sg_player)
 
-        for name in config['advisors']:
-            cfg_advisor = config['advisors'][name]
+        for name in config.advisors:
+            cfg_advisor = config.advisors[name]
             persona = cfg_advisor['persona']
             persona_goals = list()
             for g in cfg_advisor['goals']:
-                persona_goals.append(goals[g])
-            sg_advisor = snowglobe.Player(
+                persona_goals.append(self.goals[g])
+            sg_advisor = Player(
+                database=self.db,
+                verbosity = self.verbosity,
                 llm=self.llm,
                 name=name,
                 persona=f"{persona}.  {persona_goals}")
             sg_advisor.chatroom = chatroom
-            self.logger.info(f"Adding AI advisor {name} to game {ioid}")
+            self.logger.info(f"Adding AI advisor {name} to game {self.ioid}")
             self.advisors.append(sg_advisor)
         
-        self.scenario = config['scenario']
-        self.moves = config['moves']
-        self.timestep = config['timestep']
-        self.nature = config['nature']
-        self.mode = config['mode']
+        self.scenario = config.scenario
+        self.moves = config.moves
+        self.timestep = config.timestep
+        self.nature = config.nature
+        self.mode = config.mode
 
 
         # User interface properties
-        prop = snowglobe.db.add_property
+        prop = self.db.add_property
         for player in self.players:
             if player.kind == 'human':
                 prop(player.gameroom, 'title', 'Play the Game')
@@ -111,16 +126,16 @@ class UserDefinedGame(snowglobe.Control):
         prop('ac_game_help', 'title', 'Help')
         prop('ac_game_help', 'content', "## Help\n\nClick *Play the Game* to enter your response for each move, or click *Your AI Advisor* to consult with your AI advisor about what to do.")
         prop('ac_game_help', 'format', 'markdown')
-        snowglobe.db.commit()
+        self.db.commit()
 
     async def game(self):
         # Setup
         self.history.clear()
-        self.logger.info(f"History cleared.")
+        self.logger.info("History cleared.")
         self.header(self.title, h=0)
         self.record_narration(self.scenario, timestep=self.timestep)
         self.header(self.scenario, h=2)
-        self.logger.info(f"Interface headers set.")
+        self.logger.info("Interface headers set.")
         for player in self.players:
             if player.kind == 'human':
                 self.interface_send_message(
@@ -131,7 +146,7 @@ class UserDefinedGame(snowglobe.Control):
         for move in range(self.moves):
             self.logger.info(f"Taking move number {move}")
             self.header('Move ' + str(move + 1), h=1)
-            responses = snowglobe.History()
+            responses = History()
             for player in self.players:
                 self.header('### ' + player.name, h=2)
                 if player.kind == 'human':
@@ -164,44 +179,6 @@ class UserDefinedGame(snowglobe.Control):
                                                     history=self.history)
                                for advisor in self.advisors], self.game())
 
-def load_config(cfg_file):
-    config = None
-    file_config = None
-    with open(cfg_file, "r") as cfg_file:
-      yaml = YAML(typ="safe")
-      file_config = yaml.load(cfg_file)
-
-    if file_config:
-        config = {}
-        config['goals'] = file_config['goals']
-        
-        game_id = uuid.uuid4()
-        if file_config['gameroom']:
-            config['gameroom'] = file_config['gameroom']
-        else:
-            config['gameroom'] = 'game' + game_id
-
-        if file_config['chatroom']:
-            config['chatroom'] = file_config['chatroom']
-        else:
-            config['chatroom'] = 'chat' + game_id
-
-        config['title'] = file_config['title']
-        config['scenario'] = file_config['scenario']
-        config['moves'] = file_config['moves']
-        config['timestep'] = file_config['timestep']
-        config['nature'] = file_config['nature']
-        config['mode'] = file_config['mode']
-        config['players'] = dict()
-        config['advisors'] = dict()
-
-        for player in file_config['players']:
-            config['players'][player] = file_config['players'][player]
-
-        for advisor in file_config['advisors']:
-            config['advisors'][advisor] = file_config['advisors'][advisor]
-
-    return config
 
 def configure_logging(log_file):
   logger = logging.getLogger(__name__)
@@ -213,7 +190,7 @@ if __name__ == '__main__':
     logger = configure_logging('logs/snowglobe.log')
 
     config_file = '/config/game.yaml'
-    config = load_config(config_file)
+    config = Configuration("/config/game.yaml")
     logger.debug(f"Config loaded from {config_file}")
     if config:
         sim = UserDefinedGame(config, logger)

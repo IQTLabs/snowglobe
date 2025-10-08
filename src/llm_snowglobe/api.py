@@ -18,7 +18,7 @@ import os
 import fastapi
 import fastapi.staticfiles
 import pydantic
-from llm_snowglobe import db, default_chatroom
+from llm_snowglobe.core import Configuration, Database
 
 app = fastapi.FastAPI()
 here = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,11 @@ class Message(pydantic.BaseModel):
 
 @app.get("/read/{ioid}/{count}")
 async def prompt(ioid: str, count: int):
+    config = Configuration("/config/game.yaml")
+    with open(config.game_id_file,'r') as gif:
+        ioid = uuid.UUID(gif.read())
+
+    db = Database(ioid)
     if count == 0:
         name = db.get_name(ioid)
         if name is None:
@@ -42,7 +47,7 @@ async def prompt(ioid: str, count: int):
         else:
             return {"name": name}
     else:
-        chatroom = default_chatroom(ioid)
+        chatroom = db.default_chatroom(ioid)
         chatlog = db.get_chatlog(chatroom)
         if len(chatlog) >= count:
             return chatlog[count - 1]
@@ -52,7 +57,12 @@ async def prompt(ioid: str, count: int):
 
 @app.post("/post/{ioid}")
 async def answer(ioid: str, answer: Message):
-    chatroom = default_chatroom(ioid)
+    config = Configuration("/config/game.yaml")
+    with open(config.game_id_file,'r') as gif:
+        ioid = uuid.UUID(gif.read())
+
+    db = Database(ioid)
+    chatroom = db.default_chatroom(ioid)
     message = answer.dict()
     db.send_message(chatroom, **message)
     db.commit()

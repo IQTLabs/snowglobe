@@ -34,15 +34,26 @@ class Player(Intelligent, Stateful):
         presets=None,
         **kwargs
     ):
-        super().__init__(database=database, verbosity=verbosity, kind=kind, logger=logger, **kwargs)
         self.llm = llm
-        self.name = name
         self.persona = persona
         self.reasoning = reasoning
         self.tools = tools
-        self.ioid = ioid
-        self.iodict = iodict
         self.presets = presets
+        Intelligent.__init__(
+            self,
+            database=database,
+            verbosity=verbosity, 
+            kind=kind,
+            name=name,
+            ioid=ioid,
+            iodict=iodict,
+            logger=logger,
+            **kwargs
+        )
+        Stateful.__init__(
+            self,
+            **kwargs
+        )
 
 
     async def respond(self, history=None, query=None, reminder=2, mc=None, short=False):
