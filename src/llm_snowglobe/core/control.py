@@ -54,6 +54,7 @@ class Control(Intelligent, Stateful):
             name=name,
             iodict=iodict,
             logger=logger,
+            ioid=ioid,
             **kwargs
         )
         Stateful.__init__(

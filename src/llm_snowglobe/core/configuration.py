@@ -19,6 +19,8 @@ from ruamel.yaml import YAML
 class Configuration:
   def __init__(self, config_path="/config/game.yaml"):
     self.config_path = config_path
+    self.data_dir = '/data/snowglobe/'
+    self.game_id_file = '/data/snowglobe/game.id'
     file_config = None
     with open(config_path, "r") as cfg_file:
       yaml = YAML(typ="safe")

@@ -10,7 +10,8 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    command: "snowglobe_game -c /config/WoTRM.yaml"
+    command: ["snowglobe_simulation", "-c", "/config/WoTRM.yaml", "-l", "/home/snowglobe/logs/snowglobe.log", "--runs", "5", "--simulation-name", "WoTR", "--simulation-mode"]
+    # command: "tail -f /dev/null"
     image: snowglobe:latest
     stdin_open: true # docker run -i
     tty: true # docker run -t
@@ -38,7 +39,7 @@ services:
     #         - driver: nvidia
     #           count: all
     #           capabilities: [gpu]
-    command: "snowglobe_server"
+    command: "snowglobe_server -c /config/WoTRM.yaml"
     image: snowglobe:latest
     stdin_open: true # docker run -i
     tty: true # docker run -t

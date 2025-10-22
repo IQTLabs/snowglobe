@@ -20,7 +20,7 @@ def config():
 
 
 def ui(host="0.0.0.0", port=8000):
-    snowglobe.ui.run(host=host, port=port)
+    snowglobe.ui.main(host=host, port=port)
 
 
 def api(host="0.0.0.0", port=8000, log_level="warning"):
