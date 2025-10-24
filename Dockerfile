@@ -29,6 +29,6 @@ USER $username
 COPY --chown=$uid:$gid . /home/$username
 RUN python3 -m venv /home/$username/.venv
 ENV PATH=/home/$username/.venv/bin:"$PATH"
-RUN pip install cmake
-RUN CMAKE_ARGS="-DGGML_CUDA=on" pip install .
+RUN pip install cmake && \
+    CMAKE_ARGS="-DGGML_CUDA=on" pip install .
 RUN snowglobe_config

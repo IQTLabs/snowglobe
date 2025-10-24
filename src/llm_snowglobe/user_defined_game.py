@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 import uuid
+import time
 import threading
 import logging
 import asyncio
@@ -123,6 +124,7 @@ class UserDefinedGame(Control):
 
 
     # User interface properties
+    self.logger.info(f"Setting interface properties")
     prop = self.db.add_property
     for player in self.players:
       if player.kind == 'human':
@@ -133,6 +135,7 @@ class UserDefinedGame(Control):
     prop('ac_game_help', 'title', 'Help')
     prop('ac_game_help', 'content', "## Help\n\nClick *Play the Game* to enter your response for each move, or click *Your AI Advisor* to consult with your AI advisor about what to do.")
     prop('ac_game_help', 'format', 'markdown')
+    self.logger.info(f"Commiting to db at {self.db.path}")
     self.db.commit()
 
   async def game(self):
@@ -165,12 +168,14 @@ class UserDefinedGame(Control):
           self.logger.info(f"Response received from player {player.name} in {player.gameroom}")
         else:
           response = await player.respond(history=self.history)
+          self.logger.info(f"Response received from AI player {player.name}")
         responses.add(player.name, response)
       self.header('### Result', h=2)
       self.logger.info(f"Adjudicating results for move {move} of game {self.ioid}")
       outcome = await self.adjudicate(
         history=self.history, responses=responses, nature=self.nature,
         timestep=self.timestep, mode=self.mode)
+      self.logger.info(f"Results for move {move} of game {self.ioid} successfully adjudicated. Recording narration.")
       self.record_narration(outcome, timestep=self.timestep)
 
     # Conclusion
@@ -180,17 +185,23 @@ class UserDefinedGame(Control):
           + '\n\n**Game Over**'
         self.interface_send_message(
           player.gameroom, content, 'markdown')
+        self.logger.info(f"Game {self.ioid} complete.")
 
-    raise TerminateChats
+    self.logger.info("Terminating advisor chats.")
+
+    for advisor in self.advisors:
+      advisor.active = False
 
   async def __call__(self):
-    try:
-      async with asyncio.TaskGroup() as group:
-        for advisor in self.advisors:
-          group.create_task(advisor.chat_session(advisor.chatroom, history=self.history))
-        group.create_task(self.game())
-    except* TerminateChats:
-      pass
+    # try:
+    async with asyncio.TaskGroup() as group:
+      for advisor in self.advisors:
+        group.create_task(advisor.chat_session(advisor.chatroom, history=self.history))
+      group.create_task(self.game())
+    # except* TerminateChats:
+    #   self.logger.info("Terminate chats exception caught")
+    #   time.sleep(3)
+      
      
     # self.tasks.append()
     # await asyncio.gather(*self.tasks)

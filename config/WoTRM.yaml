@@ -30,13 +30,13 @@ mode:
     - 'geopol'
 players:
     Prime Minister of Glacia:
-        kind: 'ai'
+        kind: 'human'
         ioid: 777778
         advisors:
             - Advisor to the Prime Minister of Glacia
-        persona: 'the leader of Glacia.'
-        goals:
-            - glacia_hawk
+        # persona: 'the leader of Glacia.'
+        # goals:
+        #     - glacia_hawk
     Premier of USSR:
         kind: 'ai'
         persona: 'the leader of Taigastan.'

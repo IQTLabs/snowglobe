@@ -26,6 +26,7 @@ class Intelligent:
         self.db = database
         self.verbosity = verbosity
         self.logger = logger
+        self.active = True
         self.kind = kind
         # Assign ID
         if ioid is not None:
@@ -343,7 +344,7 @@ class Intelligent:
             chatlog.add(name, output)
 
     async def chat_session(self, chatroom, history=None):
-        while True:
+        while self.active:
             log = self.db.get_chatlog(chatroom)
             # Respond unless most recent message was from self
             if len(log) > 0 and log[-1]["name"] != self.name:
