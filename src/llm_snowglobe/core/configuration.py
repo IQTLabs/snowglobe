@@ -34,6 +34,14 @@ class Configuration:
 
       self.title = file_config['title']
       self.scenario = file_config['scenario']
+      self.infodocs = dict()
+      if 'infodocs' in file_config:
+        for doc in file_config['infodocs']:
+          infodoc = file_config['infodocs'][doc]
+          self.infodocs[doc] = {'title': doc,
+                                'format': infodoc['format'], 
+                                'content': infodoc['content'],
+                               }
       self.moves = file_config['moves']
       self.timestep = file_config['timestep']
       self.nature = file_config['nature']

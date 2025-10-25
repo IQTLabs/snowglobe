@@ -31,4 +31,4 @@ RUN python3 -m venv /home/$username/.venv
 ENV PATH=/home/$username/.venv/bin:"$PATH"
 RUN pip install cmake && \
     CMAKE_ARGS="-DGGML_CUDA=on" pip install .
-RUN snowglobe_config
+# RUN snowglobe_config

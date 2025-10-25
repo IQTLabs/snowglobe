@@ -15,17 +15,12 @@
 #   limitations under the License.
 
 import uuid
-import time
-import threading
 import logging
 import asyncio
 import argparse
 
 from llm_snowglobe.core import Configuration, Control, Database, History, Player
 
-class TerminateChats(Exception):
-  def __init__(self):
-    super().__init__()
 
 class UserDefinedGame(Control):
   def __init__(self, config, logger, simulation_mode=False, simulation_name='simulation', run_num=0):
@@ -67,7 +62,9 @@ class UserDefinedGame(Control):
 
         infodocs = []
         if 'infodocs' in cfg_player:
-          infodocs = cfg_player['infodocs']
+          for doc in cfg_player['infodocs']:
+            infodocs.append(doc)
+
         sg_player = Player(
           database=self.db,
           verbosity = self.verbosity,
@@ -81,6 +78,7 @@ class UserDefinedGame(Control):
         })
         sg_player.gameroom = gameroom
         sg_player.chatroom = chatroom
+        sg_player.infodocs = infodocs
       elif cfg_player['kind'] == 'ai': #player is ai
         persona = cfg_player['persona']
         persona_goals = list()
@@ -124,7 +122,7 @@ class UserDefinedGame(Control):
 
 
     # User interface properties
-    self.logger.info(f"Setting interface properties")
+    self.logger.info("Setting interface properties")
     prop = self.db.add_property
     for player in self.players:
       if player.kind == 'human':

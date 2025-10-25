@@ -10,7 +10,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    command: ["snowglobe_simulation", "-c", "/config/WoTRM.yaml", "-l", "/home/snowglobe/logs/snowglobe.log", "--runs", "3", "--simulation-name", "WotR-Sim", "--simulation-mode"]
+    command: ["./start_sim.sh"]
     image: snowglobe:latest
     stdin_open: true # docker run -i
     tty: true # docker run -t
@@ -21,9 +21,11 @@ services:
       timeout: 3s
       retries: 20
     volumes:
-      - '${PWD}/config:/config'
+      - '${PWD}/config:/home/snowglobe/.config/snowglobe'
       - '${PWD}/logs:/home/snowglobe/logs'
       - '${PWD}/data:/data/snowglobe'
+    secrets:
+      - openai_key
     # ports:
     #   - 8080:8000
 
@@ -53,3 +55,6 @@ services:
     depends_on:
       snowglobe:
         condition: service_healthy
+secrets:
+  openai_key:
+    file: ${PWD}/secrets/openaiapi.key

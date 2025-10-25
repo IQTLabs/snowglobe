@@ -1,3 +1,4 @@
 *.swp
 logs
 data
+secrets

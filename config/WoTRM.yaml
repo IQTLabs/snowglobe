@@ -11,6 +11,21 @@ scenario: |-
     The submarine commander was interrogated the same day. And the next day Glacian experts inspected the submarine.  On 2 and 3 November the Taigastani ambassador conveyed Taigastan's government's irritation at Glacia's behavior and the prolonged interrogation of the submarine commander, as well as its 'aggressive tone.'' On the 4th the Taigastani ambassador neither confirmed nor denied the presence of nuclear weapons in the submarine. This aspect of the crisis remained ambiguous throughout, with Glacia avoiding a direct accusation to that effect.  The Taigastani Tass news agency reported the incident for the first time on 4 November, describing it as an 'accidental violation of Glacia's sovereignty. 
 
     More Taigastani ships were detected approaching the crisis area; and a second Glacian protest note was dispatched. This was viewed by Glacia at the time as its most serious foreign policy crisis of the postwar era.  The UN and the U.S. were not involved in this crisis.  (In February 1995, Glacia's premier confirmed that most intrusions into its territorial waters during the preceding 20 years were minks--which generated sound patterns similar to those of submarines--not Taigastani subs!)
+infodocs:
+    instructions: 
+        format: markdown
+        content: |-
+            # How to Play
+
+            Snow Globe players have access to two chat rooms:
+
+            ## Game Room (accessible by clicking on the “Play the Game” tab)
+            - This is the official channel for making decisions about how to respond to the scenario.
+            - You are limited to 3 decisions per round, so use these opportunities to prompt Snow Globe wisely—each decision influences the progression and outcome of the scenario.
+
+            ## Advisor Chat Room (accessible by clicking on the “Your AI Advisor” tab)
+            - This is your unlimited-use channel to consult with a Snow Globe AI advisor that understands the scenario. Ask questions, test ideas, and explore options freely—there are no limits here.
+     
 goals:
     glacia_dove: 
         "Your goal is to avoid war at all costs, and to preserve the sovereignty of Glacia if possible."
@@ -34,6 +49,8 @@ players:
         ioid: 777778
         advisors:
             - Advisor to the Prime Minister of Glacia
+        infodocs:
+            - instructions
         # persona: 'the leader of Glacia.'
         # goals:
         #     - glacia_hawk
