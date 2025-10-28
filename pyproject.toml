@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llm-snowglobe"
-version = "1.0.0"
+version = "1.0.1-dev"
 description = "Snow Globe multi-agent system for open-ended wargames with large language models"
 license = "Apache-2.0"
 authors = ["Daniel Hogan <6313241+dphogan@users.noreply.github.com>"]
@@ -8,7 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/IQTLabs/snowglobe"
 
 [tool.poetry.dependencies]
-python = ">=3.10"
+python = ">=3.11,<4.0"
 numpy = "*"
 torch = "*"
 torchvision = "*"
@@ -20,11 +20,11 @@ fastapi = "*"
 uvicorn = "*"
 pydantic = "*"
 platformdirs = "*"
-langchain = "*"
+langchain = "0.3.27"
 openai = "*"
 twine = "*"
 jupyter = "*"
-nicegui = "*"
+nicegui = "2.24.2"
 markdown2 = "*"
 watchfiles = "*"
 langgraph = "*"
@@ -35,10 +35,16 @@ langchain-chroma = "*"
 langchain-community = "*"
 langchain-text-splitters = "*"
 llama-cpp-python = ">=0.3.8"
+pdbpp = "*"
+ruamel-yaml = "*"
+black = "^25.9.0"
+ruff = "^0.13.2"
 
 [tool.poetry.scripts]
 snowglobe_config = "llm_snowglobe.scripts:config"
 snowglobe_server = "llm_snowglobe.scripts:server"
+snowglobe_game = "llm_snowglobe.user_defined_game:main"
+snowglobe_simulation = "llm_snowglobe.user_defined_sim:main"
 
 [build-system]
 requires = ["poetry-core"]

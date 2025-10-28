@@ -1,0 +1,55 @@
+services:
+  snowglobe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: "snowglobe_game"
+    image: snowglobe:latest
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    container_name: snowglobe
+    hostname: snowglobe
+    healthcheck:
+      test: bash -c "[ -f /data/snowglobe/game.id ]"
+      timeout: 3s
+      retries: 20
+    volumes:
+      - '${PWD}/config:/config'
+      - '${PWD}/logs:/home/snowglobe/logs'
+      - '${PWD}/data:/data/snowglobe'
+    # ports:
+    #   - 8080:8000
+
+  snowglobe-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    command: "snowglobe_server"
+    image: snowglobe:latest
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    container_name: snowglobe-ui
+    hostname: snowglobe-ui
+    volumes:
+      - '${PWD}/config:/config'
+      - '${PWD}/logs:/home/snowglobe/logs'
+      - '${PWD}/data:/data/snowglobe'
+    ports:
+      - 8080:8000
+    depends_on:
+      snowglobe:
+        condition: service_healthy

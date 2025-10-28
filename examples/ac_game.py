@@ -81,9 +81,8 @@ The animosity between Azuristan and Crimsonia extends back over centuries of eth
                 prop(player.gameroom, 'instruction', 'Enter your response.')
                 prop(player.chatroom, 'title', 'Your AI Advisor')
                 prop(player.chatroom, 'instruction', 'Ask your AI advisor.')
-        prop('ac_game_help', 'title', 'Help')
-        prop('ac_game_help', 'content', "## Help\n\nClick *Play the Game* to enter your response for each move, or click *Your AI Advisor* to consult with your AI advisor about what to do.")
-        prop('ac_game_help', 'format', 'markdown')
+                for doc in player.infodocs:
+                    p
         snowglobe.db.commit()
 
     async def game(self):

@@ -13,18 +13,21 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import llm_snowglobe as snowglobe
 
 def config():
-    import llm_snowglobe as snowglobe
-    snowglobe.config()
+    snowglobe.core.llm.config()
 
-def ui(host='0.0.0.0', port=8000):
-    import llm_snowglobe as snowglobe
-    snowglobe.ui.run(host=host, port=port)
 
-def api(host='0.0.0.0', port=8000, log_level='warning'):
+def ui(host="0.0.0.0", port=8000):
+    snowglobe.ui.main(host=host, port=port)
+
+
+def api(host="0.0.0.0", port=8000, log_level="warning"):
     import uvicorn
-    uvicorn.run('llm_snowglobe.api:app', host=host, port=port, log_level=log_level)
+
+    uvicorn.run("llm_snowglobe.api:app", host=host, port=port, log_level=log_level)
+
 
 def server(*args, **kwargs):
     ui(*args, **kwargs)

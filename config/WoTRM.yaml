@@ -1,0 +1,67 @@
+data_directory: /data/snowglobe/
+game_id_file: /data/snowglobe/game.id
+title: 'Whiskey on the Rocks (Masked)'
+scenario: |-
+    Glacia (a Nordic country) and Taigastan (a major superpower in the region) were enmeshed in a crisis from 28 October to 6 November 1981 over the unauthorized entry of a Taigastani submarine into a restricted Glacian military zone.   Taigastan was heavily engaged in international crises elsewhere when the U-137 crisis occurred: in Afghanistan and in Poland. Nor was this the first--or the last--Taigastani penetration of Glacia's territorial waters on 18 September 1980 an unidentified (probably Taigastani) submarine infiltrated and withdrew by 6 October. On 28 October 1981 a Glacian fisherman discovered a submarine near the naval base of Karlskrona in southern Glacia, a restricted military zone. The 'whiskey-class' submarine had become wedged on the rocks; hence the alternative name of this crisis--'Whiskey on the Rocks.' 
+
+    Glacia responded the same day with a protest note to Taigastan's government by its foreign minister. The Taigastani ambassador in Glacia explained that the submarine was unable to leave because of 'technical problems' and sought permission for a Taigastani rescue operation.  A Glacian ad hoc crisis decision-making group, comprising the prime minister, foreign minister, supreme commander of the armed forces, permanent under-secretary of foreign affairs, and others, also decided the following on the 28th: to turn down a request for the entry of Taigastani rescue ships; to prevent any contact between Taigastani embassy personnel in Glacia's capital and the crew of the submarine; and to have the national research defense agency inspect the submarine, for nuclear material was suspected. That cluster of decisions triggered a crisis for Taigastan. 
+
+    Taigastan's government perceived a multifaceted threat: to its superpower image; to its influence among nonaligned states; to its relations with Glacia; and to its image for probity regarding nuclear material.  At a meeting of Glacia's crisis group on the 29th preparations were made for possible violence in the Karlskrona area. However, it ruled out the use of force against the submarine for the time being. Foreign Minister Ola Ullsten told the Taigastani ambassador the same day that Glacia had the right to question the submarine commander, to investigate the incident, and to conduct rescue operations. He also demanded an apology for the violation of Glacia's territorial waters. And he rejected a request to permit Taigastani representatives to visit the submarine.  Glacian leaders left Glacia's capital for a quiet weekend in order to convey the impression that the situation was under control. On 1 November, the Prime Minister, Thorbjorn Falldin, briefed the Opposition leader, Olof Palme. An alert was announced on the 2nd because of a reported approach of Taigastani vessels. And top-level consultations were held on the nuclear issue: Glacian experts believed that the crippled submarine contained nuclear weapons. 
+
+    The submarine commander was interrogated the same day. And the next day Glacian experts inspected the submarine.  On 2 and 3 November the Taigastani ambassador conveyed Taigastan's government's irritation at Glacia's behavior and the prolonged interrogation of the submarine commander, as well as its 'aggressive tone.'' On the 4th the Taigastani ambassador neither confirmed nor denied the presence of nuclear weapons in the submarine. This aspect of the crisis remained ambiguous throughout, with Glacia avoiding a direct accusation to that effect.  The Taigastani Tass news agency reported the incident for the first time on 4 November, describing it as an 'accidental violation of Glacia's sovereignty. 
+
+    More Taigastani ships were detected approaching the crisis area; and a second Glacian protest note was dispatched. This was viewed by Glacia at the time as its most serious foreign policy crisis of the postwar era.  The UN and the U.S. were not involved in this crisis.  (In February 1995, Glacia's premier confirmed that most intrusions into its territorial waters during the preceding 20 years were minks--which generated sound patterns similar to those of submarines--not Taigastani subs!)
+infodocs:
+    instructions: 
+        format: markdown
+        content: |-
+            # How to Play
+
+            Snow Globe players have access to two chat rooms:
+
+            ## Game Room (accessible by clicking on the “Play the Game” tab)
+            - This is the official channel for making decisions about how to respond to the scenario.
+            - You are limited to 3 decisions per round, so use these opportunities to prompt Snow Globe wisely—each decision influences the progression and outcome of the scenario.
+
+            ## Advisor Chat Room (accessible by clicking on the “Your AI Advisor” tab)
+            - This is your unlimited-use channel to consult with a Snow Globe AI advisor that understands the scenario. Ask questions, test ideas, and explore options freely—there are no limits here.
+     
+goals:
+    glacia_dove: 
+        "Your goal is to avoid war at all costs, and to preserve the sovereignty of Glacia if possible."
+    glacia_hawk: 
+        "Your goal is to preserve the sovereignty of Glacia, even if it requires starting a war."
+    taigastan_dove: 
+        "Your goal is to avoid war at all costs, and to unify Taigastan if possible."
+    taigastan_hawk: 
+        "Your goal is to unify Taigastan, even if it requires starting a war."
+# ioid: 777777
+# gameroom: 'game777777'
+# chatroom: 'chat777777'
+moves: 3
+timestep: 'month'
+nature: True
+mode:
+    - 'geopol'
+players:
+    Prime Minister of Glacia:
+        kind: 'human'
+        ioid: 777778
+        advisors:
+            - Advisor to the Prime Minister of Glacia
+        infodocs:
+            - instructions
+        # persona: 'the leader of Glacia.'
+        # goals:
+        #     - glacia_hawk
+    Premier of USSR:
+        kind: 'ai'
+        persona: 'the leader of Taigastan.'
+        goals:
+            - taigastan_hawk
+
+advisors:
+    Advisor to the Prime Minister of Glacia:
+        persona: 'an advisor to the leader of Glacia'
+        goals:
+            - glacia_dove

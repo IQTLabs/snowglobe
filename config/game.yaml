@@ -1,0 +1,66 @@
+data_directory: /data/snowglobe/
+game_id_file: /data/snowglobe/game.id
+title: 'Azuristan and Crimsonia'
+scenario: |
+    Azuristan and Crimsonia are neighboring countries in Central Asia.  Azuristan is a Western-backed democracy that suffers from endemic corruption.  Crimsonia is controlled by an autocratic government that stifles dissent and commits human rights violations.
+    
+    Both countries have modern professional militaries, although Crimsonia's is slightly larger than Azuristan's.  In addition, Azuristan possesses ten nuclear weapons and Crimsonia has eight.
+    
+    Most citizens of Azuristan are from the Azuristani ethnic group, and most citizens of Crimsonia are from the Crimsonian ethnic group.  The only exception is Azuristan's province of Tyriana, on the border with Crimsonia.  Most residents of Tyriana belong to the Crimsonian ethnic group.
+    The animosity between Azuristan and Crimsonia extends back over centuries of ethnic tension and intermittent warfare.  Recent years have been fairly calm.  However, that suddenly changes when Tyriana declares independence.  Amidst the crisis, local leaders in Tyriana ask Crimsonia to come to the province's defense, and the same leaders indicate that they want Tyriana to become part of Crimsonia.
+goals:
+    azuristan_political: 
+        "Your goal is to ensure the political stability of Azuristan. If possible you would like to see this scenario benefit the president's political future."
+    azuristan_economic: 
+        "Your goal is to create a strong economy for Azuristan. You value free trade and a beneficial business climate."
+    azuristan_military: 
+        "Your goal is to maintain and demonstrate the strength of Azuristan's military. If conflict is in Azuristan's best interest it should be pursued."
+    azuristan_dove: 
+        "Your goal is to avoid war at all costs, and to preserve the sovereignty of Azuristan if possible."
+    azuristan_hawk: 
+        "Your goal is to preserve the sovereignty of Azuristan, even if it requires starting a war."
+    crimsonia_dove: 
+        "Your goal is to avoid war at all costs, and to unify the Crimsonian people if possible."
+    crimsonia_hawk: 
+        "Your goal is to unify the Crimsonian people, even if it requires starting a war."
+
+# ioid: 777777
+# gameroom: 'game777777'
+# chatroom: 'chat777777'
+moves: 3
+timestep: 'month'
+nature: True
+mode:
+    - 'geopol'
+players:
+    President of Azuristan:
+        kind: 'human'
+        ioid: 777778
+        advisors:
+            - Political Adviser
+            - Economic Adviser
+            - Military Adviser
+    # Governor of Tryriana:
+    #     kind: 'human'
+    #     ioid: 777779
+    #     advisors:
+    #         - Advisor to the President of Azuristan
+    Premier of Crimsonia:
+        kind: 'ai'
+        persona: 'the leader of Crimsonia.'
+        goals:
+            - crimsonia_dove
+
+advisors:
+    Political Adviser:
+        persona: 'a political advisor to the leader of Azuristan'
+        goals:
+            - azuristan_political
+    Economic Adviser:
+        persona: 'an economic advisor to the leader of Azuristan'
+        goals:
+            - azuristan_economic
+    Military Adviser:
+        persona: 'a military advisor to the leader of Azuristan'
+        goals:
+            - azuristan_military
