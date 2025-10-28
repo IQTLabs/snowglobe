@@ -45,7 +45,15 @@ class UserDefinedGame(Control):
     self.data_dir = config.data_dir
     self.db = Database(self.ioid, path=config.data_dir, initialize=True)
     self.name = 'Game Control'
-    super().__init__(database=self.db, verbosity=self.verbosity, logger=self.logger, name=self.name, ioid=self.ioid)
+    super().__init__(
+      database=self.db,
+      verbosity=self.verbosity,
+      logger=self.logger,
+      name=self.name,
+      ioid=self.ioid,
+      source=config.source,
+      model=config.model
+    )
 
     self.title = config.title
     self.players = list()

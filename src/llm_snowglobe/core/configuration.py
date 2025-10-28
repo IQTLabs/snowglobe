@@ -17,6 +17,8 @@
 from ruamel.yaml import YAML
 
 class Configuration:
+  VALID_SOURCES = ["llamacpp", "azure", "openai"]
+
   def __init__(self, config_path="/config/game.yaml"):
     self.config_path = config_path
     self.data_dir = '/data/snowglobe/'
@@ -29,6 +31,14 @@ class Configuration:
     if file_config:
       self.data_dir = file_config['data_directory']
       self.game_id_file = file_config['game_id_file']
+      if 'source' in file_config and file_config['source'] in self.VALID_SOURCES:
+        self.source = file_config['source']
+      else:
+        self.source = None
+      if 'model' in file_config:
+        self.model = file_config['model']
+      else:
+        self.model = None
 
       self.goals = file_config['goals']
 
