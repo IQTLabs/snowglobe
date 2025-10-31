@@ -1,5 +1,5 @@
 azure:
   gpt-4o:
     deployment: gpt-4o-2
-    endpoint: https://iqt-openai-dev.openai.azure.com
+    endpoint: https://<your_endpoint_here>.openai.azure.com
     version: 2025-01-01-preview
