@@ -41,7 +41,6 @@ def main(host="0.0.0.0", port=8000):
 
     cfg_file = args.config_file
     log_file = args.log_file
-
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     logger.info('Logging started')
@@ -61,7 +60,7 @@ def main(host="0.0.0.0", port=8000):
 
     async def detect_updates():
         while True:
-            config = Configuration()
+            config = Configuration(config_path=cfg_file)
             # with open(config.game_id_file,'r') as gif:
             #     ioid = gif.read()
 

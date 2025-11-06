@@ -25,8 +25,6 @@ services:
       - '${PWD}/config/local:/home/snowglobe/.config/snowglobe'
       - '${PWD}/logs:/home/snowglobe/logs'
       - '${PWD}/data:/data/snowglobe'
-    secrets:
-      - openai_key
     # ports:
     #   - 8080:8000
 
@@ -57,62 +55,62 @@ services:
       snowglobe:
         condition: service_healthy
 
-  snowglobe-openai:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    command: ["./start_sim_openai.sh"]
-    image: snowglobe:latest
-    stdin_open: true # docker run -i
-    tty: true # docker run -t
-    container_name: snowglobe-openai
-    hostname: snowglobe-openai
-    healthcheck:
-      test: bash -c "[ -f /data/snowglobe/openai/game.id ]"
-      timeout: 3s
-      retries: 20
-    volumes:
-      - '${PWD}/config/openai:/home/snowglobe/.config/snowglobe'
-      - '${PWD}/logs:/home/snowglobe/logs'
-      - '${PWD}/data:/data/snowglobe'
-    secrets:
-      - openai_key
-    # ports:
-    #   - 8080:8000
+#   snowglobe-openai:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     deploy:
+#       resources:
+#         reservations:
+#           devices:
+#             - driver: nvidia
+#               count: all
+#               capabilities: [gpu]
+#     command: ["./start_sim_openai.sh"]
+#     image: snowglobe:latest
+#     stdin_open: true # docker run -i
+#     tty: true # docker run -t
+#     container_name: snowglobe-openai
+#     hostname: snowglobe-openai
+#     healthcheck:
+#       test: bash -c "[ -f /data/snowglobe/openai/game.id ]"
+#       timeout: 3s
+#       retries: 20
+#     volumes:
+#       - '${PWD}/config/openai:/home/snowglobe/.config/snowglobe'
+#       - '${PWD}/logs:/home/snowglobe/logs'
+#       - '${PWD}/data:/data/snowglobe'
+#     secrets:
+#       - openai_key
+#     # ports:
+#     #   - 8080:8000
 
-  snowglobe-ui-openai:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-    command: "snowglobe_server -c /home/snowglobe/.config/snowglobe/wotr_unmasked-openai.yaml -l /home/snowglobe/logs/openai/snowglobe-ui.log"
-    image: snowglobe:latest
-    stdin_open: true # docker run -i
-    tty: true # docker run -t
-    container_name: snowglobe-ui-openai
-    hostname: snowglobe-ui-openai
-    volumes:
-      - '${PWD}/config/openai:/home/snowglobe/.config/snowglobe'
-      - '${PWD}/logs:/home/snowglobe/logs'
-      - '${PWD}/data:/data/snowglobe'
-    ports:
-      - 8081:8000
-    depends_on:
-      snowglobe-openai:
-        condition: service_healthy
-secrets:
-  openai_key:
-    file: ${PWD}/secrets/openaiapi.key
+#   snowglobe-ui-openai:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     # deploy:
+#     #   resources:
+#     #     reservations:
+#     #       devices:
+#     #         - driver: nvidia
+#     #           count: all
+#     #           capabilities: [gpu]
+#     command: "snowglobe_server -c /home/snowglobe/.config/snowglobe/wotr_unmasked-openai.yaml -l /home/snowglobe/logs/openai/snowglobe-ui.log"
+#     image: snowglobe:latest
+#     stdin_open: true # docker run -i
+#     tty: true # docker run -t
+#     container_name: snowglobe-ui-openai
+#     hostname: snowglobe-ui-openai
+#     volumes:
+#       - '${PWD}/config/openai:/home/snowglobe/.config/snowglobe'
+#       - '${PWD}/logs:/home/snowglobe/logs'
+#       - '${PWD}/data:/data/snowglobe'
+#     ports:
+#       - 8081:8000
+#     depends_on:
+#       snowglobe-openai:
+#         condition: service_healthy
+# secrets:
+#   openai_key:
+#     file: ${PWD}/secrets/openaiapi.key
