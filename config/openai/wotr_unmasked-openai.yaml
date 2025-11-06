@@ -1,0 +1,52 @@
+data_directory: /data/snowglobe/openai
+game_id_file: /data/snowglobe/openai/game.id
+source: "azure"
+model: "gpt-4o"
+title: 'Whiskey on the Rocks'
+scenario: |-
+    Sweden and the USSR are enmeshed in a crisis over the unauthorized entry of a Soviet U-137 submarine into a restricted Swedish military zone.
+    The USSR was heavily engaged in international crises elsewhere when the U-137 crisis occurred: in Central Asia and in Northern Europe. Nor was this the first--or the last--Soviet penetration of Sweden's territorial waters: a year prior, an unidentified (probably Soviet) submarine infiltrated and withdrew by a few days later. 
+    Most recently, a Swedish fishing captain discovered a submarine near the naval base of Karlskrona in southern Sweden, a restricted military zone. The 'whiskey-class' submarine had become wedged on the rocks; hence the name of this crisis--'Whiskey on the Rocks.' 
+    Sweden responded immediately with a protest note to the USSR government by its foreign minister. The Soviet ambassador in Sweden explained that the submarine was unable to leave because of 'technical problems' and sought permission for a Soviet rescue operation.  
+    A Swedish ad hoc crisis decision-making group, comprising the prime minister, foreign minister, supreme commander of the armed forces, permanent under-secretary of foreign affairs, and others, also decided the following: to turn down a request for the entry of Soviet rescue ships; to prevent any contact between Soviet embassy personnel in Sweden's capital and the crew of the submarine; and to have the national research defense agency inspect the submarine, for nuclear material was suspected. That cluster of decisions triggered a crisis for Taigastan. 
+    The USSR perceived a multifaceted threat: to its superpower image; to its influence among nonaligned states; to its relations with Sweden; and to its image for probity regarding nuclear material.  At a meeting of Sweden's crisis group on the 29th preparations were made for possible violence in the Karlskrona area. However, it ruled out the use of force against the submarine for the time being. Foreign Minister Ola Ullsten told the Soviet ambassador the same day that Sweden had the right to question the submarine commander, to investigate the incident, and to conduct rescue operations. He also demanded an apology for the violation of Sweden's territorial waters. And he rejected a request to permit Soviet representatives to visit the submarine.  
+    Swedish leaders left Sweden's capital for a quiet weekend in order to convey the impression that the situation was under control. In addition, the Swedish Prime Minister briefed the Opposition leader. A naval alert was issued because of a reported approach of Soviet vessels. And top-level consultations were held on the nuclear issue: Swedish experts believed that the crippled submarine contained nuclear weapons. 
+    The Soviet submarine commander was interrogated the same day. And the next day Swedish experts inspected the submarine.  Afterwards, the Soviet ambassador conveyed the USSR's irritation at Sweden's behavior and the prolonged interrogation of the submarine commander, as well as its 'aggressive tone.'' In this same communication, the Soviet ambassador neither confirmed nor denied the presence of nuclear weapons in the submarine. This aspect of the crisis remained ambiguous throughout, with Sweden avoiding a direct accusation to that effect.  
+    The Soviet news agency reported the incident for the first time a few days afterwards, describing it as an 'accidental violation of Sweden's sovereignty. 
+    More Soviet ships were detected approaching the crisis area; and a second Swedish protest note was dispatched. This was viewed by Sweden at the time as its most serious foreign policy crisis of the postwar era.  The UN and the U.S. were not involved in this crisis.
+goals:
+    sweden_dove: 
+        "Your goal is to avoid war at all costs, and to preserve the sovereignty of Sweden if possible."
+    sweden_hawk: 
+        "Your goal is to preserve the sovereignty of Sweden, even if it requires starting a war."
+    sweden_pragmatist: 
+        "Your goal is to preserve the sovereignty of Sweden, by war if necessary or by diplomacy if possible."
+    ussr_dove: 
+        "Your goal is to avoid war at all costs, and to unify the USSR if possible."
+    ussr_hawk: 
+        "Your goal is to unify the USSR, even if it requires starting a war."
+# ioid: 777777
+# gameroom: 'game777777'
+# chatroom: 'chat777777'
+moves: 3
+timestep: 'month'
+nature: True
+mode:
+    - 'geopol'
+players:
+    Prime Minister of Sweden:
+        kind: 'human'
+        ioid: 777778
+        advisors:
+            - Advisor to the Prime Minister of Sweden
+    Premier of USSR:
+        kind: 'ai'
+        persona: 'the leader of the USSR.'
+        goals:
+            - ussr_hawk
+
+advisors:
+    Advisor to the Prime Minister of Sweden:
+        persona: 'an advisor to the leader of Sweden'
+        goals:
+            - sweden_pragmatist
