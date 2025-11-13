@@ -209,7 +209,7 @@ advisors:
 ### Checking that Snow Globe will be able to run your new scenario
 
 > [!TIP]
-> YAML files can be finicky. Before loading your scenario into Snow Globe, confirm that all indentation is consistent using a YAML validator, such as the command line tool yamllint or https://www.yamllint.com/, which will highlight any issues to correct before loading your YAML into Snow Globe.
+> YAML files can be finicky. Before loading your scenario into Snow Globe, confirm that all indentation is consistent using a YAML validator, such as the command line tool yamllint or https://www.yamllint.com/, which will highlight any issues.
 
 ### Essential Scenario Components
 
