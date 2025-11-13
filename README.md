@@ -79,6 +79,7 @@ To create a custom scenario in Snow Globe, edit the following parameters in [gam
 Below is a worked example that explains what each parameter does and how to change them.
 
 ### 1. Title
+
 Start by giving your new game a custom title, as follows:
 
 ```diff
@@ -165,7 +166,7 @@ Fourth, specify the players (and their corresponding AI advisors) in your Snow G
 +            - taigastan_dove
 ```
 
-> [!NOTE]
+> [!IMPORTANT]
 > There should be at least one human in Snow Globe. You can have as many advisors as you like, but more than a handful can become unwieldy in practice. 
 
 > [!CAUTION]
@@ -174,6 +175,9 @@ Fourth, specify the players (and their corresponding AI advisors) in your Snow G
 In the code above, we have collapsed the Political Adviser, Economic Adviser, and Military Adviser from the Azuristan example into a single Advisor to the Prime Minister of Glacia.
 
 Also, note how there are corresponding goals for each of the players and advisors here, defined in the goal section immediately above. Moreover, note how in these examples, the Premier of Crimsonia and the Premier of Taigastan are both AI-based players, whose goals we have also defined previously.
+
+> [!NOTE]
+> You do not need to worry about ```ioid: 777778``` -- in theory, this can be any integer value you like, so long as you keep track of the integer.
 
 ### 5. Advisors
 
@@ -205,7 +209,31 @@ advisors:
 ### Checking that Snow Globe will be able to run your new scenario
 
 > [!TIP]
-> YAML files can be finicky. To ensure that your newly created scenario will load properly in Snow Globe, make sure to use a YAML validator, such as the command line tool yamllint or https://www.yamllint.com/, which will highlight any issues to correct before loading your YAML into Snow Globe.
+> YAML files can be finicky. Before loading your scenario into Snow Globe, confirm that all indentation is consistent using a YAML validator, such as the command line tool yamllint or https://www.yamllint.com/, which will highlight any issues to correct before loading your YAML into Snow Globe.
+
+### Essential Scenario Components
+
+To avoid issues with Snow Globe, make sure your YAML file includes:
+
+- [ ] a **title** that reflects the scenario
+- [ ] a properly formatted **scenario** description, incl.:
+  - [ ] background context (e.g., location, timing)
+  - [ ] key actors and their motivations
+  - [ ] brief narrative on the inciting event or trigger
+- [ ] individual **goals** for each player and advisor
+- [ ] listings of all **players** with:
+  - [ ] at least one human player
+  - [ ] AI players (if any) with assigned goals and no advisors
+- [ ] personas of **Advisors** (defined only for human players)
+  - [ ] with goal(s) for each advisor
+
+### Consistency Checks
+
+Finally, before playing, we recommend you triple check the following:
+
+- [ ] All referenced goals in the `players` and `advisors` sections are defined in the `goals` section.
+- [ ] No AI players are mistakenly assigned advisors.
+- [ ] Your scenario narrative aligns with the goals and roles defined.
 
 ## Disclaimer
 
