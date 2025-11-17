@@ -76,7 +76,7 @@ To create a custom scenario in Snow Globe, edit the following parameters in [gam
 4. Players
 5. Advisors
 
-Below is an explanation of what these parameter do and how you can change each.
+Below is an explanation of what these parameters do and how you can change each.
 
 ### 1. Title
 
